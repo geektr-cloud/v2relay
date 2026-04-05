@@ -1,12 +1,11 @@
-export default {
-	fetch(request) {
-		const url = new URL(request.url);
+import { Hono } from "hono";
+import { env } from "cloudflare:workers";
 
-		if (url.pathname.startsWith("/api/")) {
-			return Response.json({
-				name: "Cloudflare",
-			});
-		}
-		return new Response(null, { status: 404 });
-	},
-} satisfies ExportedHandler<Env>;
+
+export const h = new Hono();
+
+h.get("/api/*", (c) => c.json({ name: "Cloudflare" }));
+
+h.get("/*", () => env.ASSETS.fetch("http://localhost/index.html"));
+
+export default h;

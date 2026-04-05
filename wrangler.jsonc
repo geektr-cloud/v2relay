@@ -8,8 +8,15 @@
 	"compatibility_date": "2026-04-05",
 	"main": "server/index.ts",
 	"assets": {
-		"not_found_handling": "single-page-application"
+		"binding": "ASSETS",
+		"directory": "./dist"
 	},
+	"routes": [
+		{
+			"pattern": "v2relay.geektr.cloud",
+			"custom_domain": true
+		}
+	],
 	"observability": {
 		"enabled": true
 	},
