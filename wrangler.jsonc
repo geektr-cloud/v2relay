@@ -23,6 +23,14 @@
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "v2relay",
+			"database_id": "f7fda464-f94f-4cd7-b638-5f37756dfa3d",
+			// "remote": true
+		}
 	]
 	/**
 	 * Smart Placement
