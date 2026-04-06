@@ -1,24 +1,41 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import {
   NConfigProvider,
   NLayout,
   NLayoutContent,
   NLayoutHeader,
   NMessageProvider,
+  NModalProvider,
   darkTheme,
   zhCN,
   dateZhCN,
 } from 'naive-ui'
+
+const route = useRoute()
+const navLinkClass = (active: boolean) =>
+  [
+    'no-underline transition-colors',
+    active ? 'text-cyan-400' : 'text-zinc-400 hover:text-cyan-400',
+  ].join(' ')
+const providersActive = computed(
+  () => route.name === 'home' || route.name === 'provider-detail',
+)
+const subscriptionsActive = computed(
+  () =>
+    route.name === 'subscriptions' || route.name === 'subscription-detail',
+)
 </script>
 
 <template>
   <NConfigProvider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN">
     <NMessageProvider>
+    <NModalProvider>
       <NLayout class="min-h-screen bg-zinc-950 text-zinc-100">
         <NLayoutHeader
           bordered
-          class="sticky top-0 z-10 flex h-14 items-center border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80"
+          class="sticky top-0 z-10 flex h-14 items-center gap-6 border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80"
         >
           <RouterLink
             to="/"
@@ -26,14 +43,23 @@ import {
           >
             V2Relay
           </RouterLink>
-          <span class="ml-3 hidden text-sm text-zinc-500 sm:inline">
-            I thought what I'd do was, I'd pretend I was one of those deaf-mutes.
-          </span>
+          <nav class="flex items-center gap-4 text-sm">
+            <RouterLink to="/" :class="navLinkClass(providersActive)">
+              提供商
+            </RouterLink>
+            <RouterLink
+              to="/subscriptions"
+              :class="navLinkClass(subscriptionsActive)"
+            >
+              订阅
+            </RouterLink>
+          </nav>
         </NLayoutHeader>
         <NLayoutContent class="bg-zinc-950">
           <RouterView />
         </NLayoutContent>
       </NLayout>
+    </NModalProvider>
     </NMessageProvider>
   </NConfigProvider>
 </template>

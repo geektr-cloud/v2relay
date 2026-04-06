@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import ProviderDetailView from '../views/ProviderDetailView.vue'
+import ProviderPage from '../views/provider/ProviderPage.vue'
+import ProviderDetailPage from '../views/provider/ProviderDetailPage.vue'
+import SubscriptionPage from '../views/subscription/SubscriptionPage.vue'
+import SubscriptionDetailPage from '../views/subscription/SubscriptionDetailPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,12 +10,22 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: ProviderPage,
+    },
+    {
+      path: '/subscriptions',
+      name: 'subscriptions',
+      component: SubscriptionPage,
+    },
+    {
+      path: '/subscriptions/:id',
+      name: 'subscription-detail',
+      component: SubscriptionDetailPage,
     },
     {
       path: '/providers/:idOrName',
       name: 'provider-detail',
-      component: ProviderDetailView,
+      component: ProviderDetailPage,
     },
   ],
 })
