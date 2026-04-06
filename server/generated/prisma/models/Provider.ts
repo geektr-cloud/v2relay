@@ -138,7 +138,7 @@ export type ProviderGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type ProviderGroupByOutputType = {
   id: string
   name: string
-  url: string | null
+  url: string
   _count: ProviderCountAggregateOutputType | null
   _min: ProviderMinAggregateOutputType | null
   _max: ProviderMaxAggregateOutputType | null
@@ -165,14 +165,14 @@ export type ProviderWhereInput = {
   NOT?: Prisma.ProviderWhereInput | Prisma.ProviderWhereInput[]
   id?: Prisma.StringFilter<"Provider"> | string
   name?: Prisma.StringFilter<"Provider"> | string
-  url?: Prisma.StringNullableFilter<"Provider"> | string | null
+  url?: Prisma.StringFilter<"Provider"> | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
 }
 
 export type ProviderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrder
   subscriptions?: Prisma.SubscriptionOrderByRelationAggregateInput
 }
 
@@ -182,14 +182,14 @@ export type ProviderWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ProviderWhereInput | Prisma.ProviderWhereInput[]
   OR?: Prisma.ProviderWhereInput[]
   NOT?: Prisma.ProviderWhereInput | Prisma.ProviderWhereInput[]
-  url?: Prisma.StringNullableFilter<"Provider"> | string | null
+  url?: Prisma.StringFilter<"Provider"> | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
 }, "id" | "name">
 
 export type ProviderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrder
   _count?: Prisma.ProviderCountOrderByAggregateInput
   _max?: Prisma.ProviderMaxOrderByAggregateInput
   _min?: Prisma.ProviderMinOrderByAggregateInput
@@ -201,53 +201,53 @@ export type ProviderScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ProviderScalarWhereWithAggregatesInput | Prisma.ProviderScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Provider"> | string
   name?: Prisma.StringWithAggregatesFilter<"Provider"> | string
-  url?: Prisma.StringNullableWithAggregatesFilter<"Provider"> | string | null
+  url?: Prisma.StringWithAggregatesFilter<"Provider"> | string
 }
 
 export type ProviderCreateInput = {
   id?: string
   name: string
-  url?: string | null
+  url?: string
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderUncheckedCreateInput = {
   id?: string
   name: string
-  url?: string | null
+  url?: string
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProviderNestedInput
 }
 
 export type ProviderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProviderNestedInput
 }
 
 export type ProviderCreateManyInput = {
   id?: string
   name: string
-  url?: string | null
+  url?: string
 }
 
 export type ProviderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ProviderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ProviderCountOrderByAggregateInput = {
@@ -277,10 +277,6 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ProviderCreateNestedOneWithoutSubscriptionsInput = {
   create?: Prisma.XOR<Prisma.ProviderCreateWithoutSubscriptionsInput, Prisma.ProviderUncheckedCreateWithoutSubscriptionsInput>
   connectOrCreate?: Prisma.ProviderCreateOrConnectWithoutSubscriptionsInput
@@ -298,13 +294,13 @@ export type ProviderUpdateOneRequiredWithoutSubscriptionsNestedInput = {
 export type ProviderCreateWithoutSubscriptionsInput = {
   id?: string
   name: string
-  url?: string | null
+  url?: string
 }
 
 export type ProviderUncheckedCreateWithoutSubscriptionsInput = {
   id?: string
   name: string
-  url?: string | null
+  url?: string
 }
 
 export type ProviderCreateOrConnectWithoutSubscriptionsInput = {
@@ -326,13 +322,13 @@ export type ProviderUpdateToOneWithWhereWithoutSubscriptionsInput = {
 export type ProviderUpdateWithoutSubscriptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ProviderUncheckedUpdateWithoutSubscriptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -408,7 +404,7 @@ export type $ProviderPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
-    url: string | null
+    url: string
   }, ExtArgs["result"]["provider"]>
   composites: {}
 }

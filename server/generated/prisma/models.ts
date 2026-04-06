@@ -10,4 +10,5 @@
  */
 export type * from './models/Provider.js'
 export type * from './models/Subscription.js'
+export type * from './models/Tag.js'
 export type * from './commonInputTypes.js'

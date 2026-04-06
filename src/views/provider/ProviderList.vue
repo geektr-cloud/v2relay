@@ -64,8 +64,9 @@ async function onDelete(row: { id: string }) {
                 </Route>
               </td>
               <td>
-                <Link :href="row.url" class="max-w-md truncate inline-block align-bottom" :title="row.url"
-                  @click.stop />
+                <Link v-if="row.url" :href="row.url" class="max-w-md truncate inline-block align-bottom"
+                  :title="row.url" @click.stop />
+                <span v-else class="text-zinc-500">—</span>
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">

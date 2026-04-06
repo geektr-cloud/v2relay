@@ -108,7 +108,7 @@ function buildPayload() {
     urls: form.urls,
     enabled: form.enabled,
     name: form.name.trim(),
-    remark: form.remark.trim() || null,
+    remark: form.remark.trim(),
   }
 }
 

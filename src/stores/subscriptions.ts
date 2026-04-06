@@ -51,7 +51,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     urls: string[]
     enabled?: boolean
     name?: string
-    remark?: string | null
+    remark?: string
   }) =>
     hydrateDates(
       await apiFetch<SubscriptionWithProvider>('/subscriptions', {
@@ -67,7 +67,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
       urls: string[]
       enabled: boolean
       name: string
-      remark: string | null
+      remark: string
     }>,
   ) =>
     hydrateDates(

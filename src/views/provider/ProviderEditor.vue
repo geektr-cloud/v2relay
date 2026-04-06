@@ -70,7 +70,7 @@ async function create() {
   try { await formRef.value?.validate() } catch { return }
   saving.value = true
   try {
-    const row = await store.create(form.name.trim(), form.url.trim() || null)
+    const row = await store.create(form.name.trim(), form.url.trim())
     message.success('已添加')
     notifySaved(row.id, row)
   } catch (e) {
@@ -86,7 +86,7 @@ async function patch() {
   try {
     const row = await store.update(editorId.value!, {
       name: form.name.trim(),
-      url: form.url.trim() || null,
+      url: form.url.trim(),
     })
     provider.value = row
     syncForm(row)

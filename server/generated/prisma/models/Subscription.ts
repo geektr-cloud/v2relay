@@ -27,16 +27,32 @@ export type AggregateSubscription = {
 export type SubscriptionMinAggregateOutputType = {
   id: string | null
   providerId: string | null
+  name: string | null
+  remark: string | null
+  enabled: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type SubscriptionMaxAggregateOutputType = {
   id: string | null
   providerId: string | null
+  name: string | null
+  remark: string | null
+  enabled: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type SubscriptionCountAggregateOutputType = {
   id: number
   providerId: number
+  name: number
+  remark: number
+  urls: number
+  enabled: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -44,16 +60,32 @@ export type SubscriptionCountAggregateOutputType = {
 export type SubscriptionMinAggregateInputType = {
   id?: true
   providerId?: true
+  name?: true
+  remark?: true
+  enabled?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type SubscriptionMaxAggregateInputType = {
   id?: true
   providerId?: true
+  name?: true
+  remark?: true
+  enabled?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type SubscriptionCountAggregateInputType = {
   id?: true
   providerId?: true
+  name?: true
+  remark?: true
+  urls?: true
+  enabled?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -132,6 +164,12 @@ export type SubscriptionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type SubscriptionGroupByOutputType = {
   id: string
   providerId: string
+  name: string
+  remark: string
+  urls: runtime.JsonValue
+  enabled: boolean
+  createdAt: Date
+  updatedAt: Date
   _count: SubscriptionCountAggregateOutputType | null
   _min: SubscriptionMinAggregateOutputType | null
   _max: SubscriptionMaxAggregateOutputType | null
@@ -158,12 +196,24 @@ export type SubscriptionWhereInput = {
   NOT?: Prisma.SubscriptionWhereInput | Prisma.SubscriptionWhereInput[]
   id?: Prisma.StringFilter<"Subscription"> | string
   providerId?: Prisma.StringFilter<"Subscription"> | string
+  name?: Prisma.StringFilter<"Subscription"> | string
+  remark?: Prisma.StringFilter<"Subscription"> | string
+  urls?: Prisma.JsonFilter<"Subscription">
+  enabled?: Prisma.BoolFilter<"Subscription"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   provider?: Prisma.XOR<Prisma.ProviderScalarRelationFilter, Prisma.ProviderWhereInput>
 }
 
 export type SubscriptionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   providerId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  remark?: Prisma.SortOrder
+  urls?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   provider?: Prisma.ProviderOrderByWithRelationInput
 }
 
@@ -173,12 +223,24 @@ export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SubscriptionWhereInput[]
   NOT?: Prisma.SubscriptionWhereInput | Prisma.SubscriptionWhereInput[]
   providerId?: Prisma.StringFilter<"Subscription"> | string
+  name?: Prisma.StringFilter<"Subscription"> | string
+  remark?: Prisma.StringFilter<"Subscription"> | string
+  urls?: Prisma.JsonFilter<"Subscription">
+  enabled?: Prisma.BoolFilter<"Subscription"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   provider?: Prisma.XOR<Prisma.ProviderScalarRelationFilter, Prisma.ProviderWhereInput>
 }, "id">
 
 export type SubscriptionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   providerId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  remark?: Prisma.SortOrder
+  urls?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.SubscriptionCountOrderByAggregateInput
   _max?: Prisma.SubscriptionMaxOrderByAggregateInput
   _min?: Prisma.SubscriptionMinOrderByAggregateInput
@@ -190,40 +252,88 @@ export type SubscriptionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SubscriptionScalarWhereWithAggregatesInput | Prisma.SubscriptionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
   providerId?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
+  name?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
+  remark?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
+  urls?: Prisma.JsonWithAggregatesFilter<"Subscription">
+  enabled?: Prisma.BoolWithAggregatesFilter<"Subscription"> | boolean
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
 }
 
 export type SubscriptionCreateInput = {
   id?: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   provider: Prisma.ProviderCreateNestedOneWithoutSubscriptionsInput
 }
 
 export type SubscriptionUncheckedCreateInput = {
   id?: string
   providerId: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type SubscriptionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   provider?: Prisma.ProviderUpdateOneRequiredWithoutSubscriptionsNestedInput
 }
 
 export type SubscriptionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubscriptionCreateManyInput = {
   id?: string
   providerId: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type SubscriptionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubscriptionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubscriptionListRelationFilter = {
@@ -239,16 +349,32 @@ export type SubscriptionOrderByRelationAggregateInput = {
 export type SubscriptionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   providerId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  remark?: Prisma.SortOrder
+  urls?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type SubscriptionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   providerId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  remark?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type SubscriptionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   providerId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  remark?: Prisma.SortOrder
+  enabled?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type SubscriptionCreateNestedManyWithoutProviderInput = {
@@ -293,12 +419,32 @@ export type SubscriptionUncheckedUpdateManyWithoutProviderNestedInput = {
   deleteMany?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
 export type SubscriptionCreateWithoutProviderInput = {
   id?: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type SubscriptionUncheckedCreateWithoutProviderInput = {
   id?: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type SubscriptionCreateOrConnectWithoutProviderInput = {
@@ -332,22 +478,52 @@ export type SubscriptionScalarWhereInput = {
   NOT?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
   id?: Prisma.StringFilter<"Subscription"> | string
   providerId?: Prisma.StringFilter<"Subscription"> | string
+  name?: Prisma.StringFilter<"Subscription"> | string
+  remark?: Prisma.StringFilter<"Subscription"> | string
+  urls?: Prisma.JsonFilter<"Subscription">
+  enabled?: Prisma.BoolFilter<"Subscription"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
 }
 
 export type SubscriptionCreateManyProviderInput = {
   id?: string
+  name?: string
+  remark?: string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type SubscriptionUpdateWithoutProviderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubscriptionUncheckedUpdateWithoutProviderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubscriptionUncheckedUpdateManyWithoutProviderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  remark?: Prisma.StringFieldUpdateOperationsInput | string
+  urls?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -355,27 +531,51 @@ export type SubscriptionUncheckedUpdateManyWithoutProviderInput = {
 export type SubscriptionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   providerId?: boolean
+  name?: boolean
+  remark?: boolean
+  urls?: boolean
+  enabled?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   provider?: boolean | Prisma.ProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
 
 export type SubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   providerId?: boolean
+  name?: boolean
+  remark?: boolean
+  urls?: boolean
+  enabled?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   provider?: boolean | Prisma.ProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
 
 export type SubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   providerId?: boolean
+  name?: boolean
+  remark?: boolean
+  urls?: boolean
+  enabled?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   provider?: boolean | Prisma.ProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
 
 export type SubscriptionSelectScalar = {
   id?: boolean
   providerId?: boolean
+  name?: boolean
+  remark?: boolean
+  urls?: boolean
+  enabled?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "providerId", ExtArgs["result"]["subscription"]>
+export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "providerId" | "name" | "remark" | "urls" | "enabled" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
 export type SubscriptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   provider?: boolean | Prisma.ProviderDefaultArgs<ExtArgs>
 }
@@ -394,6 +594,12 @@ export type $SubscriptionPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     providerId: string
+    name: string
+    remark: string
+    urls: runtime.JsonValue
+    enabled: boolean
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["subscription"]>
   composites: {}
 }
@@ -820,6 +1026,12 @@ export interface Prisma__SubscriptionClient<T, Null = never, ExtArgs extends run
 export interface SubscriptionFieldRefs {
   readonly id: Prisma.FieldRef<"Subscription", 'String'>
   readonly providerId: Prisma.FieldRef<"Subscription", 'String'>
+  readonly name: Prisma.FieldRef<"Subscription", 'String'>
+  readonly remark: Prisma.FieldRef<"Subscription", 'String'>
+  readonly urls: Prisma.FieldRef<"Subscription", 'Json'>
+  readonly enabled: Prisma.FieldRef<"Subscription", 'Boolean'>
+  readonly createdAt: Prisma.FieldRef<"Subscription", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Subscription", 'DateTime'>
 }
     
 

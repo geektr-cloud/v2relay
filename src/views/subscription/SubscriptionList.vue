@@ -53,8 +53,8 @@ function displayName(row: { name?: string | null }) {
   return t || null
 }
 
-function displayRemark(row: { remark?: string | null }) {
-  const t = (row.remark ?? '').trim()
+function displayRemark(row: { remark: string }) {
+  const t = row.remark.trim()
   return t || null
 }
 </script>

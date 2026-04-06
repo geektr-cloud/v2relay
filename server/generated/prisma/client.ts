@@ -48,3 +48,8 @@ export type Provider = Prisma.ProviderModel
  * 
  */
 export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model Tag
+ * 
+ */
+export type Tag = Prisma.TagModel

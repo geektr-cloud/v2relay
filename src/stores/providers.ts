@@ -28,15 +28,15 @@ export const useProviderStore = defineStore('providers', () => {
   const get = (idOrName: string) =>
     apiFetch<Provider>(`/providers/${encodeURIComponent(idOrName)}`)
 
-  const create = (name: string, url: string | null) =>
+  const create = (name: string, url: string) =>
     apiFetch<Provider>('/providers', {
       method: 'POST',
-      body: { name, url: url || null },
+      body: { name, url },
     })
 
   const update = (
     idOrName: string,
-    patch: { name?: string; url?: string | null },
+    patch: { name?: string; url?: string },
   ) =>
     apiFetch<Provider>(`/providers/${encodeURIComponent(idOrName)}`, {
       method: 'PATCH',
