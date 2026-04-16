@@ -3,6 +3,7 @@ import ProviderPage from '../views/provider/ProviderPage.vue'
 import ProviderDetailPage from '../views/provider/ProviderDetailPage.vue'
 import SubscriptionPage from '../views/subscription/SubscriptionPage.vue'
 import SubscriptionDetailPage from '../views/subscription/SubscriptionDetailPage.vue'
+import TagPage from '../views/tag/TagPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/providers/:idOrName',
       name: 'provider-detail',
       component: ProviderDetailPage,
+    },
+    {
+      path: '/tags',
+      name: 'tags',
+      component: TagPage,
     },
   ],
 })

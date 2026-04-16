@@ -32,15 +32,8 @@ model Subscription {
   updatedAt  DateTime @updatedAt
 }
 
-enum TagType {
-  cloud
-  location
-  feature
-}
-
 model Tag {
-  id       String  @id @default(uuid())
-  type     TagType
-  name     String  @unique
-  keywords Json    @default("[]")
+  id       String @id @default(uuid())
+  name     String @unique
+  keywords Json   @default("[]")
 }

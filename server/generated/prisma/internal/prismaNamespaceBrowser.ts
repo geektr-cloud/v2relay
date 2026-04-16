@@ -94,7 +94,6 @@ export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[k
 
 export const TagScalarFieldEnum = {
   id: 'id',
-  type: 'type',
   name: 'name',
   keywords: 'keywords'
 } as const

@@ -21,7 +21,6 @@ CREATE TABLE "Subscription" (
 -- CreateTable
 CREATE TABLE "Tag" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "type" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "keywords" JSONB NOT NULL DEFAULT []
 );

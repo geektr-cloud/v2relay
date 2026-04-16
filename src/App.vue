@@ -26,6 +26,7 @@ const subscriptionsActive = computed(
   () =>
     route.name === 'subscriptions' || route.name === 'subscription-detail',
 )
+const tagsActive = computed(() => route.name === 'tags')
 </script>
 
 <template>
@@ -52,6 +53,9 @@ const subscriptionsActive = computed(
               :class="navLinkClass(subscriptionsActive)"
             >
               订阅
+            </RouterLink>
+            <RouterLink to="/tags" :class="navLinkClass(tagsActive)">
+              标签
             </RouterLink>
           </nav>
         </NLayoutHeader>

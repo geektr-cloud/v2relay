@@ -124,23 +124,6 @@ export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
 }
 
-export type EnumTagTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.TagType | Prisma.EnumTagTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.TagType[]
-  notIn?: $Enums.TagType[]
-  not?: Prisma.NestedEnumTagTypeFilter<$PrismaModel> | $Enums.TagType
-}
-
-export type EnumTagTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.TagType | Prisma.EnumTagTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.TagType[]
-  notIn?: $Enums.TagType[]
-  not?: Prisma.NestedEnumTagTypeWithAggregatesFilter<$PrismaModel> | $Enums.TagType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumTagTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumTagTypeFilter<$PrismaModel>
-}
-
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -238,23 +221,6 @@ export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
-}
-
-export type NestedEnumTagTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.TagType | Prisma.EnumTagTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.TagType[]
-  notIn?: $Enums.TagType[]
-  not?: Prisma.NestedEnumTagTypeFilter<$PrismaModel> | $Enums.TagType
-}
-
-export type NestedEnumTagTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.TagType | Prisma.EnumTagTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.TagType[]
-  notIn?: $Enums.TagType[]
-  not?: Prisma.NestedEnumTagTypeWithAggregatesFilter<$PrismaModel> | $Enums.TagType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumTagTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumTagTypeFilter<$PrismaModel>
 }
 
 

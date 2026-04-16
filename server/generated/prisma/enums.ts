@@ -9,10 +9,7 @@
 * 🟢 You can import this file directly.
 */
 
-export const TagType = {
-  cloud: 'cloud',
-  location: 'location',
-  feature: 'feature'
-} as const
 
-export type TagType = (typeof TagType)[keyof typeof TagType]
+
+// This file is empty because there are no enums in the schema.
+export {}

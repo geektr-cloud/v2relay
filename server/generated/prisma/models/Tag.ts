@@ -26,19 +26,16 @@ export type AggregateTag = {
 
 export type TagMinAggregateOutputType = {
   id: string | null
-  type: $Enums.TagType | null
   name: string | null
 }
 
 export type TagMaxAggregateOutputType = {
   id: string | null
-  type: $Enums.TagType | null
   name: string | null
 }
 
 export type TagCountAggregateOutputType = {
   id: number
-  type: number
   name: number
   keywords: number
   _all: number
@@ -47,19 +44,16 @@ export type TagCountAggregateOutputType = {
 
 export type TagMinAggregateInputType = {
   id?: true
-  type?: true
   name?: true
 }
 
 export type TagMaxAggregateInputType = {
   id?: true
-  type?: true
   name?: true
 }
 
 export type TagCountAggregateInputType = {
   id?: true
-  type?: true
   name?: true
   keywords?: true
   _all?: true
@@ -139,7 +133,6 @@ export type TagGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
 
 export type TagGroupByOutputType = {
   id: string
-  type: $Enums.TagType
   name: string
   keywords: runtime.JsonValue
   _count: TagCountAggregateOutputType | null
@@ -167,14 +160,12 @@ export type TagWhereInput = {
   OR?: Prisma.TagWhereInput[]
   NOT?: Prisma.TagWhereInput | Prisma.TagWhereInput[]
   id?: Prisma.StringFilter<"Tag"> | string
-  type?: Prisma.EnumTagTypeFilter<"Tag"> | $Enums.TagType
   name?: Prisma.StringFilter<"Tag"> | string
   keywords?: Prisma.JsonFilter<"Tag">
 }
 
 export type TagOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
   name?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
 }
@@ -185,13 +176,11 @@ export type TagWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.TagWhereInput | Prisma.TagWhereInput[]
   OR?: Prisma.TagWhereInput[]
   NOT?: Prisma.TagWhereInput | Prisma.TagWhereInput[]
-  type?: Prisma.EnumTagTypeFilter<"Tag"> | $Enums.TagType
   keywords?: Prisma.JsonFilter<"Tag">
 }, "id" | "name">
 
 export type TagOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
   name?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
   _count?: Prisma.TagCountOrderByAggregateInput
@@ -204,121 +193,101 @@ export type TagScalarWhereWithAggregatesInput = {
   OR?: Prisma.TagScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TagScalarWhereWithAggregatesInput | Prisma.TagScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Tag"> | string
-  type?: Prisma.EnumTagTypeWithAggregatesFilter<"Tag"> | $Enums.TagType
   name?: Prisma.StringWithAggregatesFilter<"Tag"> | string
   keywords?: Prisma.JsonWithAggregatesFilter<"Tag">
 }
 
 export type TagCreateInput = {
   id?: string
-  type: $Enums.TagType
   name: string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagUncheckedCreateInput = {
   id?: string
-  type: $Enums.TagType
   name: string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumTagTypeFieldUpdateOperationsInput | $Enums.TagType
   name?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumTagTypeFieldUpdateOperationsInput | $Enums.TagType
   name?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagCreateManyInput = {
   id?: string
-  type: $Enums.TagType
   name: string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumTagTypeFieldUpdateOperationsInput | $Enums.TagType
   name?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumTagTypeFieldUpdateOperationsInput | $Enums.TagType
   name?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type TagCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
   name?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
 }
 
 export type TagMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
 export type TagMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  type?: Prisma.SortOrder
   name?: Prisma.SortOrder
-}
-
-export type EnumTagTypeFieldUpdateOperationsInput = {
-  set?: $Enums.TagType
 }
 
 
 
 export type TagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
   name?: boolean
   keywords?: boolean
 }, ExtArgs["result"]["tag"]>
 
 export type TagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
   name?: boolean
   keywords?: boolean
 }, ExtArgs["result"]["tag"]>
 
 export type TagSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  type?: boolean
   name?: boolean
   keywords?: boolean
 }, ExtArgs["result"]["tag"]>
 
 export type TagSelectScalar = {
   id?: boolean
-  type?: boolean
   name?: boolean
   keywords?: boolean
 }
 
-export type TagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "name" | "keywords", ExtArgs["result"]["tag"]>
+export type TagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "keywords", ExtArgs["result"]["tag"]>
 
 export type $TagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Tag"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    type: $Enums.TagType
     name: string
     keywords: runtime.JsonValue
   }, ExtArgs["result"]["tag"]>
@@ -745,7 +714,6 @@ export interface Prisma__TagClient<T, Null = never, ExtArgs extends runtime.Type
  */
 export interface TagFieldRefs {
   readonly id: Prisma.FieldRef<"Tag", 'String'>
-  readonly type: Prisma.FieldRef<"Tag", 'TagType'>
   readonly name: Prisma.FieldRef<"Tag", 'String'>
   readonly keywords: Prisma.FieldRef<"Tag", 'Json'>
 }
