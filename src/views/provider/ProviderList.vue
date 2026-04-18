@@ -9,7 +9,8 @@ import {
   useMessage,
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
-import { Link, Route } from '@/components/DataView'
+import Link from '@/components/DataView/Link.vue'
+import Route from '@/components/DataView/Route.vue'
 import { useEditorModal } from '@/components/EditorModal'
 import { useProviderStore } from '@/stores/providers'
 import ProviderEditor from './ProviderEditor.vue'
@@ -59,14 +60,12 @@ async function onDelete(row: { id: string }) {
           <tbody>
             <tr v-for="row in store.sorted" :key="row.id">
               <td>
-                <Route :to="{ name: 'provider-detail', params: { idOrName: row.id } }" class="font-medium">
+                <Route :to="{ name: 'provider-detail', params: { idOrName: row.id } }">
                   {{ row.name }}
                 </Route>
               </td>
               <td>
-                <Link v-if="row.url" :href="row.url" class="max-w-md truncate inline-block align-bottom"
-                  :title="row.url" @click.stop />
-                <span v-else class="text-zinc-500">—</span>
+                <Link :href="row.url" class="max-w-[40ch]" />
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">

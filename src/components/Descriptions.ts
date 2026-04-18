@@ -1,5 +1,5 @@
 import { type PropType, type VNode, defineComponent, h } from 'vue'
-import { Link } from '@/components/DataView'
+import Link from '@/components/DataView/Link.vue'
 
 const row = (label: string, content: () => unknown) =>
   h('div', { class: 'flex gap-2 py-2 text-sm' }, [

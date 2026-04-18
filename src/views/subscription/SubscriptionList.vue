@@ -11,7 +11,7 @@ import {
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
 import CopyTag from '@/components/CopyTag.vue'
-import { Route } from '@/components/DataView'
+import Route from '@/components/DataView/Route.vue'
 import { useEditorModal } from '@/components/EditorModal'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import SubscriptionEditor from './SubscriptionEditor.vue'
