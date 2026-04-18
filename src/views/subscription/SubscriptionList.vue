@@ -104,10 +104,8 @@ function displayRemark(row: { remark: string }) {
                   {{ row.provider.name }}
                 </Route>
               </td>
-              <td>
-                <div class="flex max-w-[40ch] flex-col gap-1">
-                  <CopyTag v-for="(url, i) in row.urls" :key="i" :value="url" truncate />
-                </div>
+              <td class="flex flex-col gap-1 max-w-[40ch]">
+                <CopyTag v-for="(url, i) in row.urls" :key="i" :value="url" />
               </td>
               <td>
                 <NTag :type="row.enabled ? 'success' : 'default'" size="small">
@@ -119,9 +117,11 @@ function displayRemark(row: { remark: string }) {
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">
-                  <ActionButton :icon="Eye" tooltip="详情" :route="{ name: 'subscription-detail', params: { id: row.id } }" />
+                  <ActionButton :icon="Eye" tooltip="详情"
+                    :route="{ name: 'subscription-detail', params: { id: row.id } }" />
                   <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton :icon="TrashAlt" tooltip="删除" type="error" confirm="确定删除此订阅？不可恢复。" @click="onDelete(row)" />
+                  <ActionButton :icon="TrashAlt" tooltip="删除" type="error" confirm="确定删除此订阅？不可恢复。"
+                    @click="onDelete(row)" />
                 </NSpace>
               </td>
             </tr>

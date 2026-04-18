@@ -220,7 +220,8 @@ function onCancelForm() {
           <template #header-extra>
             <NSpace size="small">
               <ActionButton label="编辑" @click="switchMode('edit')" />
-              <ActionButton label="删除" type="error" :disabled="saving || !editorId" confirm="确定删除此订阅？不可恢复。" @click="remove" />
+              <ActionButton label="删除" type="error" :disabled="saving || !editorId" confirm="确定删除此订阅？不可恢复。"
+                @click="remove" />
             </NSpace>
           </template>
           <Descriptions>
@@ -233,7 +234,7 @@ function onCancelForm() {
         </NCard>
 
         <NCard title="订阅链接" size="small" class="border-zinc-800">
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1.5 max-w-[40ch]">
             <CopyTag v-for="(url, i) in subscription.urls" :key="i" :value="url" />
           </div>
         </NCard>
