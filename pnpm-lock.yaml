@@ -26,6 +26,9 @@ importers:
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.32(typescript@5.9.3))
+      '@vueuse/router':
+        specifier: ^14.2.1
+        version: 14.2.1(vue-router@5.0.4(@vue/compiler-sfc@3.5.32)(pinia@3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1540,6 +1543,12 @@ packages:
 
   '@vueuse/metadata@14.2.1':
     resolution: {integrity: sha512-1ButlVtj5Sb/HDtIy1HFr1VqCP4G6Ypqt5MAo0lCgjokrk2mvQKsK2uuy0vqu/Ks+sHfuHo0B9Y9jn9xKdjZsw==, tarball: https://registry.npmjs.org/@vueuse/metadata/-/metadata-14.2.1.tgz}
+
+  '@vueuse/router@14.2.1':
+    resolution: {integrity: sha512-SbZfJe+qn5bj78zNOXT4nYbnp8OIFMyAsdcJb4Y0y9vXi1TsOfglF+YIazi5DPO2lk6/ZukpN5DEQe6KrNOjMw==, tarball: https://registry.npmjs.org/@vueuse/router/-/router-14.2.1.tgz}
+    peerDependencies:
+      vue: ^3.5.0
+      vue-router: ^4.0.0 || ^5.0.0
 
   '@vueuse/shared@14.2.1':
     resolution: {integrity: sha512-shTJncjV9JTI4oVNyF1FQonetYAiTBd+Qj7cY89SWbXSkx7gyhrgtEdF2ZAVWS1S3SHlaROO6F2IesJxQEkZBw==, tarball: https://registry.npmjs.org/@vueuse/shared/-/shared-14.2.1.tgz}
@@ -4835,6 +4844,12 @@ snapshots:
       vue: 3.5.32(typescript@5.9.3)
 
   '@vueuse/metadata@14.2.1': {}
+
+  '@vueuse/router@14.2.1(vue-router@5.0.4(@vue/compiler-sfc@3.5.32)(pinia@3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3))':
+    dependencies:
+      '@vueuse/shared': 14.2.1(vue@3.5.32(typescript@5.9.3))
+      vue: 3.5.32(typescript@5.9.3)
+      vue-router: 5.0.4(@vue/compiler-sfc@3.5.32)(pinia@3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3))
 
   '@vueuse/shared@14.2.1(vue@3.5.32(typescript@5.9.3))':
     dependencies:

@@ -1,27 +1,22 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
-import CopyTag from '@/components/DataView/CopyTag.vue'
 import type { FormInst, FormRules } from 'naive-ui'
 import {
   NButton,
-  NCard,
   NDynamicInput,
   NEmpty,
   NForm,
   NFormItem,
   NInput,
-  NSpace,
   NSpin,
   NSwitch,
   useMessage,
 } from 'naive-ui'
-import ActionButton from '@/components/ActionButton'
 import type { EditorEmits } from '@/components/EditorModal'
 import { type EditorBridgeProps, useEditorBridge } from '@/composables/useEditorBridge'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import type { SubscriptionWithProvider } from '@/types/api'
 import ProviderSelect from '@/views/provider/ProviderSelect'
-import { DataView, DataItem, CopyBtn, VSeparator, Multiline, Date } from '@/components/DataView'
 
 const props = defineProps<EditorBridgeProps<SubscriptionWithProvider>>()
 const emit = defineEmits<EditorEmits<SubscriptionWithProvider>>()
@@ -147,19 +142,6 @@ const submit = () => {
   notifyClose()
 }
 
-async function remove() {
-  saving.value = true
-  try {
-    await store.remove(editorId.value!)
-    message.success('已删除')
-    emit('deleted', editorId.value!)
-  } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e))
-  } finally {
-    saving.value = false
-  }
-}
-
 function onCancelForm() {
   if (isEdit.value) syncForm(subscription.value)
   notifyClose()
@@ -205,50 +187,4 @@ function onCancelForm() {
       </div>
     </NSpin>
   </template>
-
-  <!-- view -->
-  <NSpin v-else :show="loading" class="min-h-32">
-    <div v-if="!loading">
-      <NEmpty v-if="loadError" :description="loadError">
-        <template #extra>
-          <NButton @click="load">重试</NButton>
-        </template>
-      </NEmpty>
-
-      <template v-else-if="subscription">
-        <NCard title="基本信息" size="small" class="mb-4 border-zinc-800">
-          <template #header-extra>
-            <NSpace size="small">
-              <ActionButton label="编辑" @click="switchMode('edit')" />
-              <ActionButton label="删除" type="error" :disabled="saving || !editorId" confirm="确定删除此订阅？不可恢复。"
-                @click="remove" />
-            </NSpace>
-          </template>
-          <DataView>
-            <DataItem label="ID">
-              {{ subscription.id }}
-              <VSeparator />
-              <CopyBtn :value="subscription.id" />
-            </DataItem>
-            <DataItem label="名称">{{ subscription.name }}</DataItem>
-            <DataItem label="备注">
-              <Multiline :value="subscription.remark" />
-            </DataItem>
-            <DataItem label="创建时间">
-              <Date :value="subscription.createdAt" format="datetime" />
-            </DataItem>
-            <DataItem label="更新时间">
-              <Date :value="subscription.updatedAt" format="datetime" />
-            </DataItem>
-          </DataView>
-        </NCard>
-
-        <NCard title="订阅链接" size="small" class="border-zinc-800">
-          <div class="flex flex-col gap-1.5 max-w-[40ch]">
-            <CopyTag variant="ghost" v-for="(url, i) in subscription.urls" :key="i" :value="url" />
-          </div>
-        </NCard>
-      </template>
-    </div>
-  </NSpin>
 </template>

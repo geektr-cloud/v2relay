@@ -4,18 +4,14 @@ import { useRouter } from 'vue-router'
 import type { FormInst, FormRules } from 'naive-ui'
 import {
   NButton,
-  NCard,
   NEmpty,
   NForm,
   NFormItem,
   NInput,
-  NSpace,
   NSpin,
   useMessage,
 } from 'naive-ui'
-import ActionButton from '@/components/ActionButton'
 import type { EditorEmits } from '@/components/EditorModal'
-import { DataView, DataItem, CopyBtn, Link, VSeparator } from '@/components/DataView'
 import { type EditorBridgeProps, useEditorBridge } from '@/composables/useEditorBridge'
 import { useProviderStore } from '@/stores/providers'
 import type { Provider } from '@/types/api'
@@ -154,36 +150,4 @@ function onCancelForm() {
       </div>
     </NSpin>
   </template>
-
-  <!-- view -->
-  <NSpin v-else :show="loading" class="min-h-32">
-    <div v-if="!loading">
-      <NEmpty v-if="loadError" :description="loadError">
-        <template #extra>
-          <NButton @click="load">重试</NButton>
-        </template>
-      </NEmpty>
-
-      <NCard v-else-if="provider" :title="provider.name" segmented class="mb-4">
-        <template #header-extra>
-          <NSpace size="small">
-            <ActionButton label="编辑" @click="switchMode('edit')" />
-            <ActionButton label="删除" type="error" :disabled="saving || !editorId" confirm="确定删除该提供商？若仍有订阅条目将无法删除。"
-              @click="remove" />
-          </NSpace>
-        </template>
-        <DataView>
-          <DataItem label="ID">
-            {{ provider.id }}
-            <VSeparator />
-            <CopyBtn :value="provider.id" />
-          </DataItem>
-          <DataItem label="名称">{{ provider.name }}</DataItem>
-          <DataItem label="订阅地址">
-            <Link :href="provider.url" class="max-w-[40ch]" />
-          </DataItem>
-        </DataView>
-      </NCard>
-    </div>
-  </NSpin>
 </template>

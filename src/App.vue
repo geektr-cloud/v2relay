@@ -30,7 +30,7 @@ const tagsActive = computed(() => route.name === 'tags')
 </script>
 
 <template>
-  <NConfigProvider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN" class="dark">
+  <NConfigProvider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN">
     <NMessageProvider>
     <NModalProvider>
       <NLayout class="min-h-screen bg-zinc-950 text-zinc-100">

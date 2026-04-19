@@ -53,7 +53,7 @@ async function onDelete(row: { id: string }) {
           <thead>
             <tr>
               <th>名称</th>
-              <th>订阅地址</th>
+              <th>地址</th>
               <th class="w-[120px]">操作</th>
             </tr>
           </thead>
