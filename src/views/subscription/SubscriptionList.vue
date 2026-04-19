@@ -10,11 +10,14 @@ import {
   useMessage,
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
-import CopyTag from '@/components/CopyTag.vue'
+import CopyTag from '@/components/DataView/CopyTag.vue'
 import Route from '@/components/DataView/Route.vue'
 import { useEditorModal } from '@/components/EditorModal'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import SubscriptionEditor from './SubscriptionEditor.vue'
+import Badge from '@/components/ui/badge/Badge.vue'
+import Date from '@/components/DataView/Date.vue'
+import Multiline from '@/components/DataView/Multiline.vue'
 
 withDefaults(
   defineProps<{
@@ -44,19 +47,6 @@ async function onDelete(row: { id: string }) {
   }
 }
 
-function formatTime(d: Date) {
-  return d.toLocaleString('zh-CN')
-}
-
-function displayName(row: { name?: string | null }) {
-  const t = (row.name ?? '').trim()
-  return t || null
-}
-
-function displayRemark(row: { remark: string }) {
-  const t = row.remark.trim()
-  return t || null
-}
 </script>
 
 <template>
@@ -85,35 +75,30 @@ function displayRemark(row: { remark: string }) {
           <tbody>
             <tr v-for="row in store.sortedByUpdated" :key="row.id">
               <td>
-                <span v-if="displayName(row)" class="block max-w-[120px] truncate"
-                  :title="displayName(row) ?? undefined">
-                  {{ displayName(row) }}
-                </span>
-                <span v-else class="text-zinc-500">—</span>
+                <Route :to="{ name: 'subscription-detail', params: { id: row.id } }">
+                  {{ row.name }}
+                </Route>
               </td>
               <td>
-                <span v-if="displayRemark(row)" class="block max-w-[120px] truncate"
-                  :title="displayRemark(row) ?? undefined">
-                  {{ displayRemark(row) }}
-                </span>
-                <span v-else class="text-zinc-500">—</span>
+                <Multiline :value="row.remark" />
               </td>
               <td v-if="!hideProviderColumn">
-                <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }"
-                  class="max-w-[140px] truncate block" :title="row.provider.name">
+                <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }">
                   {{ row.provider.name }}
                 </Route>
               </td>
-              <td class="flex flex-col gap-1 max-w-[40ch]">
-                <CopyTag v-for="(url, i) in row.urls" :key="i" :value="url" />
+              <td>
+                <div class="flex flex-col gap-1 max-w-[40ch]">
+                  <CopyTag variant="ghost" v-for="(url, i) in row.urls" :key="i" :value="url" />
+                </div>
               </td>
               <td>
-                <NTag :type="row.enabled ? 'success' : 'default'" size="small">
+                <Badge :variant="row.enabled ? 'default' : 'destructive'">
                   {{ row.enabled ? '启用' : '停用' }}
-                </NTag>
+                </Badge>
               </td>
-              <td class="whitespace-nowrap text-sm text-zinc-400">
-                {{ formatTime(row.updatedAt) }}
+              <td>
+                <Date :value="row.updatedAt" />
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge'
 import type { RouteLocationRaw } from "vue-router";
+import { Minus } from 'lucide-vue-next';
 
 const props = defineProps<{ to?: RouteLocationRaw | null }>()
 </script>
@@ -8,7 +9,9 @@ const props = defineProps<{ to?: RouteLocationRaw | null }>()
 <template>
     <Badge as-child v-bind="$attrs" variant="link">
         <RouterLink :to="to ?? ''">
-            <slot></slot>
+            <slot>
+                <Minus />
+            </slot>
         </RouterLink>
     </Badge>
 </template>

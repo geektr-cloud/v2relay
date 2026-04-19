@@ -14,11 +14,12 @@ import {
   useMessage,
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
-import { Descriptions, DescriptionsCode, DescriptionsText } from '@/components/Descriptions'
 import type { EditorEmits } from '@/components/EditorModal'
 import { type EditorBridgeProps, useEditorBridge } from '@/composables/useEditorBridge'
 import { useTagStore } from '@/stores/tags'
 import type { Tag } from '@/types/api'
+import Badge from '@/components/ui/badge/Badge.vue'
+import { DataView, DataItem, CopyBtn, VSeparator } from '@/components/DataView'
 
 const props = defineProps<EditorBridgeProps<Tag>>()
 const emit = defineEmits<EditorEmits<Tag>>()
@@ -154,8 +155,7 @@ function onCancelForm() {
         <template v-else>
           <NForm ref="formRef" :model="form" :rules="rules" label-placement="left" label-width="88">
             <NFormItem label="名称" path="name">
-              <NInput v-model:value="form.name" placeholder="标签名称" :disabled="saving"
-                @keydown.enter.prevent="submit" />
+              <NInput v-model:value="form.name" placeholder="标签名称" :disabled="saving" @keydown.enter.prevent="submit" />
             </NFormItem>
             <NFormItem label="关键词" path="keywords">
               <NDynamicInput v-model:value="form.keywords" :disabled="saving" placeholder="输入关键词" />
@@ -184,15 +184,25 @@ function onCancelForm() {
           <template #header-extra>
             <NSpace size="small">
               <ActionButton label="编辑" @click="switchMode('edit')" />
-              <ActionButton label="删除" type="error" :disabled="saving || !editorId"
-                confirm="确定删除此标签？不可恢复。" @click="remove" />
+              <ActionButton label="删除" type="error" :disabled="saving || !editorId" confirm="确定删除此标签？不可恢复。"
+                @click="remove" />
             </NSpace>
           </template>
-          <Descriptions>
-            <DescriptionsCode label="ID" :value="tag.id" />
-            <DescriptionsText label="名称" :value="tag.name" />
-            <DescriptionsText label="关键词" :value="tag.keywords.join(', ')" fallback="无" />
-          </Descriptions>
+          <DataView>
+            <DataItem label="ID">
+              {{ tag.id }}
+              <VSeparator />
+              <CopyBtn :value="tag.id" />
+            </DataItem>
+            <DataItem label="名称">{{ tag.name }}</DataItem>
+            <DataItem label="关键词">
+              <div class="flex flex-wrap gap-1">
+                <Badge v-for="(kw, i) in tag.keywords" :key="i" variant="outline">
+                  {{ kw }}
+                </Badge>
+              </div>
+            </DataItem>
+          </DataView>
         </NCard>
       </template>
     </div>

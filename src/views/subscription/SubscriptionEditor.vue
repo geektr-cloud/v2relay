@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
-import CopyTag from '@/components/CopyTag.vue'
+import CopyTag from '@/components/DataView/CopyTag.vue'
 import type { FormInst, FormRules } from 'naive-ui'
 import {
   NButton,
@@ -16,12 +16,12 @@ import {
   useMessage,
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
-import { Descriptions, DescriptionsCode, DescriptionsDate, DescriptionsText } from '@/components/Descriptions'
 import type { EditorEmits } from '@/components/EditorModal'
 import { type EditorBridgeProps, useEditorBridge } from '@/composables/useEditorBridge'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import type { SubscriptionWithProvider } from '@/types/api'
 import ProviderSelect from '@/views/provider/ProviderSelect'
+import { DataView, DataItem, CopyBtn, VSeparator, Multiline, Date } from '@/components/DataView'
 
 const props = defineProps<EditorBridgeProps<SubscriptionWithProvider>>()
 const emit = defineEmits<EditorEmits<SubscriptionWithProvider>>()
@@ -224,18 +224,28 @@ function onCancelForm() {
                 @click="remove" />
             </NSpace>
           </template>
-          <Descriptions>
-            <DescriptionsCode label="ID" :value="subscription.id" />
-            <DescriptionsText label="名称" :value="subscription.name" />
-            <DescriptionsText label="备注" :value="subscription.remark" />
-            <DescriptionsDate label="创建时间" :value="subscription.createdAt" />
-            <DescriptionsDate label="更新时间" :value="subscription.updatedAt" />
-          </Descriptions>
+          <DataView>
+            <DataItem label="ID">
+              {{ subscription.id }}
+              <VSeparator />
+              <CopyBtn :value="subscription.id" />
+            </DataItem>
+            <DataItem label="名称">{{ subscription.name }}</DataItem>
+            <DataItem label="备注">
+              <Multiline :value="subscription.remark" />
+            </DataItem>
+            <DataItem label="创建时间">
+              <Date :value="subscription.createdAt" format="datetime" />
+            </DataItem>
+            <DataItem label="更新时间">
+              <Date :value="subscription.updatedAt" format="datetime" />
+            </DataItem>
+          </DataView>
         </NCard>
 
         <NCard title="订阅链接" size="small" class="border-zinc-800">
           <div class="flex flex-col gap-1.5 max-w-[40ch]">
-            <CopyTag v-for="(url, i) in subscription.urls" :key="i" :value="url" />
+            <CopyTag variant="ghost" v-for="(url, i) in subscription.urls" :key="i" :value="url" />
           </div>
         </NCard>
       </template>
