@@ -2,7 +2,6 @@
 import { Edit, Eye, TrashAlt } from '@vicons/fa'
 import {
   NButton,
-  NEmpty,
   NSpace,
   NSpin,
   NTable,
@@ -13,13 +12,6 @@ import ActionButton from '@/components/ActionButton'
 import { useEditorModal } from '@/components/EditorModal'
 import { useTagStore } from '@/stores/tags'
 import TagEditor from './TagEditor.vue'
-
-withDefaults(
-  defineProps<{
-    emptyDescription?: string
-  }>(),
-  { emptyDescription: '暂无标签' },
-)
 
 const message = useMessage()
 const store = useTagStore()
@@ -81,7 +73,6 @@ async function onDelete(row: { id: string }) {
           </tbody>
         </NTable>
       </div>
-      <NEmpty v-else-if="!store.loading" :description="emptyDescription" class="py-24" />
     </NSpin>
   </div>
 </template>

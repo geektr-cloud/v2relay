@@ -23,6 +23,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@7.3.1(@types/node@24.12.2)(jiti@2.6.1)(lightningcss@1.32.0)(stylus@0.57.0)(yaml@2.8.3))
+      '@tanstack/vue-table':
+        specifier: ^8.21.3
+        version: 8.21.3(vue@3.5.32(typescript@5.9.3))
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.32(typescript@5.9.3))
@@ -1380,8 +1383,18 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/table-core@8.21.3':
+    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==, tarball: https://registry.npmjs.org/@tanstack/table-core/-/table-core-8.21.3.tgz}
+    engines: {node: '>=12'}
+
   '@tanstack/virtual-core@3.14.0':
     resolution: {integrity: sha512-JLANqGy/D6k4Ujmh8Tr25lGimuOXNiaVyXaCAZS0W+1390sADdGnyUdSWNIfd49gebtIxGMij4IktRVzrdr12Q==, tarball: https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.14.0.tgz}
+
+  '@tanstack/vue-table@8.21.3':
+    resolution: {integrity: sha512-rusRyd77c5tDPloPskctMyPLFEQUeBzxdQ+2Eow4F7gDPlPOB1UnnhzfpdvqZ8ZyX2rRNGmqNnQWm87OI2OQPw==, tarball: https://registry.npmjs.org/@tanstack/vue-table/-/vue-table-8.21.3.tgz}
+    engines: {node: '>=12'}
+    peerDependencies:
+      vue: '>=3.2'
 
   '@tanstack/vue-virtual@3.13.24':
     resolution: {integrity: sha512-A0k2qF0zFSUStXSZkGXABouXr2Tw2Ztl/cVIYG9qy84uR8W7UNjAcX3DvzBS3YnDcwvLxab8v7dbmYBZ39itDA==, tarball: https://registry.npmjs.org/@tanstack/vue-virtual/-/vue-virtual-3.13.24.tgz}
@@ -4617,7 +4630,14 @@ snapshots:
       tailwindcss: 4.2.2
       vite: 7.3.1(@types/node@24.12.2)(jiti@2.6.1)(lightningcss@1.32.0)(stylus@0.57.0)(yaml@2.8.3)
 
+  '@tanstack/table-core@8.21.3': {}
+
   '@tanstack/virtual-core@3.14.0': {}
+
+  '@tanstack/vue-table@8.21.3(vue@3.5.32(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/table-core': 8.21.3
+      vue: 3.5.32(typescript@5.9.3)
 
   '@tanstack/vue-virtual@3.13.24(vue@3.5.32(typescript@5.9.3))':
     dependencies:

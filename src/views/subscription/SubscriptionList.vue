@@ -2,11 +2,9 @@
 import { Edit, Eye, TrashAlt } from '@vicons/fa'
 import {
   NButton,
-  NEmpty,
   NSpace,
   NSpin,
   NTable,
-  NTag,
   useMessage,
 } from 'naive-ui'
 import ActionButton from '@/components/ActionButton'
@@ -18,17 +16,6 @@ import SubscriptionEditor from './SubscriptionEditor.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Date from '@/components/DataView/Date.vue'
 import Multiline from '@/components/DataView/Multiline.vue'
-
-withDefaults(
-  defineProps<{
-    emptyDescription?: string
-    hideProviderColumn?: boolean
-  }>(),
-  {
-    emptyDescription: '暂无订阅',
-    hideProviderColumn: false,
-  },
-)
 
 const message = useMessage()
 const store = useSubscriptionStore()
@@ -63,7 +50,7 @@ async function onDelete(row: { id: string }) {
             <tr>
               <th class="max-w-[100px]">名称</th>
               <th class="max-w-[100px]">备注</th>
-              <th v-if="!hideProviderColumn" class="max-w-[140px]">
+              <th class="max-w-[140px]">
                 提供商
               </th>
               <th>订阅链接</th>
@@ -82,7 +69,7 @@ async function onDelete(row: { id: string }) {
               <td>
                 <Multiline :value="row.remark" />
               </td>
-              <td v-if="!hideProviderColumn">
+              <td>
                 <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }">
                   {{ row.provider.name }}
                 </Route>
@@ -113,7 +100,6 @@ async function onDelete(row: { id: string }) {
           </tbody>
         </NTable>
       </div>
-      <NEmpty v-else-if="!store.loading" :description="emptyDescription" class="py-24" />
     </NSpin>
   </div>
 </template>

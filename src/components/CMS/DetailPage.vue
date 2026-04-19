@@ -19,7 +19,7 @@ const errorMessage = computed(() => props.error instanceof Error ? props.error.m
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8 flex flex-col gap-4">
+  <main class="mx-auto max-w-5xl px-4 py-8 flex flex-col gap-4">
     <header>
       <BackButton />
     </header>
@@ -45,20 +45,18 @@ const errorMessage = computed(() => props.error instanceof Error ? props.error.m
         </DataView>
       </CardContent>
     </Card>
-    <Card v-if="error">
+    <Card v-if="!loading && error">
       <CardContent>
-        <Empty>
-          <EmptyContent>
-            <EmptyHeader>
-              <EmptyMedia>
-                <FileX />
-              </EmptyMedia>
-              <EmptyTitle>获取失败</EmptyTitle>
-              <EmptyDescription v-show="errorMessage">
-                <p class="text-sm text-red-500/90">{{ errorMessage }}</p>
-              </EmptyDescription>
-            </EmptyHeader>
-          </EmptyContent>
+        <Empty class="py-24 text-ring">
+          <EmptyHeader>
+            <EmptyMedia>
+              <FileX class="size-10" />
+            </EmptyMedia>
+            <EmptyTitle>获取失败</EmptyTitle>
+            <EmptyDescription v-show="errorMessage">
+              <p class="text-sm text-red-500/90">{{ errorMessage }}</p>
+            </EmptyDescription>
+          </EmptyHeader>
           <EmptyContent>
             <Button variant="secondary" @click="$emit('retry')">
               <RotateCcw />重试

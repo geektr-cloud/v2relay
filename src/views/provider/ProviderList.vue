@@ -15,13 +15,6 @@ import { useEditorModal } from '@/components/EditorModal'
 import { useProviderStore } from '@/stores/providers'
 import ProviderEditor from './ProviderEditor.vue'
 
-withDefaults(
-  defineProps<{
-    emptyDescription?: string
-  }>(),
-  { emptyDescription: '暂无数据' },
-)
-
 const message = useMessage()
 const store = useProviderStore()
 const { showEditor } = useEditorModal(ProviderEditor, {
@@ -80,7 +73,6 @@ async function onDelete(row: { id: string }) {
           </tbody>
         </NTable>
       </div>
-      <NEmpty v-else-if="!store.loading" :description="emptyDescription" class="py-24" />
     </NSpin>
   </div>
 </template>
