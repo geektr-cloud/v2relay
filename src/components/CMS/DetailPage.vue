@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import BackButton from '@/components/CMS/BackButton.vue'
-import { DataView, DataItem } from '@/components/DataView'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from '@/components/ui/card'
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { computed } from 'vue'
-import { FileX, RotateCcw } from 'lucide-vue-next'
-import Button from '@/components/ui/button/Button.vue'
+import BackButton from "@/components/CMS/BackButton.vue";
+import { DataView, DataItem } from "@/components/DataView";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { computed } from "vue";
+import { FileX, RotateCcw } from "lucide-vue-next";
+import Button from "@/components/ui/button/Button.vue";
 
 const props = defineProps<{
-  loading?: boolean
-  error?: any
-}>()
+  loading?: boolean;
+  error?: any;
+}>();
 
-defineEmits<{ (e: 'retry'): void }>()
+defineEmits<{ (e: "retry"): void }>();
 
-const errorMessage = computed(() => props.error instanceof Error ? props.error.message : String(props.error ?? ''))
+const errorMessage = computed(() => (props.error instanceof Error ? props.error.message : String(props.error ?? "")));
 </script>
 
 <template>
@@ -58,9 +58,7 @@ const errorMessage = computed(() => props.error instanceof Error ? props.error.m
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button variant="secondary" @click="$emit('retry')">
-              <RotateCcw />重试
-            </Button>
+            <Button variant="secondary" @click="$emit('retry')"> <RotateCcw />重试 </Button>
           </EmptyContent>
         </Empty>
       </CardContent>

@@ -1,34 +1,27 @@
 <script setup lang="ts">
-import { Edit, Eye, TrashAlt } from '@vicons/fa'
-import {
-  NButton,
-  NEmpty,
-  NSpace,
-  NSpin,
-  NTable,
-  useMessage,
-} from 'naive-ui'
-import ActionButton from '@/components/ActionButton'
-import Link from '@/components/DataView/Link.vue'
-import Route from '@/components/DataView/Route.vue'
-import { useEditorModal } from '@/components/EditorModal'
-import { useProviderStore } from '@/stores/providers'
-import ProviderEditor from './ProviderEditor.vue'
+import { Edit, Eye, TrashAlt } from "@vicons/fa";
+import { NButton, NEmpty, NSpace, NSpin, NTable, useMessage } from "naive-ui";
+import ActionButton from "@/components/ActionButton";
+import Link from "@/components/DataView/Link.vue";
+import Route from "@/components/DataView/Route.vue";
+import { useEditorModal } from "@/components/EditorModal";
+import { useProviderStore } from "@/stores/providers";
+import ProviderEditor from "./ProviderEditor.vue";
 
-const message = useMessage()
-const store = useProviderStore()
+const message = useMessage();
+const store = useProviderStore();
 const { showEditor } = useEditorModal(ProviderEditor, {
-  title: '提供商',
+  title: "提供商",
   onSaved: () => void store.refresh(),
-})
+});
 
 async function onDelete(row: { id: string }) {
   try {
-    await store.remove(row.id)
-    message.success('已删除')
-    void store.refresh()
+    await store.remove(row.id);
+    message.success("已删除");
+    void store.refresh();
   } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e))
+    message.error(e instanceof Error ? e.message : String(e));
   }
 }
 </script>
@@ -62,11 +55,19 @@ async function onDelete(row: { id: string }) {
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">
-                  <ActionButton :icon="Eye" tooltip="详情"
-                    :route="{ name: 'provider-detail', params: { idOrName: row.id } }" />
+                  <ActionButton
+                    :icon="Eye"
+                    tooltip="详情"
+                    :route="{ name: 'provider-detail', params: { idOrName: row.id } }"
+                  />
                   <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton :icon="TrashAlt" tooltip="删除" type="error" confirm="确定删除该提供商？若仍有订阅条目将无法删除。"
-                    @click="onDelete(row)" />
+                  <ActionButton
+                    :icon="TrashAlt"
+                    tooltip="删除"
+                    type="error"
+                    confirm="确定删除该提供商？若仍有订阅条目将无法删除。"
+                    @click="onDelete(row)"
+                  />
                 </NSpace>
               </td>
             </tr>

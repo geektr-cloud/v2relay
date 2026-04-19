@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import DetailPage from '@/components/CMS/DetailPage.vue'
-import CopyTag from '@/components/DataView/CopyTag.vue'
-import DeleteButton from '@/components/CMS/DeleteButton.vue'
-import { useSubscriptionStore } from '@/stores/subscriptions'
-import { DataView, DataItem, CopyBtn, VSeparator, Multiline, Date } from '@/components/DataView'
-import { useAsyncState } from '@vueuse/core'
-import { Edit } from 'lucide-vue-next'
-import Button from '@/components/ui/button/Button.vue'
-import { useRouteParams } from '@vueuse/router'
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from '@/components/ui/card'
+import DetailPage from "@/components/CMS/DetailPage.vue";
+import CopyTag from "@/components/DataView/CopyTag.vue";
+import DeleteButton from "@/components/CMS/DeleteButton.vue";
+import { useSubscriptionStore } from "@/stores/subscriptions";
+import { DataView, DataItem, CopyBtn, VSeparator, Multiline, Date } from "@/components/DataView";
+import { useAsyncState } from "@vueuse/core";
+import { Edit } from "lucide-vue-next";
+import Button from "@/components/ui/button/Button.vue";
+import { useRouteParams } from "@vueuse/router";
+import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 
-const id = useRouteParams<string>('id')
+const id = useRouteParams<string>("id");
 
-const { get, remove } = useSubscriptionStore()
+const { get, remove } = useSubscriptionStore();
 
-const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!), null, { throwError: false })
+const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!), null, { throwError: false });
 </script>
 
 <template>

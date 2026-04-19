@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Button from '@/components/ui/button/Button.vue'
-import { ArrowLeft } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import Button from "@/components/ui/button/Button.vue";
+import { ArrowLeft } from "lucide-vue-next";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-const canGoBack = ref(false)
-onMounted(() => canGoBack.value = !!window.history.state?.back)
+const router = useRouter();
+const canGoBack = ref(false);
+onMounted(() => (canGoBack.value = !!window.history.state?.back));
 </script>
 
 <template>

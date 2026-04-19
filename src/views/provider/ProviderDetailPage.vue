@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import DetailPage from '@/components/CMS/DetailPage.vue'
-import { DataView, DataItem, CopyBtn, VSeparator } from '@/components/DataView'
-import { useAsyncState } from '@vueuse/core'
-import { useRouteParams } from '@vueuse/router'
-import { Card, CardHeader, CardTitle, CardContent, CardAction } from '@/components/ui/card'
-import { useProviderStore } from '@/stores/providers'
-import DeleteButton from '@/components/CMS/DeleteButton.vue'
-import { Edit } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
+import DetailPage from "@/components/CMS/DetailPage.vue";
+import { DataView, DataItem, CopyBtn, VSeparator } from "@/components/DataView";
+import { useAsyncState } from "@vueuse/core";
+import { useRouteParams } from "@vueuse/router";
+import { Card, CardHeader, CardTitle, CardContent, CardAction } from "@/components/ui/card";
+import { useProviderStore } from "@/stores/providers";
+import DeleteButton from "@/components/CMS/DeleteButton.vue";
+import { Edit } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
 
-const id = useRouteParams<string>('idOrName')
+const id = useRouteParams<string>("idOrName");
 
-const { get, remove } = useProviderStore()
+const { get, remove } = useProviderStore();
 
-const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!), null, { throwError: false })
+const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!), null, { throwError: false });
 </script>
 
 <template>

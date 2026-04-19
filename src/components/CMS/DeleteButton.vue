@@ -1,29 +1,25 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import Button from '@/components/ui/button/Button.vue'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Spinner } from '@/components/ui/spinner'
-import { PopoverClose } from 'reka-ui'
-import { Trash, Check, X } from 'lucide-vue-next';
-import { useAsyncState } from '@vueuse/core'
-import { useRouter } from 'vue-router';
+import { computed } from "vue";
+import Button from "@/components/ui/button/Button.vue";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
+import { PopoverClose } from "reka-ui";
+import { Trash, Check, X } from "lucide-vue-next";
+import { useAsyncState } from "@vueuse/core";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
-  label?: string,
-  action: () => Promise<void>,
-  confirm: string,
-}>()
+  label?: string;
+  action: () => Promise<void>;
+  confirm: string;
+}>();
 
 const { isLoading, execute, error } = useAsyncState(props.action, null, {
   immediate: false,
   onSuccess: () => router.back(),
-})
+});
 
-const router = useRouter()
+const router = useRouter();
 </script>
 
 <template>

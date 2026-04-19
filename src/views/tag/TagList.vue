@@ -1,32 +1,25 @@
 <script setup lang="ts">
-import { Edit, Eye, TrashAlt } from '@vicons/fa'
-import {
-  NButton,
-  NSpace,
-  NSpin,
-  NTable,
-  NTag,
-  useMessage,
-} from 'naive-ui'
-import ActionButton from '@/components/ActionButton'
-import { useEditorModal } from '@/components/EditorModal'
-import { useTagStore } from '@/stores/tags'
-import TagEditor from './TagEditor.vue'
+import { Edit, Eye, TrashAlt } from "@vicons/fa";
+import { NButton, NSpace, NSpin, NTable, NTag, useMessage } from "naive-ui";
+import ActionButton from "@/components/ActionButton";
+import { useEditorModal } from "@/components/EditorModal";
+import { useTagStore } from "@/stores/tags";
+import TagEditor from "./TagEditor.vue";
 
-const message = useMessage()
-const store = useTagStore()
+const message = useMessage();
+const store = useTagStore();
 const { showEditor } = useEditorModal(TagEditor, {
-  title: '标签',
+  title: "标签",
   onSaved: () => void store.refresh(),
-})
+});
 
 async function onDelete(row: { id: string }) {
   try {
-    await store.remove(row.id)
-    message.success('已删除')
-    void store.refresh()
+    await store.remove(row.id);
+    message.success("已删除");
+    void store.refresh();
   } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e))
+    message.error(e instanceof Error ? e.message : String(e));
   }
 }
 </script>
@@ -65,8 +58,13 @@ async function onDelete(row: { id: string }) {
                 <NSpace :size="4" :wrap="false">
                   <ActionButton :icon="Eye" tooltip="详情" @click="showEditor({ id: row.id, viewMode: true })" />
                   <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton :icon="TrashAlt" tooltip="删除" type="error" confirm="确定删除此标签？不可恢复。"
-                    @click="onDelete(row)" />
+                  <ActionButton
+                    :icon="TrashAlt"
+                    tooltip="删除"
+                    type="error"
+                    confirm="确定删除此标签？不可恢复。"
+                    @click="onDelete(row)"
+                  />
                 </NSpace>
               </td>
             </tr>

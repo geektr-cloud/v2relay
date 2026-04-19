@@ -1,26 +1,25 @@
 <script setup lang="ts">
-import BackButton from '@/components/CMS/BackButton.vue'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from '@/components/ui/card'
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { computed } from 'vue'
-import { FileX, RotateCcw, Plus, File } from 'lucide-vue-next'
-import Button from '@/components/ui/button/Button.vue'
-import Spinner from '../ui/spinner/Spinner.vue'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-
+import BackButton from "@/components/CMS/BackButton.vue";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { computed } from "vue";
+import { FileX, RotateCcw, Plus, File } from "lucide-vue-next";
+import Button from "@/components/ui/button/Button.vue";
+import Spinner from "../ui/spinner/Spinner.vue";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 const props = defineProps<{
-  title: string
-  description?: string
-  loading?: boolean
-  error?: any
-  items?: any[] | null
-}>()
+  title: string;
+  description?: string;
+  loading?: boolean;
+  error?: any;
+  items?: any[] | null;
+}>();
 
-defineEmits<{ (e: 'retry'): void, (e: 'create'): void }>()
+defineEmits<{ (e: "retry"): void; (e: "create"): void }>();
 
-const errorMessage = computed(() => props.error instanceof Error ? props.error.message : String(props.error ?? ''))
+const errorMessage = computed(() => (props.error instanceof Error ? props.error.message : String(props.error ?? "")));
 </script>
 
 <template>
@@ -72,9 +71,7 @@ const errorMessage = computed(() => props.error instanceof Error ? props.error.m
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="secondary" @click="$emit('retry')">
-          <RotateCcw />重试
-        </Button>
+        <Button variant="secondary" @click="$emit('retry')"> <RotateCcw />重试 </Button>
       </EmptyContent>
     </Empty>
     <Empty v-if="!loading && items?.length === 0" class="py-24 text-ring">
@@ -85,9 +82,7 @@ const errorMessage = computed(() => props.error instanceof Error ? props.error.m
         <EmptyTitle>暂无数据</EmptyTitle>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="secondary" @click="$emit('create')">
-          <Plus />新建
-        </Button>
+        <Button variant="secondary" @click="$emit('create')"> <Plus />新建 </Button>
       </EmptyContent>
     </Empty>
     <slot />

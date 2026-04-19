@@ -1,39 +1,32 @@
 <script setup lang="ts">
-import { Edit, Eye, TrashAlt } from '@vicons/fa'
-import {
-  NButton,
-  NSpace,
-  NSpin,
-  NTable,
-  useMessage,
-} from 'naive-ui'
-import ActionButton from '@/components/ActionButton'
-import CopyTag from '@/components/DataView/CopyTag.vue'
-import Route from '@/components/DataView/Route.vue'
-import { useEditorModal } from '@/components/EditorModal'
-import { useSubscriptionStore } from '@/stores/subscriptions'
-import SubscriptionEditor from './SubscriptionEditor.vue'
-import Badge from '@/components/ui/badge/Badge.vue'
-import Date from '@/components/DataView/Date.vue'
-import Multiline from '@/components/DataView/Multiline.vue'
+import { Edit, Eye, TrashAlt } from "@vicons/fa";
+import { NButton, NSpace, NSpin, NTable, useMessage } from "naive-ui";
+import ActionButton from "@/components/ActionButton";
+import CopyTag from "@/components/DataView/CopyTag.vue";
+import Route from "@/components/DataView/Route.vue";
+import { useEditorModal } from "@/components/EditorModal";
+import { useSubscriptionStore } from "@/stores/subscriptions";
+import SubscriptionEditor from "./SubscriptionEditor.vue";
+import Badge from "@/components/ui/badge/Badge.vue";
+import Date from "@/components/DataView/Date.vue";
+import Multiline from "@/components/DataView/Multiline.vue";
 
-const message = useMessage()
-const store = useSubscriptionStore()
+const message = useMessage();
+const store = useSubscriptionStore();
 const { showEditor } = useEditorModal(SubscriptionEditor, {
-  title: '订阅',
+  title: "订阅",
   onSaved: () => void store.refresh(),
-})
+});
 
 async function onDelete(row: { id: string }) {
   try {
-    await store.remove(row.id)
-    message.success('已删除')
-    void store.refresh()
+    await store.remove(row.id);
+    message.success("已删除");
+    void store.refresh();
   } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e))
+    message.error(e instanceof Error ? e.message : String(e));
   }
 }
-
 </script>
 
 <template>
@@ -50,9 +43,7 @@ async function onDelete(row: { id: string }) {
             <tr>
               <th class="max-w-[100px]">名称</th>
               <th class="max-w-[100px]">备注</th>
-              <th class="max-w-[140px]">
-                提供商
-              </th>
+              <th class="max-w-[140px]">提供商</th>
               <th>订阅链接</th>
               <th class="w-[90px]">状态</th>
               <th class="w-[170px]">更新于</th>
@@ -81,7 +72,7 @@ async function onDelete(row: { id: string }) {
               </td>
               <td>
                 <Badge :variant="row.enabled ? 'default' : 'destructive'">
-                  {{ row.enabled ? '启用' : '停用' }}
+                  {{ row.enabled ? "启用" : "停用" }}
                 </Badge>
               </td>
               <td>
@@ -89,11 +80,19 @@ async function onDelete(row: { id: string }) {
               </td>
               <td>
                 <NSpace :size="4" :wrap="false">
-                  <ActionButton :icon="Eye" tooltip="详情"
-                    :route="{ name: 'subscription-detail', params: { id: row.id } }" />
+                  <ActionButton
+                    :icon="Eye"
+                    tooltip="详情"
+                    :route="{ name: 'subscription-detail', params: { id: row.id } }"
+                  />
                   <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton :icon="TrashAlt" tooltip="删除" type="error" confirm="确定删除此订阅？不可恢复。"
-                    @click="onDelete(row)" />
+                  <ActionButton
+                    :icon="TrashAlt"
+                    tooltip="删除"
+                    type="error"
+                    confirm="确定删除此订阅？不可恢复。"
+                    @click="onDelete(row)"
+                  />
                 </NSpace>
               </td>
             </tr>
