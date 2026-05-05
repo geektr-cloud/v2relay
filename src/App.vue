@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
-import {
-  NConfigProvider,
-  NLayout,
-  NLayoutContent,
-  NLayoutHeader,
-  NMessageProvider,
-  NModalProvider,
-  darkTheme,
-  zhCN,
-  dateZhCN,
-} from "naive-ui";
-import { ModalsContainer } from 'vue-final-modal'
+import { ModalsContainer } from "vue-final-modal";
 
 const route = useRoute();
 const navLinkClass = (active: boolean) =>
@@ -23,29 +12,25 @@ const tagsActive = computed(() => route.name === "tags");
 </script>
 
 <template>
-  <NConfigProvider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN">
-    <NMessageProvider>
-      <NModalProvider>
-        <ModalsContainer />
-        <NLayout class="min-h-screen bg-zinc-950 text-zinc-100">
-          <NLayoutHeader bordered
-            class="sticky top-0 z-10 flex h-14 items-center gap-6 border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80">
-            <RouterLink to="/"
-              class="text-lg font-semibold tracking-tight text-zinc-100 no-underline transition-colors hover:text-cyan-400">
-              V2Relay
-            </RouterLink>
-            <nav class="flex items-center gap-4 text-sm">
-              <RouterLink to="/" :class="navLinkClass(providersActive)"> 提供商 </RouterLink>
-              <RouterLink to="/subscriptions" :class="navLinkClass(subscriptionsActive)"> 订阅 </RouterLink>
-              <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
-            </nav>
-          </NLayoutHeader>
-          <NLayoutContent class="bg-zinc-950">
-            <RouterView />
-          </NLayoutContent>
-        </NLayout>
-        <ModalsContainer />
-      </NModalProvider>
-    </NMessageProvider>
-  </NConfigProvider>
+  <div class="min-h-screen bg-zinc-950 text-zinc-100">
+    <ModalsContainer />
+    <header
+      class="sticky top-0 z-10 flex h-14 items-center gap-6 border-b border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80"
+    >
+      <RouterLink
+        to="/"
+        class="text-lg font-semibold tracking-tight text-zinc-100 no-underline transition-colors hover:text-cyan-400"
+      >
+        V2Relay
+      </RouterLink>
+      <nav class="flex items-center gap-4 text-sm">
+        <RouterLink to="/" :class="navLinkClass(providersActive)"> 提供商 </RouterLink>
+        <RouterLink to="/subscriptions" :class="navLinkClass(subscriptionsActive)"> 订阅 </RouterLink>
+        <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
+      </nav>
+    </header>
+    <main class="bg-zinc-950">
+      <RouterView />
+    </main>
+  </div>
 </template>

@@ -7,7 +7,7 @@ import Button from "@/components/ui/button/Button.vue";
 import { useConfirmPopover } from "@/components/Actions";
 import { Trash2, File, SquarePen } from "lucide-vue-next";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useFormModel } from "@/components/CMS/utils";
+import { useFormModel } from "@/components/CMS";
 
 const { useAll, useRemoval } = useProviderStore();
 const store = useAll();

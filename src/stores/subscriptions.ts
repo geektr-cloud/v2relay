@@ -1,5 +1,8 @@
-import { computed, ref } from "vue";
+import { computed, reactive, watchEffect, type Ref } from "vue";
 import { defineStore } from "pinia";
+import { useAsyncState } from "@vueuse/core";
+import { z } from "zod";
+import { CMS } from "@/components/CMS";
 import type { SubscriptionWithProvider } from "@/types/api";
 import { apiFetch } from "@/utils/api";
 
@@ -11,68 +14,128 @@ function hydrateDates(row: SubscriptionWithProvider): SubscriptionWithProvider {
   };
 }
 
-export const useSubscriptionStore = defineStore("subscriptions", () => {
-  const items = ref<SubscriptionWithProvider[]>([]);
-  const loading = ref(false);
-  const error = ref<string | null>(null);
+const schema = z.object({
+  providerId: z.string().trim().min(1),
+  urls: z.array(z.string().trim().url()).min(1),
+  enabled: z.boolean(),
+  name: z.string().trim().max(64),
+  remark: z.string().trim().max(512),
+});
 
-  const sortedByUpdated = computed(() =>
-    [...items.value].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
+type SubscriptionForm = {
+  id: string;
+  providerId: string;
+  urls: string[];
+  enabled: boolean;
+  name: string;
+  remark: string;
+};
+type SubscriptionUpsert = CMS.BaseData & Omit<SubscriptionForm, "id">;
+
+const useNewValue = (): SubscriptionForm => ({
+  id: "",
+  providerId: "",
+  urls: [""],
+  enabled: true,
+  name: "",
+  remark: "",
+});
+
+export const useSubscriptionStore = defineStore("subscriptions", () => {
+  const as = useAsyncState(
+    async () => {
+      const list = await apiFetch<SubscriptionWithProvider[]>("/subscriptions");
+      return list.map(hydrateDates);
+    },
+    [],
+    { shallow: false },
+  );
+  const sorted = computed(() =>
+    [...(as.state.value ?? [])].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
   );
 
-  async function refresh(providerId?: string | null) {
-    loading.value = true;
-    error.value = null;
-    try {
-      const q = providerId ? `?providerId=${encodeURIComponent(providerId)}` : "";
-      const raw = await apiFetch<SubscriptionWithProvider[]>(`/subscriptions${q}`);
-      items.value = raw.map(hydrateDates);
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e);
-      items.value = [];
-    } finally {
-      loading.value = false;
+  const localRemove = (id: string) => (as.state.value = as.state.value?.filter((row) => row.id !== id) ?? []);
+  const localAddOrUpdate = (data: SubscriptionWithProvider) => {
+    const index = as.state.value.findIndex((row) => row.id === data.id);
+    if (index !== -1) {
+      as.state.value.splice(index, 1, data);
+    } else {
+      as.state.value.push(data);
     }
-  }
+  };
 
-  const get = async (id: string) =>
-    hydrateDates(await apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id)}`));
+  const useRawItem = (id: Ref<string | undefined>) =>
+    computed(() => (id.value ? as.state.value?.find((row) => row.id === id.value) : undefined));
 
-  const create = async (input: {
-    providerId: string;
-    urls: string[];
-    enabled?: boolean;
-    name?: string;
-    remark?: string;
-  }) =>
-    hydrateDates(
-      await apiFetch<SubscriptionWithProvider>("/subscriptions", {
-        method: "POST",
-        body: input,
-      }),
+  const useAll: CMS.UseAll<SubscriptionWithProvider> = () => CMS.toAllItems({ ...as, state: sorted });
+  const useOne: CMS.UseOne<SubscriptionWithProvider> = (id) => CMS.toOneItem({ ...as, state: useRawItem(id) });
+
+  const useRemoval: CMS.UseRemoval<SubscriptionWithProvider> = (id) => {
+    const source = CMS.fork(useRawItem(id));
+    const del = useAsyncState(
+      async () => {
+        await apiFetch<void>(`/subscriptions/${encodeURIComponent(id.value!)}`, { method: "DELETE" });
+        return source.value;
+      },
+      undefined,
+      {
+        immediate: false,
+        throwError: true,
+        onError: () => {},
+        onSuccess: () => id.value && localRemove(id.value),
+      },
     );
 
-  const update = async (
-    id: string,
-    patch: Partial<{
-      providerId: string;
-      urls: string[];
-      enabled: boolean;
-      name: string;
-      remark: string;
-    }>,
-  ) =>
-    hydrateDates(
-      await apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id)}`, {
-        method: "PATCH",
-        body: patch,
-      }),
-    );
+    return CMS.toRemoval(source, del);
+  };
 
-  const remove = (id: string) =>
-    apiFetch<void>(`/subscriptions/${encodeURIComponent(id)}`, {
-      method: "DELETE",
+  const useUpsert: CMS.UseUpsert<SubscriptionUpsert> = (id: Ref<string | undefined>) => {
+    const source = CMS.fork(useRawItem(id));
+    const form = reactive<SubscriptionForm>(source.value ? mapToForm(source.value) : useNewValue());
+    watchEffect(() => Object.assign(form, source.value ? mapToForm(source.value) : useNewValue()));
+
+    const payload = () => ({
+      providerId: form.providerId,
+      urls: form.urls.map((url) => url.trim()).filter(Boolean),
+      enabled: form.enabled,
+      name: form.name.trim(),
+      remark: form.remark.trim(),
+    });
+    const create = () =>
+      apiFetch<SubscriptionWithProvider>("/subscriptions", { method: "POST", body: payload() });
+    const update = () =>
+      apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id.value!)}`, { method: "PATCH", body: payload() });
+    const { state, execute: validate } = useAsyncState(
+      async () => await schema["~standard"].validate(payload()),
+      undefined,
+      { immediate: false },
+    );
+    const issues = computed(() => state.value?.issues);
+    const submit = async () => {
+      const result = await validate();
+      if (result?.issues) throw new Error("Validation failed");
+      const row = await (id.value ? update() : create());
+      return hydrateDates(row);
+    };
+    const upsert = useAsyncState(submit, undefined, {
+      immediate: false,
+      throwError: true,
+      onSuccess: (data) => data && localAddOrUpdate(data),
     });
 
-  return { items, sortedByUpdated, loading, error, refresh, get, create, update, remove };
+    return CMS.toUpsert(form, issues, upsert);
+  };
+
+  return { schema, useAll, useOne, useUpsert, useRemoval };
 });
+
+function mapToForm(row: SubscriptionWithProvider): SubscriptionForm {
+  return {
+    id: row.id,
+    providerId: row.providerId,
+    urls: row.urls.length ? [...row.urls] : [""],
+    enabled: row.enabled,
+    name: row.name ?? "",
+    remark: row.remark ?? "",
+  };
+}

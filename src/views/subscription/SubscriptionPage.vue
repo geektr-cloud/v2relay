@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { useEditorModal } from "@/components/EditorModal";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 import SubscriptionList from "./SubscriptionList.vue";
 import SubscriptionEditor from "./SubscriptionEditor.vue";
-import PageEntry from "@/components/CMS/PageEntry.vue";
+import { PageEntry, useFormModel } from "@/components/CMS";
 
-const store = useSubscriptionStore();
-const { showEditor } = useEditorModal(SubscriptionEditor, {
-  title: "提供商",
-  onSaved: () => void store.refresh(),
-});
-
-onMounted(() => void store.refresh());
+const { useAll } = useSubscriptionStore();
+const { create } = useFormModel(SubscriptionEditor);
+const store = useAll();
 </script>
 
 <template>
@@ -22,8 +16,8 @@ onMounted(() => void store.refresh());
     :loading="store.loading"
     :error="store.error"
     :items="store.items"
-    @retry="void store.refresh()"
-    @create="showEditor({})"
+    @retry="void store.reload()"
+    @create="create()"
   >
     <SubscriptionList />
   </PageEntry>

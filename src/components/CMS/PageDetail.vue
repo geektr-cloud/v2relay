@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BackButton from "@/components/CMS/BackButton.vue";
+import { BackButton } from "@/components/CMS";
 import { DataView, DataItem } from "@/components/DataView";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";

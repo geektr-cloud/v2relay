@@ -1,76 +1,71 @@
 <script setup lang="ts">
-import { Edit, Eye, TrashAlt } from "@vicons/fa";
-import { NButton, NSpace, NSpin, NTable, NTag, useMessage } from "naive-ui";
-import ActionButton from "@/components/ActionButton";
-import { useEditorModal } from "@/components/EditorModal";
+import Route from "@/components/DataView/Route.vue";
 import { useTagStore } from "@/stores/tags";
 import TagEditor from "./TagEditor.vue";
+import Button from "@/components/ui/button/Button.vue";
+import { useConfirmPopover } from "@/components/Actions";
+import { Trash2, File, SquarePen } from "lucide-vue-next";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useFormModel } from "@/components/CMS";
+import { Badge } from "@/components/ui/badge";
 
-const message = useMessage();
-const store = useTagStore();
-const { showEditor } = useEditorModal(TagEditor, {
-  title: "标签",
-  onSaved: () => void store.refresh(),
+const { useAll, useRemoval } = useTagStore();
+const store = useAll();
+const { update } = useFormModel(TagEditor);
+
+const removal = useConfirmPopover({
+  message: "确定删除该标签？不可恢复。",
+  useRemoval,
 });
-
-async function onDelete(row: { id: string }) {
-  try {
-    await store.remove(row.id);
-    message.success("已删除");
-    void store.refresh();
-  } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e));
-  }
-}
 </script>
 
 <template>
-  <div>
-    <div v-if="store.error" class="mb-3 rounded-lg border border-amber-900/50 bg-amber-950/30 p-3">
-      <p class="text-sm text-amber-200/90">加载失败：{{ store.error }}</p>
-      <NButton class="mt-2" size="small" @click="store.refresh()">重试</NButton>
-    </div>
-
-    <NSpin :show="store.loading && store.items.length === 0" class="min-h-24">
-      <div v-if="store.sorted.length > 0" class="overflow-x-auto rounded-lg">
-        <NTable :bordered="false" :single-line="false" size="small">
-          <thead>
-            <tr>
-              <th>名称</th>
-              <th>关键词</th>
-              <th class="w-[120px]">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in store.sorted" :key="row.id">
-              <td class="font-medium">
-                <NTag type="primary" :bordered="false" size="small">{{ row.name }}</NTag>
-              </td>
-              <td>
-                <div v-if="row.keywords.length" class="flex flex-wrap gap-1">
-                  <NTag v-for="(kw, i) in row.keywords" :key="i" size="small" :bordered="false">
-                    {{ kw }}
-                  </NTag>
-                </div>
-                <span v-else class="text-zinc-500">—</span>
-              </td>
-              <td>
-                <NSpace :size="4" :wrap="false">
-                  <ActionButton :icon="Eye" tooltip="详情" @click="showEditor({ id: row.id, viewMode: true })" />
-                  <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton
-                    :icon="TrashAlt"
-                    tooltip="删除"
-                    type="error"
-                    confirm="确定删除此标签？不可恢复。"
-                    @click="onDelete(row)"
-                  />
-                </NSpace>
-              </td>
-            </tr>
-          </tbody>
-        </NTable>
-      </div>
-    </NSpin>
+  <div v-if="store.items.length > 0">
+    <removal.ConfirmPopover />
+    <Table>
+      <TableCaption>共 {{ store.items.length }} 个标签</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>名称</TableHead>
+          <TableHead>关键词</TableHead>
+          <TableHead class="w-[120px]"> 操作 </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="row in store.items" :key="row.id">
+          <TableCell>
+            <Route :to="{ name: 'tag-detail', params: { idOrName: row.id } }">
+              {{ row.name }}
+            </Route>
+          </TableCell>
+          <TableCell>
+            <div v-if="row.keywords.length" class="flex flex-wrap gap-1">
+              <Badge v-for="(kw, i) in row.keywords" :key="i" variant="outline">
+                {{ kw }}
+              </Badge>
+            </div>
+            <span v-else class="text-muted-foreground">—</span>
+          </TableCell>
+          <TableCell>
+            <Button variant="ghost" size="icon" as-child>
+              <RouterLink :to="{ name: 'tag-detail', params: { idOrName: row.id } }">
+                <File />
+              </RouterLink>
+            </Button>
+            <Button variant="ghost" size="icon" @click="update(row.id)">
+              <SquarePen />
+            </Button>
+            <Button
+              variant="ghost"
+              class="text-destructive hover:text-destructive"
+              size="icon"
+              @click="(e: MouseEvent) => removal.open(e, row.id)"
+            >
+              <Trash2 />
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   </div>
 </template>

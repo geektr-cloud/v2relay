@@ -1,104 +1,86 @@
 <script setup lang="ts">
-import { Edit, Eye, TrashAlt } from "@vicons/fa";
-import { NButton, NSpace, NSpin, NTable, useMessage } from "naive-ui";
-import ActionButton from "@/components/ActionButton";
+import { useConfirmPopover } from "@/components/Actions";
 import CopyTag from "@/components/DataView/CopyTag.vue";
 import Route from "@/components/DataView/Route.vue";
-import { useEditorModal } from "@/components/EditorModal";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 import SubscriptionEditor from "./SubscriptionEditor.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import Date from "@/components/DataView/Date.vue";
-import Multiline from "@/components/DataView/Multiline.vue";
+import { MultiLine } from "@/components/DataView";
+import Button from "@/components/ui/button/Button.vue";
+import { Trash2, File, SquarePen } from "lucide-vue-next";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useFormModel } from "@/components/CMS";
 
-const message = useMessage();
-const store = useSubscriptionStore();
-const { showEditor } = useEditorModal(SubscriptionEditor, {
-  title: "订阅",
-  onSaved: () => void store.refresh(),
+const { useAll, useRemoval } = useSubscriptionStore();
+const store = useAll();
+const { update } = useFormModel(SubscriptionEditor);
+const removal = useConfirmPopover({
+  message: "确定删除此订阅？不可恢复。",
+  useRemoval,
 });
-
-async function onDelete(row: { id: string }) {
-  try {
-    await store.remove(row.id);
-    message.success("已删除");
-    void store.refresh();
-  } catch (e) {
-    message.error(e instanceof Error ? e.message : String(e));
-  }
-}
 </script>
 
 <template>
-  <div>
-    <div v-if="store.error" class="mb-3 rounded-lg border border-amber-900/50 bg-amber-950/30 p-3">
-      <p class="text-sm text-amber-200/90">加载失败：{{ store.error }}</p>
-      <NButton class="mt-2" size="small" @click="store.refresh()">重试</NButton>
-    </div>
-
-    <NSpin :show="store.loading && store.items.length === 0" class="min-h-24">
-      <div v-if="store.sortedByUpdated.length > 0" class="overflow-x-auto rounded-lg">
-        <NTable :bordered="false" :single-line="false" size="small">
-          <thead>
-            <tr>
-              <th class="max-w-[100px]">名称</th>
-              <th class="max-w-[100px]">备注</th>
-              <th class="max-w-[140px]">提供商</th>
-              <th>订阅链接</th>
-              <th class="w-[90px]">状态</th>
-              <th class="w-[170px]">更新于</th>
-              <th class="w-[120px]">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in store.sortedByUpdated" :key="row.id">
-              <td>
-                <Route :to="{ name: 'subscription-detail', params: { id: row.id } }">
-                  {{ row.name }}
-                </Route>
-              </td>
-              <td>
-                <Multiline :value="row.remark" />
-              </td>
-              <td>
-                <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }">
-                  {{ row.provider.name }}
-                </Route>
-              </td>
-              <td>
-                <div class="flex flex-col gap-1 max-w-[40ch]">
-                  <CopyTag variant="ghost" v-for="(url, i) in row.urls" :key="i" :value="url" />
-                </div>
-              </td>
-              <td>
-                <Badge :variant="row.enabled ? 'default' : 'destructive'">
-                  {{ row.enabled ? "启用" : "停用" }}
-                </Badge>
-              </td>
-              <td>
-                <Date :value="row.updatedAt" />
-              </td>
-              <td>
-                <NSpace :size="4" :wrap="false">
-                  <ActionButton
-                    :icon="Eye"
-                    tooltip="详情"
-                    :route="{ name: 'subscription-detail', params: { id: row.id } }"
-                  />
-                  <ActionButton :icon="Edit" tooltip="编辑" @click="showEditor({ id: row.id })" />
-                  <ActionButton
-                    :icon="TrashAlt"
-                    tooltip="删除"
-                    type="error"
-                    confirm="确定删除此订阅？不可恢复。"
-                    @click="onDelete(row)"
-                  />
-                </NSpace>
-              </td>
-            </tr>
-          </tbody>
-        </NTable>
-      </div>
-    </NSpin>
+  <div v-if="store.items.length > 0">
+    <removal.ConfirmPopover />
+    <Table>
+      <TableCaption>共 {{ store.items.length }} 个订阅条目</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>名称</TableHead>
+          <TableHead>备注</TableHead>
+          <TableHead>提供商</TableHead>
+          <TableHead>订阅链接</TableHead>
+          <TableHead>状态</TableHead>
+          <TableHead>更新于</TableHead>
+          <TableHead class="w-[120px]">操作</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="row in store.items" :key="row.id">
+          <TableCell>
+            <Route :to="{ name: 'subscription-detail', params: { id: row.id } }">
+              {{ row.name || "-" }}
+            </Route>
+          </TableCell>
+          <TableCell>
+            <MultiLine :value="row.remark" />
+          </TableCell>
+          <TableCell>
+            <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }">
+              {{ row.provider.name }}
+            </Route>
+          </TableCell>
+          <TableCell>
+            <div class="flex max-w-[40ch] flex-col gap-1">
+              <CopyTag v-for="(url, i) in row.urls" :key="i" :value="url" />
+            </div>
+          </TableCell>
+          <TableCell>
+            <Badge :variant="row.enabled ? 'secondary' : 'destructive'">
+              {{ row.enabled ? "已启用" : "已停用" }}
+            </Badge>
+          </TableCell>
+          <TableCell>
+            <Date :value="row.updatedAt" />
+          </TableCell>
+          <TableCell>
+            <Button variant="ghost" size="icon" as-child>
+              <RouterLink :to="{ name: 'subscription-detail', params: { id: row.id } }">
+                <File />
+              </RouterLink>
+            </Button>
+            <Button variant="ghost" size="icon" @click="update(row.id)">
+              <SquarePen />
+            </Button>
+            <Button variant="ghost" class="text-destructive hover:text-destructive" size="icon"
+              @click="(e: MouseEvent) => removal.open(e, row.id)">
+              <Trash2 />
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   </div>
 </template>

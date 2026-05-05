@@ -2,8 +2,7 @@
 import { useProviderStore } from "@/stores/providers";
 import ProviderList from "./ProviderList.vue";
 import ProviderEditor from "./ProviderEditor.vue";
-import PageEntry from "@/components/CMS/PageEntry.vue";
-import { useFormModel } from "@/components/CMS/utils";
+import { PageEntry, useFormModel } from "@/components/CMS";
 
 const { useAll } = useProviderStore();
 const { create } = useFormModel(ProviderEditor);

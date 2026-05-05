@@ -1,51 +1,62 @@
 <script setup lang="ts">
-import DetailPage from "@/components/CMS/DetailPage.vue";
+import { DetailPage, RemovalButton, useFormModel } from "@/components/CMS";
 import CopyTag from "@/components/DataView/CopyTag.vue";
-import DeleteButton from "@/components/CMS/DeleteButton.vue";
 import { useSubscriptionStore } from "@/stores/subscriptions";
-import { DataView, DataItem, CopyBtn, VSeparator, Multiline, Date } from "@/components/DataView";
-import { useAsyncState } from "@vueuse/core";
+import { DataView, DataItem, CopyBtn, VSeparator, MultiLine, Date } from "@/components/DataView";
 import { Edit } from "lucide-vue-next";
 import Button from "@/components/ui/button/Button.vue";
 import { useRouteParams } from "@vueuse/router";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import Route from "@/components/DataView/Route.vue";
+import Badge from "@/components/ui/badge/Badge.vue";
+import SubscriptionEditor from "./SubscriptionEditor.vue";
 
 const id = useRouteParams<string>("id");
-
-const { get, remove } = useSubscriptionStore();
-
-const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!), null, { throwError: false });
+const { useOne, useRemoval } = useSubscriptionStore();
+const { update } = useFormModel(SubscriptionEditor);
+const subscription = useOne(id);
+const removal = useRemoval(id);
 </script>
 
 <template>
-  <DetailPage :loading="isLoading" :error="error" @retry="execute">
-    <template v-if="state">
+  <DetailPage :loading="subscription.loading" :error="subscription.error" @retry="subscription.reload">
+    <template v-if="subscription.item">
       <Card>
         <CardHeader>
           <CardTitle class="text-base">基本信息</CardTitle>
           <CardAction>
-            <Button variant="secondary">
+            <Button variant="secondary" @click="subscription.item?.id && update(subscription.item.id)">
               <Edit />
             </Button>
-            <DeleteButton :action="() => remove(id)" confirm="确定删除此订阅？不可恢复。" />
+            <RemovalButton :ctx="removal" confirm="确定删除此订阅？不可恢复。" />
           </CardAction>
         </CardHeader>
         <CardContent>
           <DataView>
             <DataItem label="ID">
-              {{ state.id }}
+              {{ subscription.item.id }}
               <VSeparator />
-              <CopyBtn :value="state.id" />
+              <CopyBtn :value="subscription.item.id" />
             </DataItem>
-            <DataItem label="名称">{{ state.name }}</DataItem>
+            <DataItem label="名称">{{ subscription.item.name }}</DataItem>
+            <DataItem label="提供商">
+              <Route :to="{ name: 'provider-detail', params: { idOrName: subscription.item.provider.id } }">
+                {{ subscription.item.provider.name }}
+              </Route>
+            </DataItem>
+            <DataItem label="状态">
+              <Badge :variant="subscription.item.enabled ? 'default' : 'destructive'">
+                {{ subscription.item.enabled ? "启用" : "停用" }}
+              </Badge>
+            </DataItem>
             <DataItem label="备注">
-              <Multiline :value="state.remark" />
+              <MultiLine :value="subscription.item.remark" />
             </DataItem>
             <DataItem label="创建时间">
-              <Date :value="state.createdAt" format="datetime" />
+              <Date :value="subscription.item.createdAt" format="datetime" />
             </DataItem>
             <DataItem label="更新时间">
-              <Date :value="state.updatedAt" format="datetime" />
+              <Date :value="subscription.item.updatedAt" format="datetime" />
             </DataItem>
           </DataView>
         </CardContent>
@@ -56,7 +67,7 @@ const { state, error, isLoading, execute } = useAsyncState(() => get(id.value!),
           <CardTitle class="text-base">订阅链接</CardTitle>
         </CardHeader>
         <CardContent>
-          <CopyTag variant="ghost" v-for="(url, i) in state.urls" :key="i" :value="url" />
+          <CopyTag variant="ghost" v-for="(url, i) in subscription.item.urls" :key="i" :value="url" />
         </CardContent>
       </Card>
     </template>

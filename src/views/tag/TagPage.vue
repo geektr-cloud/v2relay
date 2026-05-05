@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { useEditorModal } from "@/components/EditorModal";
-import PageEntry from "@/components/CMS/PageEntry.vue";
 import { useTagStore } from "@/stores/tags";
 import TagList from "./TagList.vue";
 import TagEditor from "./TagEditor.vue";
+import { PageEntry, useFormModel } from "@/components/CMS";
 
-const store = useTagStore();
-const { showEditor } = useEditorModal(TagEditor, {
-  title: "标签",
-  onSaved: () => void store.refresh(),
-});
+const { useAll } = useTagStore();
+const { create } = useFormModel(TagEditor);
 
-onMounted(() => void store.refresh());
+const store = useAll();
 </script>
 
 <template>
@@ -21,9 +16,9 @@ onMounted(() => void store.refresh());
     description="管理标签及其关键词匹配规则。"
     :loading="store.loading"
     :error="store.error"
-    :items="store.sorted"
-    @retry="void store.refresh()"
-    @create="showEditor({})"
+    :items="store.items"
+    @retry="void store.reload()"
+    @create="create()"
   >
     <TagList />
   </PageEntry>

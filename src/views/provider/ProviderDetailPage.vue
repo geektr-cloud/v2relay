@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import DetailPage from "@/components/CMS/DetailPage.vue";
+import { DetailPage, RemovalButton } from "@/components/CMS";
 import { DataView, DataItem, CopyBtn, VSeparator } from "@/components/DataView";
 import { useRouteParams } from "@vueuse/router";
 import { Card, CardHeader, CardTitle, CardContent, CardAction } from "@/components/ui/card";
 import { useProviderStore } from "@/stores/providers";
-import RemovalButton from "@/components/CMS/RemovalButton.vue";
 import { Edit } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import Link from "@/components/DataView/Link.vue";
