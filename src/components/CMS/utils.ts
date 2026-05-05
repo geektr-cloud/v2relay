@@ -58,6 +58,8 @@ export const useFormModel = (Form: Component) => {
           {
             class: "flex justify-center items-center",
             contentClass: "flex flex-col max-w-5xl",
+            focusTrap: false,
+            zIndexFn: ({ index }) => index + 1,
           },
           {
             default: () =>

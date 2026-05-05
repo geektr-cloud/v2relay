@@ -1,4 +1,4 @@
-import { computed, reactive, ref, shallowRef, watch, type Reactive, type Ref } from "vue";
+import { computed, reactive, ref, shallowRef, toValue, watch, type Reactive, type Ref } from "vue";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 type AsyncState<T, R = unknown> = {
@@ -12,15 +12,31 @@ export type Id = string;
 export type BaseData = { id: Id };
 
 // All
-export type AllItems<T> = Reactive<{
+export type ListItems<T> = Reactive<{
   items: Ref<T[]>;
   error: Ref<unknown>;
   loading: Ref<boolean>;
   reload: () => Promise<unknown>;
 }>;
-export const toAllItems = <T>(as: AsyncState<T[]>): AllItems<T> =>
+export const toAllItems = <T>(as: AsyncState<T[]>): ListItems<T> =>
   reactive({ items: as.state, error: as.error, loading: as.isLoading, reload: as.execute });
-export type UseAll<T> = () => AllItems<T>;
+export type UseAll<T> = () => ListItems<T>;
+
+// Filtered
+export type Filter<T> = ((item: T) => boolean) | undefined;
+export const toFilteredItems = <T extends BaseData>(
+  as: AsyncState<T[]>,
+  filter: Filter<T> | Ref<Filter<T>>,
+): ListItems<T> => {
+  const fn = computed(() => {
+    const _filter = toValue(filter);
+    if (typeof _filter === "function") return _filter as (item: T) => boolean;
+    return () => true;
+  });
+  const filtered = computed(() => as.state.value?.filter(fn.value) ?? []);
+  return reactive({ items: filtered, error: as.error, loading: as.isLoading, reload: as.execute });
+};
+export type UseFiltered<T> = (filter: Filter<T> | Ref<Filter<T>>) => ListItems<T>;
 
 // One
 export type OneItem<T> = Reactive<{

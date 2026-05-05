@@ -68,6 +68,8 @@ export const useSubscriptionStore = defineStore("subscriptions", () => {
     computed(() => (id.value ? as.state.value?.find((row) => row.id === id.value) : undefined));
 
   const useAll: CMS.UseAll<SubscriptionWithProvider> = () => CMS.toAllItems({ ...as, state: sorted });
+  const useFiltered: CMS.UseFiltered<SubscriptionWithProvider> = (filter) =>
+    CMS.toFilteredItems({ ...as, state: sorted }, filter);
   const useOne: CMS.UseOne<SubscriptionWithProvider> = (id) => CMS.toOneItem({ ...as, state: useRawItem(id) });
 
   const useRemoval: CMS.UseRemoval<SubscriptionWithProvider> = (id) => {
@@ -128,7 +130,7 @@ export const useSubscriptionStore = defineStore("subscriptions", () => {
     return CMS.toUpsert(form, issues, upsert);
   };
 
-  return { schema, useAll, useOne, useUpsert, useRemoval };
+  return { schema, useAll, useFiltered, useOne, useUpsert, useRemoval };
 });
 
 function mapToForm(row: SubscriptionWithProvider): SubscriptionForm {

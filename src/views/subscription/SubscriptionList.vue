@@ -10,10 +10,15 @@ import { MultiLine } from "@/components/DataView";
 import Button from "@/components/ui/button/Button.vue";
 import { Trash2, File, SquarePen } from "lucide-vue-next";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useFormModel } from "@/components/CMS";
+import { useFormModel, CMS } from "@/components/CMS";
+import type { SubscriptionWithProvider } from "@/types/api";
+import { toRef } from "vue";
 
-const { useAll, useRemoval } = useSubscriptionStore();
-const store = useAll();
+const props = defineProps<{ filter?: CMS.Filter<SubscriptionWithProvider> }>();
+
+const { useFiltered, useRemoval } = useSubscriptionStore();
+const store = useFiltered(toRef(props, "filter"));
+
 const { update } = useFormModel(SubscriptionEditor);
 const removal = useConfirmPopover({
   message: "确定删除此订阅？不可恢复。",

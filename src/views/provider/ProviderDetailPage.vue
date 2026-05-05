@@ -7,6 +7,7 @@ import { useProviderStore } from "@/stores/providers";
 import { Edit } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import Link from "@/components/DataView/Link.vue";
+import SubscriptionList from "../subscription/SubscriptionList.vue";
 
 const id = useRouteParams<string>("idOrName");
 const { useOne, useRemoval } = useProviderStore();
@@ -42,6 +43,14 @@ const removal = useRemoval(id);
               <Link :href="provider.item.url" />
             </DataItem>
           </DataView>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle class="text-base">订阅条目</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SubscriptionList :filter="(s) => s.providerId === provider.item?.id" />
         </CardContent>
       </Card>
     </template>

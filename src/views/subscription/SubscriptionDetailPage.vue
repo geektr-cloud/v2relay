@@ -45,7 +45,7 @@ const removal = useRemoval(id);
               </Route>
             </DataItem>
             <DataItem label="状态">
-              <Badge :variant="subscription.item.enabled ? 'default' : 'destructive'">
+              <Badge :variant="subscription.item.enabled ? 'secondary' : 'destructive'">
                 {{ subscription.item.enabled ? "启用" : "停用" }}
               </Badge>
             </DataItem>
@@ -66,8 +66,8 @@ const removal = useRemoval(id);
         <CardHeader>
           <CardTitle class="text-base">订阅链接</CardTitle>
         </CardHeader>
-        <CardContent>
-          <CopyTag variant="ghost" v-for="(url, i) in subscription.item.urls" :key="i" :value="url" />
+        <CardContent class="flex flex-col gap-2">
+          <CopyTag v-for="(url, i) in subscription.item.urls" :key="i" :value="url" />
         </CardContent>
       </Card>
     </template>
