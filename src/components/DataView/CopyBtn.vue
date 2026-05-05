@@ -4,7 +4,7 @@ import { useClipboard } from "@vueuse/core";
 import { Check, Copy } from "lucide-vue-next";
 
 const { copy, copied } = useClipboard();
-const props = defineProps<{ value: string }>();
+defineProps<{ value: string }>();
 </script>
 
 <template>

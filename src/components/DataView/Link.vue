@@ -4,8 +4,11 @@ import CopyBtn from "./CopyBtn.vue";
 import { VSeparator } from "./DataView.ts";
 import { ExternalLink, Minus } from "lucide-vue-next";
 
+defineOptions({ name: "DataLink" });
+
 const props = defineProps<{
-  label?: string; href?: string | null;
+  label?: string;
+  href?: string | null;
   variant?: BadgeVariants["variant"] | "raw";
 }>();
 

@@ -8,9 +8,11 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
+  { ignores: ["src/components/ui/**", "src/assets/main.css"] },
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
   tseslint.configs.recommended,
   pluginVue.configs["flat/strongly-recommended"],
+  { rules: { "vue/one-component-per-file": "off" } },
   { files: ["**/*.vue"], languageOptions: { parserOptions: { parser: tseslint.parser } } },
   { files: ["**/*.md"], plugins: { markdown }, language: "markdown/commonmark", extends: ["markdown/recommended"] },
   { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },

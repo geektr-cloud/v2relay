@@ -101,10 +101,12 @@ export const useSubscriptionStore = defineStore("subscriptions", () => {
       name: form.name.trim(),
       remark: form.remark.trim(),
     });
-    const create = () =>
-      apiFetch<SubscriptionWithProvider>("/subscriptions", { method: "POST", body: payload() });
+    const create = () => apiFetch<SubscriptionWithProvider>("/subscriptions", { method: "POST", body: payload() });
     const update = () =>
-      apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id.value!)}`, { method: "PATCH", body: payload() });
+      apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id.value!)}`, {
+        method: "PATCH",
+        body: payload(),
+      });
     const { state, execute: validate } = useAsyncState(
       async () => await schema["~standard"].validate(payload()),
       undefined,

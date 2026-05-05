@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import type { RouteLocationRaw } from "vue-router";
 import { Minus } from "lucide-vue-next";
 
-const props = defineProps<{ to?: RouteLocationRaw | null }>();
+defineOptions({ name: "DataRoute" });
+defineProps<{ to?: RouteLocationRaw | null }>();
 </script>
 
 <template>

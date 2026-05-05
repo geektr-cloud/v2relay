@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import { format as _format } from "date-fns";
 
+defineOptions({ name: "DataDate" });
+
 const props = withDefaults(
   defineProps<{
     value: Date;

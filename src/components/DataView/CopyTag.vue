@@ -5,15 +5,18 @@ import { Check, Copy } from "lucide-vue-next";
 import { VSeparator } from "./DataView.ts";
 const { copy, copied } = useClipboard();
 
-const props = withDefaults(defineProps<{
-  label?: string;
-  value?: string;
-  variant?: BadgeVariants["variant"] | "raw";
-}>(), {
-  label: undefined,
-  value: undefined,
-  variant: "raw",
-});
+const props = withDefaults(
+  defineProps<{
+    label?: string;
+    value?: string;
+    variant?: BadgeVariants["variant"] | "raw";
+  }>(),
+  {
+    label: undefined,
+    value: undefined,
+    variant: "raw",
+  },
+);
 
 const WrapTag = props.variant === "raw" ? "p" : Badge;
 </script>

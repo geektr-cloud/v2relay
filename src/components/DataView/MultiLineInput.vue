@@ -99,14 +99,7 @@ const onBackspace = (index: number, event: KeyboardEvent) => {
       </Button>
     </div>
 
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      class="w-fit"
-      :disabled="disabled"
-      @click="addLine"
-    >
+    <Button type="button" variant="outline" size="sm" class="w-fit" :disabled="disabled" @click="addLine">
       <Plus class="size-4" />
       {{ addText }}
     </Button>

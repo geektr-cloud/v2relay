@@ -62,8 +62,7 @@ export const useTagStore = defineStore("tags", () => {
     watchEffect(() => Object.assign(form, source?.value ?? useNewValue()));
 
     const create = () => apiFetch<Tag>("/tags", { method: "POST", body: form });
-    const update = () =>
-      apiFetch<Tag>(`/tags/${encodeURIComponent(idOrName.value!)}`, { method: "PATCH", body: form });
+    const update = () => apiFetch<Tag>(`/tags/${encodeURIComponent(idOrName.value!)}`, { method: "PATCH", body: form });
 
     const { state, execute: validate } = useAsyncState(
       async () => await schema["~standard"].validate(form),

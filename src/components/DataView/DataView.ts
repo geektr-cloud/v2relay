@@ -11,7 +11,7 @@ export const DataView = defineComponent({
 export const DataItem = defineComponent({
   name: "DataItem",
   props: {
-    label: { type: String, required: false },
+    label: { type: String, required: false, default: "" },
   },
   setup(props, { slots }) {
     return () => {
