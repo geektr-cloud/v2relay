@@ -1,46 +1,85 @@
-import { computed, ref } from "vue";
+import { computed, reactive, watchEffect, type Ref } from "vue";
 import { defineStore } from "pinia";
 import type { Provider } from "@/types/api";
 import { apiFetch } from "@/utils/api";
+import { useAsyncState } from "@vueuse/core";
+import { CMS } from "@/components/CMS";
+import { z } from "zod";
+
+const schema = z.object({
+  name: z.string().trim().min(1).max(32),
+  url: z.url(),
+});
+
+const useNewValue = () => ({
+  id: "",
+  name: "",
+  url: "",
+});
 
 export const useProviderStore = defineStore("providers", () => {
-  const items = ref<Provider[]>([]);
-  const loading = ref(false);
-  const error = ref<string | null>(null);
+  const as = useAsyncState(() => apiFetch<Provider[]>("/providers"), [], { shallow: false });
+  const sorted = computed(() => as.state.value?.sort((a, b) => a.name.localeCompare(b.name)) ?? []);
 
-  const sorted = computed(() => [...items.value].sort((a, b) => a.name.localeCompare(b.name)));
-
-  async function refresh() {
-    loading.value = true;
-    error.value = null;
-    try {
-      items.value = await apiFetch<Provider[]>("/providers");
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : String(e);
-      items.value = [];
-    } finally {
-      loading.value = false;
+  const localRemove = (id: string) => (as.state.value = as.state.value?.filter((p) => p.id !== id) ?? []);
+  const localAddOrUpdate = (data: Provider) => {
+    const index = as.state.value.findIndex((p) => p.id === data.id);
+    if (index !== -1) {
+      as.state.value.splice(index, 1, data);
+    } else {
+      as.state.value.push(data);
     }
-  }
+  };
 
-  const get = (idOrName: string) => apiFetch<Provider>(`/providers/${encodeURIComponent(idOrName)}`);
+  const useRawItem = (idOrName: Ref<string | undefined>) =>
+    computed(() =>
+      idOrName.value ? as.state.value?.find((p) => p.id === idOrName.value || p.name === idOrName.value) : undefined,
+    );
 
-  const create = (name: string, url: string) =>
-    apiFetch<Provider>("/providers", {
-      method: "POST",
-      body: { name, url },
+  const useOne: CMS.UseOne<Provider> = (idOrName) => CMS.toOneItem({ ...as, state: useRawItem(idOrName) });
+
+  const useAll: CMS.UseAll<Provider> = () => CMS.toAllItems({ ...as, state: sorted });
+
+  const useRemoval: CMS.UseRemoval<Provider> = (idOrName) =>
+    CMS.toRemoval(
+      CMS.fork(useRawItem(idOrName)),
+      useAsyncState(() => apiFetch<Provider>(`/providers/${idOrName.value}`, { method: "DELETE" }), undefined, {
+        immediate: false,
+        throwError: true,
+        onError: () => {},
+        onSuccess: (data) => data && localRemove(data.id),
+      }),
+    );
+
+  const useUpsert: CMS.UseUpsert<Provider> = (idOrName: Ref<string | undefined>) => {
+    const source = CMS.fork(useRawItem(idOrName));
+
+    const form = reactive<Provider>(source?.value ?? useNewValue());
+    watchEffect(() => Object.assign(form, source?.value ?? useNewValue()));
+
+    const create = () => apiFetch<Provider>("/providers", { method: "POST", body: form });
+    const update = () => apiFetch<Provider>(`/providers/${idOrName.value}`, { method: "PATCH", body: form });
+
+    const { state, execute: validate } = useAsyncState(
+      async () => await schema["~standard"].validate(form),
+      undefined,
+      { immediate: false },
+    );
+    const issues = computed(() => state.value?.issues);
+    const submit = async () => {
+      const result = await validate();
+      if (result?.issues) throw new Error("Validation failed");
+      return await (idOrName.value ? update() : create());
+    };
+
+    const as = useAsyncState(submit, undefined, {
+      immediate: false,
+      throwError: true,
+      onSuccess: (data) => data && localAddOrUpdate(data),
     });
 
-  const update = (idOrName: string, patch: { name?: string; url?: string }) =>
-    apiFetch<Provider>(`/providers/${encodeURIComponent(idOrName)}`, {
-      method: "PATCH",
-      body: patch,
-    });
+    return CMS.toUpsert(form, issues, as);
+  };
 
-  const remove = (idOrName: string) =>
-    apiFetch<void>(`/providers/${encodeURIComponent(idOrName)}`, {
-      method: "DELETE",
-    });
-
-  return { items, sorted, loading, error, refresh, get, create, update, remove };
+  return { schema, useAll, useOne, useRemoval, useUpsert };
 });

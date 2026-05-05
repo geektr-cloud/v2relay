@@ -12,6 +12,7 @@ import {
   zhCN,
   dateZhCN,
 } from "naive-ui";
+import { ModalsContainer } from 'vue-final-modal'
 
 const route = useRoute();
 const navLinkClass = (active: boolean) =>
@@ -25,15 +26,12 @@ const tagsActive = computed(() => route.name === "tags");
   <NConfigProvider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN">
     <NMessageProvider>
       <NModalProvider>
+        <ModalsContainer />
         <NLayout class="min-h-screen bg-zinc-950 text-zinc-100">
-          <NLayoutHeader
-            bordered
-            class="sticky top-0 z-10 flex h-14 items-center gap-6 border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80"
-          >
-            <RouterLink
-              to="/"
-              class="text-lg font-semibold tracking-tight text-zinc-100 no-underline transition-colors hover:text-cyan-400"
-            >
+          <NLayoutHeader bordered
+            class="sticky top-0 z-10 flex h-14 items-center gap-6 border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80">
+            <RouterLink to="/"
+              class="text-lg font-semibold tracking-tight text-zinc-100 no-underline transition-colors hover:text-cyan-400">
               V2Relay
             </RouterLink>
             <nav class="flex items-center gap-4 text-sm">
@@ -46,6 +44,7 @@ const tagsActive = computed(() => route.name === "tags");
             <RouterView />
           </NLayoutContent>
         </NLayout>
+        <ModalsContainer />
       </NModalProvider>
     </NMessageProvider>
   </NConfigProvider>

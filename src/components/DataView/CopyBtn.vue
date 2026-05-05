@@ -8,7 +8,7 @@ const props = defineProps<{ value: string }>();
 </script>
 
 <template>
-  <Button variant="ghost" size="icon" class="size-3.5 cursor-pointer" @click="copy(value)">
+  <Button variant="ghost" size="icon" class="size-3.5 cursor-pointer" @click="copy(value)" :disabled="!value">
     <Copy class="size-3.5 shrink-0" v-if="!copied" />
     <Check class="size-3.5 shrink-0" v-else />
   </Button>

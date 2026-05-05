@@ -6,7 +6,7 @@ import type { EditorEmits } from "@/components/EditorModal";
 import { type EditorBridgeProps, useEditorBridge } from "@/composables/useEditorBridge";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 import type { SubscriptionWithProvider } from "@/types/api";
-import ProviderSelect from "@/views/provider/ProviderSelect";
+import ProviderSelect from "@/views/provider/ProviderSelect.vue";
 
 const props = defineProps<EditorBridgeProps<SubscriptionWithProvider>>();
 const emit = defineEmits<EditorEmits<SubscriptionWithProvider>>();
@@ -164,13 +164,8 @@ function onCancelForm() {
               <NInput v-model:value="form.name" placeholder="可选，便于识别" :disabled="saving" />
             </NFormItem>
             <NFormItem label="备注" path="remark">
-              <NInput
-                v-model:value="form.remark"
-                type="textarea"
-                placeholder="可选说明"
-                :autosize="{ minRows: 2, maxRows: 6 }"
-                :disabled="saving"
-              />
+              <NInput v-model:value="form.remark" type="textarea" placeholder="可选说明"
+                :autosize="{ minRows: 2, maxRows: 6 }" :disabled="saving" />
             </NFormItem>
             <NFormItem label="订阅链接" path="urls">
               <NDynamicInput v-model:value="form.urls" :disabled="saving" placeholder="输入订阅链接" :min="1" />

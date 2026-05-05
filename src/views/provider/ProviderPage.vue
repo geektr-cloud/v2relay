@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { useEditorModal } from "@/components/EditorModal";
 import { useProviderStore } from "@/stores/providers";
 import ProviderList from "./ProviderList.vue";
 import ProviderEditor from "./ProviderEditor.vue";
 import PageEntry from "@/components/CMS/PageEntry.vue";
+import { useFormModel } from "@/components/CMS/utils";
 
-const store = useProviderStore();
-const { showEditor } = useEditorModal(ProviderEditor, {
-  title: "提供商",
-  onSaved: () => void store.refresh(),
-});
+const { useAll } = useProviderStore();
+const { create } = useFormModel(ProviderEditor);
 
-onMounted(() => void store.refresh());
+const store = useAll();
 </script>
 
 <template>
@@ -21,9 +17,9 @@ onMounted(() => void store.refresh());
     description="永远怀念喵帕斯"
     :loading="store.loading"
     :error="store.error"
-    :items="store.sorted"
-    @retry="void store.refresh()"
-    @create="showEditor({})"
+    :items="store.items"
+    @retry="void store.reload()"
+    @create="create()"
   >
     <ProviderList />
   </PageEntry>

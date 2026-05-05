@@ -14,5 +14,7 @@ export async function apiFetch<T>(path: string, opts?: { method?: string; body?:
     throw new Error(typeof data.error === "string" ? data.error : `HTTP ${res.status}`);
   }
 
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+
   return data as T;
 }

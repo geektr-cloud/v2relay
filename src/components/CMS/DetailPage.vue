@@ -10,7 +10,7 @@ import Button from "@/components/ui/button/Button.vue";
 
 const props = defineProps<{
   loading?: boolean;
-  error?: any;
+  error?: unknown;
 }>();
 
 defineEmits<{ (e: "retry"): void }>();

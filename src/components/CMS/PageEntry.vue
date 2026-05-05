@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import BackButton from "@/components/CMS/BackButton.vue";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { computed } from "vue";
 import { FileX, RotateCcw, Plus, File } from "lucide-vue-next";
@@ -13,8 +11,8 @@ const props = defineProps<{
   title: string;
   description?: string;
   loading?: boolean;
-  error?: any;
-  items?: any[] | null;
+  error?: unknown;
+  items?: unknown[] | null;
 }>();
 
 defineEmits<{ (e: "retry"): void; (e: "create"): void }>();

@@ -4,21 +4,25 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Spinner } from "@/components/ui/spinner";
 import { PopoverClose } from "reka-ui";
 import { Trash, Check, X } from "lucide-vue-next";
-import { useAsyncState } from "@vueuse/core";
 import { useRouter } from "vue-router";
 
 const props = defineProps<{
   label?: string;
-  action: () => Promise<void>;
   confirm: string;
+  ctx: {
+    loading: boolean;
+    error: unknown;
+    submit: () => Promise<unknown>;
+  };
 }>();
 
-const { isLoading, execute, error } = useAsyncState(props.action, null, {
-  immediate: false,
-  onSuccess: () => router.back(),
-});
-
 const router = useRouter();
+
+const remove = () =>
+  void props.ctx
+    .submit()
+    .then(() => router.back())
+    .catch(() => {});
 </script>
 
 <template>
@@ -32,17 +36,17 @@ const router = useRouter();
     <PopoverContent side="left" class="w-auto">
       <div class="flex flex-row items-center gap-2">
         <div>{{ confirm }}</div>
-        <Button variant="secondary" size="icon" :disabled="isLoading" @click="execute()">
-          <Check v-if="!isLoading" />
+        <Button variant="secondary" size="icon" :disabled="ctx.loading" @click="void remove()">
+          <Check v-if="!ctx.loading" />
           <Spinner v-else />
         </Button>
         <PopoverClose as-child>
-          <Button variant="ghost" size="icon" v-show="!isLoading">
+          <Button variant="ghost" size="icon" v-show="!ctx.loading">
             <X />
           </Button>
         </PopoverClose>
       </div>
-      <p v-if="error" class="text-red-500">{{ error }}</p>
+      <p v-if="ctx.error" class="text-red-500">{{ ctx.error }}</p>
     </PopoverContent>
   </Popover>
 </template>
