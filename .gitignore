@@ -45,4 +45,5 @@ __screenshots__/
 .env*
 !.env.example
 
-/src/generated/prisma
+/server/generated
+playground

@@ -8,7 +8,8 @@ const navLinkClass = (active: boolean) =>
   ["no-underline transition-colors", active ? "text-cyan-400" : "text-zinc-400 hover:text-cyan-400"].join(" ");
 const providersActive = computed(() => route.name === "home" || route.name === "provider-detail");
 const subscriptionsActive = computed(() => route.name === "subscriptions" || route.name === "subscription-detail");
-const tagsActive = computed(() => route.name === "tags");
+const tagsActive = computed(() => route.name === "tags" || route.name === "tag-detail");
+const nodesActive = computed(() => route.name === "nodes" || route.name === "node-detail");
 </script>
 
 <template>
@@ -26,6 +27,7 @@ const tagsActive = computed(() => route.name === "tags");
       <nav class="flex items-center gap-4 text-sm">
         <RouterLink to="/" :class="navLinkClass(providersActive)"> 提供商 </RouterLink>
         <RouterLink to="/subscriptions" :class="navLinkClass(subscriptionsActive)"> 订阅 </RouterLink>
+        <RouterLink to="/nodes" :class="navLinkClass(nodesActive)"> 节点 </RouterLink>
         <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
       </nav>
     </header>

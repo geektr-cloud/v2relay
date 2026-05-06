@@ -1,61 +1,12 @@
 import { Hono } from "hono";
-import { z } from "zod";
 import { prisma } from "../db";
 import * as mid from "../middlewares";
 import { zValidator } from "@hono/zod-validator";
+import { schema } from "../core/subscriptions/schema";
+import { SubscriptionRawContent, type SubscriptionCacheStatus } from "../core/subscriptions/raw-content";
+import { HttpErr } from "../utils/http-errors";
 
 const subscriptionInclude = { provider: true } as const;
-
-const subscriptionUrlsCreate = z
-  .array(z.unknown())
-  .transform((arr) => arr.map((u) => String(u).trim()).filter(Boolean))
-  .pipe(z.array(z.string()).min(1, "urls must contain at least one non-empty URL"));
-
-const remarkInput = z
-  .union([z.string(), z.null(), z.undefined()])
-  .transform((v) => (v == null || v === undefined ? "" : String(v).trim()));
-
-const subscriptionCreateSchema = z.object({
-  providerId: z.string().min(1, "providerId is required"),
-  urls: subscriptionUrlsCreate,
-  enabled: z.boolean().optional(),
-  name: z.string().trim().optional().default(""),
-  remark: remarkInput,
-});
-
-const subscriptionPatchUrls = z
-  .array(z.unknown())
-  .optional()
-  .transform((arr) => (arr === undefined ? undefined : arr.map((u) => String(u).trim()).filter(Boolean)))
-  .refine((v) => v === undefined || v.length > 0, { message: "urls cannot be empty" });
-
-const subscriptionRemarkPatch = z
-  .union([z.string(), z.null(), z.undefined()])
-  .optional()
-  .transform((v) => {
-    if (v === undefined) {
-      return undefined;
-    }
-    return v == null ? "" : String(v).trim();
-  });
-
-const subscriptionPatchSchema = z
-  .object({
-    providerId: z.string().optional(),
-    urls: subscriptionPatchUrls,
-    enabled: z.boolean().optional(),
-    name: z.string().trim().optional(),
-    remark: subscriptionRemarkPatch,
-  })
-  .refine(
-    (d) =>
-      d.providerId !== undefined ||
-      d.urls !== undefined ||
-      d.enabled !== undefined ||
-      d.name !== undefined ||
-      d.remark !== undefined,
-    { message: "No valid fields to update" },
-  );
 
 export const subscriptionRoutes = new Hono();
 
@@ -76,17 +27,15 @@ subscriptionRoutes.get("/:id", mid.paramId, async (c) => {
     where: { id },
     include: subscriptionInclude,
   });
-  return sub ? c.json(sub) : c.json({ error: "Subscription not found" }, 404);
+  if (!sub) throw HttpErr(404, "Subscription not found");
+  return c.json(sub);
 });
 
-subscriptionRoutes.post("/", zValidator("json", subscriptionCreateSchema), async (c) => {
+subscriptionRoutes.post("/", zValidator("json", schema), async (c) => {
   const body = c.req.valid("json");
-  const provider = await prisma.provider.findUnique({
-    where: { id: body.providerId },
-  });
-  if (!provider) {
-    return c.json({ error: "Provider not found" }, 400);
-  }
+  const provider = await prisma.provider.findUnique({ where: { id: body.providerId } });
+  if (!provider) throw HttpErr(400, "Provider not found");
+
   const sub = await prisma.subscription.create({
     data: {
       ...body,
@@ -97,26 +46,16 @@ subscriptionRoutes.post("/", zValidator("json", subscriptionCreateSchema), async
   return c.json(sub, 201);
 });
 
-subscriptionRoutes.patch("/:id", mid.paramId, zValidator("json", subscriptionPatchSchema), async (c) => {
+subscriptionRoutes.put("/:id", mid.paramId, zValidator("json", schema), async (c) => {
   const { id } = c.req.valid("param");
   const existing = await prisma.subscription.findUnique({ where: { id } });
-  if (!existing) {
-    return c.json({ error: "Subscription not found" }, 404);
-  }
+  if (!existing) throw HttpErr(404, "Subscription not found");
+
   const data = c.req.valid("json");
-  if (data.providerId !== undefined) {
-    const p = await prisma.provider.findUnique({
-      where: { id: data.providerId },
-    });
-    if (!p) {
-      return c.json({ error: "Provider not found" }, 400);
-    }
-  }
-  const sub = await prisma.subscription.update({
-    where: { id },
-    data,
-    include: subscriptionInclude,
-  });
+  const p = await prisma.provider.findUnique({ where: { id: data.providerId } });
+  if (!p) throw HttpErr(400, "Provider not found");
+
+  const sub = await prisma.subscription.update({ where: { id }, data, include: subscriptionInclude });
   return c.json(sub);
 });
 
@@ -125,7 +64,51 @@ subscriptionRoutes.delete("/:id", mid.paramId, async (c) => {
   try {
     await prisma.subscription.delete({ where: { id } });
   } catch {
-    return c.json({ error: "Subscription not found" }, 404);
+    throw HttpErr(404, "Subscription not found");
   }
   return c.body(null, 204);
+});
+
+// ---------- raw proxy ----------
+
+/**
+ * 解析订阅并交由 SubscriptionRawContent 处理缓存与上游拉取。
+ * 若数据库中找不到订阅、订阅被禁用或所有 URL 都不可用，则抛出 HttpError 子类，
+ * 由 server/index.ts 的 onError 统一转 JSON。
+ */
+async function getRawContentOfSubscription(
+  id: string,
+): Promise<{ response: Response; cacheStatus: SubscriptionCacheStatus }> {
+  const sub = await prisma.subscription.findUnique({ where: { id } });
+  if (!sub) throw HttpErr(404, "Subscription not found");
+  if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
+
+  const content = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
+  return content.get();
+}
+
+subscriptionRoutes.get("/:id/raw/status", mid.paramId, async (c) => {
+  const { id } = c.req.valid("param");
+  const { cacheStatus } = await getRawContentOfSubscription(id);
+  return c.json(cacheStatus);
+});
+
+subscriptionRoutes.get("/:id/raw", mid.paramId, async (c) => {
+  const { id } = c.req.valid("param");
+  const { response } = await getRawContentOfSubscription(id);
+  return new Response(response.body, { headers: response.headers });
+});
+
+subscriptionRoutes.get("/:id/readable", mid.paramId, async (c) => {
+  const { id } = c.req.valid("param");
+  const { response } = await getRawContentOfSubscription(id);
+
+  let text = await response.text();
+  try {
+    text = atob(text);
+  } catch {
+    //
+  }
+
+  return new Response(text, { headers: response.headers });
 });

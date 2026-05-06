@@ -1,26 +1,8 @@
 import { Hono } from "hono";
-import { z } from "zod";
 import { prisma } from "../db";
 import * as mid from "../middlewares";
 import { zValidator } from "@hono/zod-validator";
-
-const keywordsInput = z
-  .array(z.unknown())
-  .optional()
-  .default([])
-  .transform((arr) => arr.map((v) => String(v).trim()).filter(Boolean));
-
-const tagCreateSchema = z.object({
-  name: z.string().trim().min(1, "name cannot be empty"),
-  keywords: keywordsInput,
-});
-
-const tagPatchSchema = z
-  .object({
-    name: z.string().trim().min(1, "name cannot be empty").optional(),
-    keywords: keywordsInput.optional(),
-  })
-  .refine((d) => d.name !== undefined || d.keywords !== undefined, { message: "No valid fields to update" });
+import { schema } from "../core/tags/schema";
 
 export const tagRoutes = new Hono();
 
@@ -32,7 +14,7 @@ tagRoutes.get("/:id", mid.paramId, async (c) => {
   return tag ? c.json(tag) : c.json({ error: "Tag not found" }, 404);
 });
 
-tagRoutes.post("/", zValidator("json", tagCreateSchema), async (c) => {
+tagRoutes.post("/", zValidator("json", schema), async (c) => {
   try {
     const tag = await prisma.tag.create({ data: c.req.valid("json") });
     return c.json(tag, 201);
@@ -41,11 +23,10 @@ tagRoutes.post("/", zValidator("json", tagCreateSchema), async (c) => {
   }
 });
 
-tagRoutes.patch("/:id", mid.paramId, zValidator("json", tagPatchSchema), async (c) => {
+tagRoutes.put("/:id", mid.paramId, zValidator("json", schema), async (c) => {
   const { id } = c.req.valid("param");
   const existing = await prisma.tag.findUnique({ where: { id } });
   if (!existing) return c.json({ error: "Tag not found" }, 404);
-
   try {
     const tag = await prisma.tag.update({ where: { id }, data: c.req.valid("json") });
     return c.json(tag);

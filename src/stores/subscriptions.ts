@@ -1,10 +1,10 @@
 import { computed, reactive, watchEffect, type Ref } from "vue";
 import { defineStore } from "pinia";
 import { useAsyncState } from "@vueuse/core";
-import { z } from "zod";
 import { CMS } from "@/components/CMS";
 import type { SubscriptionWithProvider } from "@/types/api";
 import { apiFetch } from "@/utils/api";
+import { schema } from "@server/core/subscriptions/schema";
 
 function hydrateDates(row: SubscriptionWithProvider): SubscriptionWithProvider {
   return {
@@ -13,14 +13,6 @@ function hydrateDates(row: SubscriptionWithProvider): SubscriptionWithProvider {
     updatedAt: new Date(row.updatedAt as unknown as string),
   };
 }
-
-const schema = z.object({
-  providerId: z.string().trim().min(1),
-  urls: z.array(z.string().trim().url()).min(1),
-  enabled: z.boolean(),
-  name: z.string().trim().max(64),
-  remark: z.string().trim().max(512),
-});
 
 type SubscriptionForm = {
   id: string;
@@ -106,7 +98,7 @@ export const useSubscriptionStore = defineStore("subscriptions", () => {
     const create = () => apiFetch<SubscriptionWithProvider>("/subscriptions", { method: "POST", body: payload() });
     const update = () =>
       apiFetch<SubscriptionWithProvider>(`/subscriptions/${encodeURIComponent(id.value!)}`, {
-        method: "PATCH",
+        method: "PUT",
         body: payload(),
       });
     const { state, execute: validate } = useAsyncState(

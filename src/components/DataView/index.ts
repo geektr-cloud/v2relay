@@ -1,6 +1,6 @@
 export { DataView, DataItem, VSeparator } from "./DataView.ts";
 
-export { default as Date } from "./Date.vue";
+export { default as DateFormatter } from "./DateFormatter.vue";
 export { default as MultiLine } from "./MultiLine.vue";
 export { default as MultiLineInput } from "./MultiLineInput.vue";
 
@@ -9,3 +9,4 @@ export { default as Route } from "./Route.vue";
 
 export { default as CopyBtn } from "./CopyBtn.vue";
 export { default as CopyTag } from "./CopyTag.vue";
+export { default as JsonTextArea } from "./JsonTextArea.vue";

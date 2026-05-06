@@ -21,19 +21,39 @@ model Provider {
 }
 
 model Subscription {
-  id         String   @id @default(uuid())
+  id String @id @default(uuid())
+
   provider   Provider @relation(fields: [providerId], references: [id])
   providerId String
-  name       String   @default("")
-  remark     String   @default("")
-  urls       Json     @default("[]")
-  enabled    Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  name      String   @default("")
+  remark    String   @default("")
+  urls      Json     @default("[]")
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  nodes     Node[]
 }
 
 model Tag {
   id       String @id @default(uuid())
   name     String @unique
   keywords Json   @default("[]")
+}
+
+model Node {
+  id String @id @default(uuid())
+
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String
+
+  tags Json @default("[]")
+
+  protocol  String @default("")
+  name      String @default("")
+  remark    String @default("")
+  ip        String @default("")
+  priceRate Float  @default(1)
+
+  connInfo Json @default("{}")
 }

@@ -4,12 +4,7 @@ import type { Provider } from "@/types/api";
 import { apiFetch } from "@/utils/api";
 import { useAsyncState } from "@vueuse/core";
 import { CMS } from "@/components/CMS";
-import { z } from "zod";
-
-const schema = z.object({
-  name: z.string().trim().min(1).max(32),
-  url: z.url(),
-});
+import { schema } from "@server/core/providers/schema";
 
 const useNewValue = () => ({
   id: "",
@@ -58,7 +53,7 @@ export const useProviderStore = defineStore("providers", () => {
     watchEffect(() => Object.assign(form, source?.value ?? useNewValue()));
 
     const create = () => apiFetch<Provider>("/providers", { method: "POST", body: form });
-    const update = () => apiFetch<Provider>(`/providers/${idOrName.value}`, { method: "PATCH", body: form });
+    const update = () => apiFetch<Provider>(`/providers/${idOrName.value}`, { method: "PUT", body: form });
 
     const { state, execute: validate } = useAsyncState(
       async () => await schema["~standard"].validate(form),

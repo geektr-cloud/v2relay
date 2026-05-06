@@ -5,6 +5,8 @@ import SubscriptionPage from "../views/subscription/SubscriptionPage.vue";
 import SubscriptionDetailPage from "../views/subscription/SubscriptionDetailPage.vue";
 import TagPage from "../views/tag/TagPage.vue";
 import TagDetailPage from "../views/tag/TagDetailPage.vue";
+import NodePage from "../views/node/NodePage.vue";
+import NodeDetailPage from "../views/node/NodeDetailPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +40,16 @@ const router = createRouter({
       path: "/tags/:idOrName",
       name: "tag-detail",
       component: TagDetailPage,
+    },
+    {
+      path: "/nodes",
+      name: "nodes",
+      component: NodePage,
+    },
+    {
+      path: "/nodes/:id",
+      name: "node-detail",
+      component: NodeDetailPage,
     },
   ],
 });

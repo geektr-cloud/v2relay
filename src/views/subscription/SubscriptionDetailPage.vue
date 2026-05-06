@@ -1,21 +1,46 @@
 <script setup lang="ts">
+import { ref, watch } from "vue";
+import { useAsyncState } from "@vueuse/core";
 import { DetailPage, RemovalButton, useFormModel } from "@/components/CMS";
 import CopyTag from "@/components/DataView/CopyTag.vue";
 import { useSubscriptionStore } from "@/stores/subscriptions";
-import { DataView, DataItem, CopyBtn, VSeparator, MultiLine, Date } from "@/components/DataView";
+import { DataView, DataItem, CopyBtn, VSeparator, MultiLine, DateFormatter as DateView } from "@/components/DataView";
 import { Edit } from "lucide-vue-next";
 import Button from "@/components/ui/button/Button.vue";
 import { useRouteParams } from "@vueuse/router";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import Route from "@/components/DataView/Route.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
+import { apiFetch } from "@/utils/api";
+import type { SubscriptionCacheStatus } from "@server/core/subscriptions/raw-content";
 import SubscriptionEditor from "./SubscriptionEditor.vue";
+import SubscriptionContentViewer from "./SubscriptionContentViewer.vue";
 
 const id = useRouteParams<string>("id");
 const { useOne, useRemoval } = useSubscriptionStore();
 const { update } = useFormModel(SubscriptionEditor);
 const subscription = useOne(id);
 const removal = useRemoval(id);
+
+const showContent = ref(false);
+
+const {
+  state: cacheStatus,
+  isLoading: cacheStatusLoading,
+  error: cacheStatusError,
+  execute: reloadCacheStatus,
+} = useAsyncState<SubscriptionCacheStatus | null>(
+  () => apiFetch<SubscriptionCacheStatus>(`/subscriptions/${encodeURIComponent(id.value)}/raw/status`),
+  null,
+  { throwError: false, immediate: false },
+);
+watch(id, (v) => v && reloadCacheStatus(), { immediate: true });
+
+const formatSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
 </script>
 
 <template>
@@ -53,10 +78,10 @@ const removal = useRemoval(id);
               <MultiLine :value="subscription.item.remark" />
             </DataItem>
             <DataItem label="创建时间">
-              <Date :value="subscription.item.createdAt" format="datetime" />
+              <DateView :value="subscription.item.createdAt" format="datetime" />
             </DataItem>
             <DataItem label="更新时间">
-              <Date :value="subscription.item.updatedAt" format="datetime" />
+              <DateView :value="subscription.item.updatedAt" format="datetime" />
             </DataItem>
           </DataView>
         </CardContent>
@@ -68,6 +93,37 @@ const removal = useRemoval(id);
         </CardHeader>
         <CardContent class="flex flex-col gap-2">
           <CopyTag v-for="(url, i) in subscription.item.urls" :key="i" :value="url" />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle class="text-base">订阅内容</CardTitle>
+          <CardAction>
+            <Button variant="secondary" @click="showContent = !showContent">
+              {{ showContent ? "收起内容" : "查看内容" }}
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent class="flex flex-col gap-3">
+          <p v-if="cacheStatusLoading" class="text-sm text-zinc-400">加载缓存信息...</p>
+          <p v-else-if="cacheStatusError" class="text-destructive text-sm">
+            {{ (cacheStatusError as Error).message }}
+          </p>
+          <div v-else-if="cacheStatus" class="text-sm text-zinc-300 flex items-center gap-2 flex-wrap">
+            <span class="text-zinc-400">来源</span>
+            <span class="truncate max-w-[24rem]">{{ cacheStatus.sourceUrl }}</span>
+            <VSeparator />
+            <span class="text-zinc-400">大小</span>
+            <span>{{ formatSize(cacheStatus.size) }}</span>
+            <VSeparator />
+            <span class="text-zinc-400">缓存于</span>
+            <DateView :value="cacheStatus.cachedAt" format="distance" />
+            <VSeparator />
+            <span class="text-zinc-400">过期于</span>
+            <DateView :value="cacheStatus.expiresAt" format="distance" />
+          </div>
+          <SubscriptionContentViewer v-if="showContent" :id="subscription.item.id" />
         </CardContent>
       </Card>
     </template>

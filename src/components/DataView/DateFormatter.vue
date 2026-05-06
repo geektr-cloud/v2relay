@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { format as _format } from "date-fns";
+import { format as _format, formatDistanceToNow } from "date-fns";
 
 defineOptions({ name: "DataDate" });
 
 const props = withDefaults(
   defineProps<{
-    value: Date;
+    value: Date | string | number;
     format?: string;
   }>(),
   {
@@ -21,7 +21,15 @@ const dateFormatPresets: Record<string, string> = {
   timestamp: "T",
 };
 
-const dateString = computed(() => _format(props.value, dateFormatPresets[props.format] ?? props.format));
+const dateString = computed(() => {
+  const d = props.value instanceof Date ? props.value : new Date(props.value);
+
+  if (props.format === "distance") {
+    return formatDistanceToNow(d, { addSuffix: true });
+  }
+
+  return _format(d, dateFormatPresets[props.format] ?? props.format);
+});
 </script>
 
 <template>
