@@ -3,7 +3,7 @@ import { useValidation } from "./issues";
 import { useClonedReactive } from "./utils";
 import type { BaseData, BaseId, Removal, Upsert } from "./base";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { type Ref, computed, triggerRef } from "vue";
+import { type Ref, computed } from "vue";
 
 export type SortedCollectionOptions<T extends BaseData, VariantT extends T = T> = {
   newItem: () => T
@@ -29,7 +29,7 @@ export const useSortedCollection = <T extends BaseData, VariantT extends T = T>(
     } else {
       items.value.push(item);
     }
-    triggerRef(items);
+    items.value = items.value.slice()
   };
 
   const _remove = (id: BaseId) => {
@@ -37,7 +37,7 @@ export const useSortedCollection = <T extends BaseData, VariantT extends T = T>(
     if (index !== -1) {
       items.value.splice(index, 1);
     }
-    triggerRef(items);
+    items.value = items.value.slice()
   };
 
   const useAll = (): AsyncState<VariantT[]> => [sorted, status, reload];

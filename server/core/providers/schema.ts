@@ -28,5 +28,5 @@ export const create = {
 };
 
 export const upsert = {
-  body: provider.extend({ id: id.optional() }),
+  body: provider.extend({ id: z.union([id, z.literal("")]).optional() }),
 };

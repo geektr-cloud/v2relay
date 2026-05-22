@@ -28,5 +28,5 @@ export const create = {
 };
 
 export const upsert = {
-  body: tag.extend({ id: id.optional() }),
+  body: tag.extend({ id: z.union([id, z.literal("")]).optional() }),
 };

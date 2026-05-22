@@ -39,7 +39,7 @@ export const create = {
 };
 
 export const upsert = {
-  body: subscription.omit({ createdAt: true, updatedAt: true }).extend({ id: id.optional() }),
+  body: subscription.omit({ createdAt: true, updatedAt: true }).extend({ id: z.union([id, z.literal("")]).optional() }),
 };
 
 const aggregate = z.enum(["true", "false"]).transform(Boolean).optional().default(false);

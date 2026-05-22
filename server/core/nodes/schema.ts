@@ -46,7 +46,7 @@ export const create = {
 };
 
 export const upsert = {
-  body: node.extend({ id: id.optional() }),
+  body: node.extend({ id: z.union([id, z.literal("")]).optional() }),
 };
 
 const aggregate = z.enum(["true", "false"]).transform(Boolean).optional().default(false);
