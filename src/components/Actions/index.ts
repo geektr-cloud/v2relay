@@ -16,7 +16,9 @@ export const useConfirmPopover = <T extends BaseData>(opts: ConfirmPopoverOption
   const ConfirmPopover = defineComponent({
     setup() {
       const removal = opts.useRemoval(id);
-      const message = computed(() => (typeof opts.message === "function" ? opts.message(removal[2][0].value) : opts.message));
+      const message = computed(() =>
+        typeof opts.message === "function" ? opts.message(removal[2][0].value) : opts.message,
+      );
 
       return () =>
         h(_ConfirmPopover, {

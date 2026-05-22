@@ -31,6 +31,12 @@
 			"database_id": "f7fda464-f94f-4cd7-b638-5f37756dfa3d",
 			// "remote": true
 		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "kv",
+			"id": "331fe00e388146b5948958dbe91b5b23"
+		}
 	]
 	/**
 	 * Smart Placement

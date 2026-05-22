@@ -14,13 +14,12 @@ const props = defineProps<{
   ctx: Removal<unknown>;
 }>();
 
-
 const [status, _remove] = props.ctx;
 
 const submit = () =>
   void _remove()
-    .then(() => open.value = false)
-    .catch(() => { });
+    .then(() => (open.value = false))
+    .catch(() => {});
 </script>
 
 <template>

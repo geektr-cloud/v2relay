@@ -50,8 +50,12 @@ const [form, issues, status, submit] = useUpsert(id);
       <Field>
         <FieldLabel>订阅链接</FieldLabel>
         <MultiLineInput
-v-model="form.urls" placeholder="https://example.com/sub" add-text="添加链接"
-          :disabled="status.loading" @focusin="issues.ingore('urls')" />
+          v-model="form.urls"
+          placeholder="https://example.com/sub"
+          add-text="添加链接"
+          :disabled="status.loading"
+          @focusin="issues.ingore('urls')"
+        />
         <FieldError :errors="issues.errors('urls')" />
       </Field>
       <Field orientation="horizontal" class="border px-3 py-5">

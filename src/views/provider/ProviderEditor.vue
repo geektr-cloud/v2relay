@@ -32,8 +32,12 @@ const [form, issues, status, submit] = useUpsert(id);
       <Field :data-invalid="issues.errors('name').length > 0">
         <FieldLabel for="name">名称</FieldLabel>
         <Input
-id="name" v-model="form.name" autocomplete="off" placeholder="唯一名称，例如 company-a"
-          @focus="issues.ingore('name')" />
+          id="name"
+          v-model="form.name"
+          autocomplete="off"
+          placeholder="唯一名称，例如 company-a"
+          @focus="issues.ingore('name')"
+        />
         <FieldDescription>名称是唯一的，用于标识提供商。</FieldDescription>
         <FieldError :errors="issues.errors('name')" />
       </Field>

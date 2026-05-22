@@ -12,8 +12,14 @@ const [items, status, refresh] = useAll();
 
 <template>
   <PageEntry
-title="节点管理" description="管理所有节点及其连接信息。" :loading="status.loading" :error="status.error" :items="items"
-    @retry="void refresh()" @create="create()">
+    title="节点管理"
+    description="管理所有节点及其连接信息。"
+    :loading="status.loading"
+    :error="status.error"
+    :items="items"
+    @retry="void refresh()"
+    @create="create()"
+  >
     <NodeList />
   </PageEntry>
 </template>

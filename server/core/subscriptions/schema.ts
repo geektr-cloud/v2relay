@@ -51,3 +51,11 @@ export const fetch = {
 export const fetchAll = {
   query: z.object({ aggregate, providerId: z.string().optional() }).optional().default({ aggregate: false }),
 };
+
+// ── content query (forceReload) ───────────────────────────────────────────────
+
+const forceReload = z.stringbool().optional().default(false);
+
+export const content = {
+  query: z.object({ force_reload: forceReload }).optional().default({ force_reload: false }),
+};

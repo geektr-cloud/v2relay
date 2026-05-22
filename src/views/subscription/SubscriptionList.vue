@@ -84,8 +84,11 @@ const removal = useConfirmPopover({
               <SquarePen />
             </Button>
             <Button
-variant="ghost" class="text-destructive hover:text-destructive" size="icon"
-              @click="(e: MouseEvent) => removal.open(e, row.id)">
+              variant="ghost"
+              class="text-destructive hover:text-destructive"
+              size="icon"
+              @click="(e: MouseEvent) => removal.open(e, row.id)"
+            >
               <Trash2 />
             </Button>
           </TableCell>

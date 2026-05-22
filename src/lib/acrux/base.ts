@@ -59,7 +59,6 @@ export type Removal<T> = [status: AsyncStatus, remove: () => Promise<void>, sour
  */
 export type UseRemoval<T> = (id: Ref<BaseId | undefined>) => Removal<T | undefined>;
 
-
 export type Upsert<T> = [
   form: Reactive<T>,
   issues: UseValidation,

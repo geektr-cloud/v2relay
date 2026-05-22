@@ -6,15 +6,16 @@ import * as schema from "./schema";
 import { type SubscriptionCacheStatus, SubscriptionRawContent } from "./raw-content";
 import { HttpErr } from "@server/utils/http-errors";
 
-async function getRawContentOfSubscription(
+async function loadSubscriptionContent(
   id: string,
+  options: { forceReload?: boolean } = {},
 ): Promise<{ response: Response; cacheStatus: SubscriptionCacheStatus }> {
   const sub = await prisma.subscription.findUnique({ where: { id } });
   if (!sub) throw HttpErr(404, "Subscription not found");
   if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-  const content = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
-  return content.get();
+  const handle = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
+  return handle.get(options);
 }
 
 export const subscriptionRoutes = new Hono()
@@ -74,26 +75,28 @@ export const subscriptionRoutes = new Hono()
       throw HttpErr(404, "Subscription not found");
     }
   })
-  .get("/:id/raw/status", mid.paramId, async (c) => {
+  .get("/:id/status", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
-    const { cacheStatus } = await getRawContentOfSubscription(id);
+    const { cacheStatus } = await loadSubscriptionContent(id);
     return c.json(cacheStatus);
   })
-  .get("/:id/raw", mid.paramId, async (c) => {
+  .get("/:id/content", mid.paramId, zValidator("query", schema.content.query), async (c) => {
     const { id } = c.req.valid("param");
-    const { response } = await getRawContentOfSubscription(id);
+    const { force_reload } = c.req.valid("query");
+    const { response } = await loadSubscriptionContent(id, { forceReload: force_reload });
     return new Response(response.body, { headers: response.headers });
   })
-  .get("/:id/readable", mid.paramId, async (c) => {
+  .put("/:id/content", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
-    const { response } = await getRawContentOfSubscription(id);
+    const sub = await prisma.subscription.findUnique({ where: { id } });
+    if (!sub) throw HttpErr(404, "Subscription not found");
+    if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-    let text = await response.text();
-    try {
-      text = atob(text);
-    } catch {
-      //
-    }
+    const body = await c.req.arrayBuffer();
+    if (body.byteLength === 0) throw HttpErr(400, "Empty body");
+    const contentType = c.req.header("content-type") ?? "text/plain; charset=utf-8";
 
-    return new Response(text, { headers: response.headers });
+    const handle = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
+    const { cacheStatus } = await handle.put(body, contentType);
+    return c.json(cacheStatus);
   });

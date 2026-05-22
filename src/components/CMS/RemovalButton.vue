@@ -17,9 +17,10 @@ const router = useRouter();
 
 const [status, _remove] = props.ctx;
 
-const remove = () => _remove()
-  .then(() => router.back())
-  .catch(() => { });
+const remove = () =>
+  _remove()
+    .then(() => router.back())
+    .catch(() => {});
 </script>
 
 <template>

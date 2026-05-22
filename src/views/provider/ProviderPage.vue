@@ -12,8 +12,14 @@ const [items, status, refresh] = useAll();
 
 <template>
   <PageEntry
-title="订阅服务提供商" description="永远怀念喵帕斯" :loading="status.loading" :error="status.error"
-    :items="items" @retry="void refresh()" @create="create()">
+    title="订阅服务提供商"
+    description="永远怀念喵帕斯"
+    :loading="status.loading"
+    :error="status.error"
+    :items="items"
+    @retry="void refresh()"
+    @create="create()"
+  >
     <ProviderList />
   </PageEntry>
 </template>

@@ -12,8 +12,14 @@ const [items, status, refresh] = useAll();
 
 <template>
   <PageEntry
-title="标签管理" description="管理标签及其关键词匹配规则。" :loading="status.loading" :error="status.error"
-    :items="items" @retry="void refresh()" @create="create()">
+    title="标签管理"
+    description="管理标签及其关键词匹配规则。"
+    :loading="status.loading"
+    :error="status.error"
+    :items="items"
+    @retry="void refresh()"
+    @create="create()"
+  >
     <TagList />
   </PageEntry>
 </template>

@@ -53,8 +53,11 @@ const jsonInvalid = ref(false);
       <Field>
         <FieldLabel for="protocol">协议</FieldLabel>
         <Input
-id="protocol" v-model="form.protocol" placeholder="vmess / vless / trojan …"
-          @focus="issues.ingore('protocol')" />
+          id="protocol"
+          v-model="form.protocol"
+          placeholder="vmess / vless / trojan …"
+          @focus="issues.ingore('protocol')"
+        />
         <FieldError :errors="issues.errors('protocol')" />
       </Field>
       <Field>
@@ -65,9 +68,13 @@ id="protocol" v-model="form.protocol" placeholder="vmess / vless / trojan …"
       <Field>
         <FieldLabel for="priceRate">倍率</FieldLabel>
         <Input
-id="priceRate" type="number" min="0" :model-value="form.priceRate"
+          id="priceRate"
+          type="number"
+          min="0"
+          :model-value="form.priceRate"
           @change="(e: Event) => (form.priceRate = parseFloat((e.target as HTMLInputElement).value) || 1)"
-          @focus="issues.ingore('priceRate')" />
+          @focus="issues.ingore('priceRate')"
+        />
         <FieldError :errors="issues.errors('priceRate')" />
       </Field>
       <Field>
@@ -89,8 +96,11 @@ id="priceRate" type="number" min="0" :model-value="form.priceRate"
       <Field>
         <FieldLabel for="connInfo">连接信息 (JSON)</FieldLabel>
         <JsonTextArea
-id="connInfo" v-model="form.connInfo" :disabled="status.loading"
-          @update:invalid="jsonInvalid = $event" />
+          id="connInfo"
+          v-model="form.connInfo"
+          :disabled="status.loading"
+          @update:invalid="jsonInvalid = $event"
+        />
       </Field>
     </FieldGroup>
   </FieldSet>

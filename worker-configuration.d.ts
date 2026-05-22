@@ -8,6 +8,7 @@ declare namespace Cloudflare {
 	interface Env {
 		DB: D1Database;
 		ASSETS: Fetcher;
+		kv: KVNamespace;
 		DATABASE_URL: string;
 		API_TOKEN: string;
 	}
