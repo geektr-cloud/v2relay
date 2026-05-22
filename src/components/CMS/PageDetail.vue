@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { BackButton } from "@/components/CMS";
-import { DataView, DataItem } from "@/components/DataView";
+import { DataItem, DataView } from "@/components/DataView";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { computed } from "vue";
 import { FileX, RotateCcw } from "lucide-vue-next";

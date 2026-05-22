@@ -4,26 +4,23 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner";
 import { PopoverPortal, type ReferenceElement } from "reka-ui";
 import { Check, X } from "lucide-vue-next";
+import type { Removal } from "@/lib/acrux";
 
 const open = defineModel<boolean>("open", { required: true });
 
 const props = defineProps<{
   anchor?: ReferenceElement;
   message: string;
-  ctx: {
-    loading: boolean;
-    error: unknown;
-    submit: () => Promise<unknown>;
-  };
+  ctx: Removal<unknown>;
 }>();
 
+
+const [status, _remove] = props.ctx;
+
 const submit = () =>
-  void props.ctx
-    .submit()
-    .then(() => {
-      open.value = false;
-    })
-    .catch(() => {});
+  void _remove()
+    .then(() => open.value = false)
+    .catch(() => { });
 </script>
 
 <template>
@@ -33,15 +30,15 @@ const submit = () =>
       <PopoverContent side="left" class="w-auto">
         <div class="flex flex-row items-center gap-2">
           <div>{{ message }}</div>
-          <Button variant="secondary" size="icon" :disabled="ctx.loading" @click="void submit()">
-            <Check v-if="!ctx.loading" />
+          <Button variant="secondary" size="icon" :disabled="status.loading" @click="void submit()">
+            <Check v-if="!status.loading" />
             <Spinner v-else />
           </Button>
-          <Button variant="ghost" size="icon" v-show="!ctx.loading" @click="open = false">
+          <Button variant="ghost" size="icon" v-show="!status.loading" @click="open = false">
             <X />
           </Button>
         </div>
-        <p v-if="ctx.error" class="text-red-500">{{ ctx.error }}</p>
+        <p v-if="status.error" class="text-red-500">{{ status.error }}</p>
       </PopoverContent>
     </PopoverPortal>
   </Popover>

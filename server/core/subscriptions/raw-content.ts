@@ -1,5 +1,5 @@
-import { mcache } from "../../utils/meta-cache";
-import { HttpErr } from "../../utils/http-errors";
+import { mcache } from "@server/utils/meta-cache";
+import { HttpErr } from "@server/utils/http-errors";
 
 const TTL_SECONDS = 10 * 60;
 

@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProviderStore } from "@/stores/providers";
+import { useSubscriptionStore } from "@/stores/subscriptions";
 
 defineProps<{ disabled?: boolean }>();
 const modelValue = defineModel<string | undefined>();
 
-const { useAll } = useProviderStore();
+const { useAll } = useSubscriptionStore();
 const [items, status] = useAll();
 </script>
 
 <template>
-  <Skeleton v-if="status.loading" class="w-25 h-8 p-2" />
+  <Skeleton v-if="status.loading" class="h-8 w-full" />
   <Select v-else v-model="modelValue" :disabled="disabled">
     <SelectTrigger>
-      <SelectValue placeholder="选择提供商" />
+      <SelectValue placeholder="选择订阅" />
     </SelectTrigger>
-    <SelectContent>
+    <SelectContent :use-portal="false">
       <SelectItem v-for="item in items" :key="item.id" :value="item.id">
-        {{ item.name }}
+        {{ item.name || item.id }}
       </SelectItem>
     </SelectContent>
   </Select>

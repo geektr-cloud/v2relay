@@ -1,22 +1,22 @@
 import type { ReferenceElement } from "reka-ui";
 import { computed, defineComponent, h, onMounted, onUnmounted, ref } from "vue";
 import _ConfirmPopover from "./ConfirmPopover.vue";
-import type { CMS } from "../CMS";
+import type { BaseData, BaseId, UseRemoval } from "@/lib/acrux";
 
-export interface ConfirmPopoverOptions<T extends CMS.BaseData> {
+export interface ConfirmPopoverOptions<T extends BaseData> {
   message: string | ((src: T | undefined) => string);
-  useRemoval: CMS.UseRemoval<T>;
+  useRemoval: UseRemoval<T>;
 }
 
-export const useConfirmPopover = <T extends CMS.BaseData>(opts: ConfirmPopoverOptions<T>) => {
-  const id = ref<CMS.Id>();
+export const useConfirmPopover = <T extends BaseData>(opts: ConfirmPopoverOptions<T>) => {
+  const id = ref<BaseId | undefined>();
   const anchor = ref<ReferenceElement>();
   const isOpen = ref(false);
 
   const ConfirmPopover = defineComponent({
     setup() {
       const removal = opts.useRemoval(id);
-      const message = computed(() => (typeof opts.message === "function" ? opts.message(removal.item) : opts.message));
+      const message = computed(() => (typeof opts.message === "function" ? opts.message(removal[2][0].value) : opts.message));
 
       return () =>
         h(_ConfirmPopover, {
@@ -29,7 +29,7 @@ export const useConfirmPopover = <T extends CMS.BaseData>(opts: ConfirmPopoverOp
     },
   });
 
-  const open = (event: Event, _id: CMS.Id) => {
+  const open = (event: Event, _id: BaseId) => {
     anchor.value = event.target as ReferenceElement;
     id.value = _id;
     isOpen.value = true;

@@ -25,6 +25,20 @@ CREATE TABLE "Tag" (
     "keywords" JSONB NOT NULL DEFAULT []
 );
 
+-- CreateTable
+CREATE TABLE "Node" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "subscriptionId" TEXT NOT NULL,
+    "tags" JSONB NOT NULL DEFAULT [],
+    "protocol" TEXT NOT NULL DEFAULT '',
+    "name" TEXT NOT NULL DEFAULT '',
+    "remark" TEXT NOT NULL DEFAULT '',
+    "ip" TEXT NOT NULL DEFAULT '',
+    "priceRate" REAL NOT NULL DEFAULT 1,
+    "connInfo" JSONB NOT NULL DEFAULT {},
+    CONSTRAINT "Node_subscriptionId_fkey" FOREIGN KEY ("subscriptionId") REFERENCES "Subscription" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Provider_name_key" ON "Provider"("name");
 

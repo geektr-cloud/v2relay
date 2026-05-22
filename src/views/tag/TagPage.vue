@@ -7,19 +7,13 @@ import { PageEntry, useFormModel } from "@/components/CMS";
 const { useAll } = useTagStore();
 const { create } = useFormModel(TagEditor);
 
-const store = useAll();
+const [items, status, refresh] = useAll();
 </script>
 
 <template>
   <PageEntry
-    title="标签管理"
-    description="管理标签及其关键词匹配规则。"
-    :loading="store.loading"
-    :error="store.error"
-    :items="store.items"
-    @retry="void store.reload()"
-    @create="create()"
-  >
+title="标签管理" description="管理标签及其关键词匹配规则。" :loading="status.loading" :error="status.error"
+    :items="items" @retry="void refresh()" @create="create()">
     <TagList />
   </PageEntry>
 </template>

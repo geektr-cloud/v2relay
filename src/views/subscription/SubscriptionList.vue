@@ -1,23 +1,27 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useConfirmPopover } from "@/components/Actions";
 import CopyTag from "@/components/DataView/CopyTag.vue";
 import Route from "@/components/DataView/Route.vue";
 import { useSubscriptionStore } from "@/stores/subscriptions";
+import { useProviderStore } from "@/stores/providers";
 import SubscriptionEditor from "./SubscriptionEditor.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
-import Date from "@/components/DataView/Date.vue";
-import { MultiLine } from "@/components/DataView";
+import { DateFormatter as Date, MultiLine } from "@/components/DataView";
 import Button from "@/components/ui/button/Button.vue";
-import { Trash2, File, SquarePen } from "lucide-vue-next";
+import { File, SquarePen, Trash2 } from "lucide-vue-next";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useFormModel, CMS } from "@/components/CMS";
-import type { SubscriptionWithProvider } from "@/types/api";
-import { toRef } from "vue";
+import { useFormModel } from "@/components/CMS";
+import type { Subscription } from "@server/generated/prisma/dto";
 
-const props = defineProps<{ filter?: CMS.Filter<SubscriptionWithProvider> }>();
+const props = defineProps<{ filter?: (s: Subscription) => boolean }>();
 
-const { useFiltered, useRemoval } = useSubscriptionStore();
-const store = useFiltered(toRef(props, "filter"));
+const { useAll, useRemoval } = useSubscriptionStore();
+const [items] = useAll();
+const filtered = computed(() => (props.filter ? items.value.filter(props.filter) : items.value));
+
+const [providers] = useProviderStore().useAll();
+const providerById = computed(() => new Map(providers.value.map((p) => [p.id, p])));
 
 const { update } = useFormModel(SubscriptionEditor);
 const removal = useConfirmPopover({
@@ -27,10 +31,10 @@ const removal = useConfirmPopover({
 </script>
 
 <template>
-  <div v-if="store.items.length > 0">
+  <div v-if="filtered.length > 0">
     <removal.ConfirmPopover />
     <Table>
-      <TableCaption>共 {{ store.items.length }} 个订阅条目</TableCaption>
+      <TableCaption>共 {{ filtered.length }} 个订阅条目</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>名称</TableHead>
@@ -43,18 +47,18 @@ const removal = useConfirmPopover({
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow v-for="row in store.items" :key="row.id">
+        <TableRow v-for="row in filtered" :key="row.id">
           <TableCell>
             <Route :to="{ name: 'subscription-detail', params: { id: row.id } }">
-              {{ row.name || "-" }}
+              {{ row.name || "—" }}
             </Route>
           </TableCell>
           <TableCell>
             <MultiLine :value="row.remark" />
           </TableCell>
           <TableCell>
-            <Route :to="{ name: 'provider-detail', params: { idOrName: row.provider.id } }">
-              {{ row.provider.name }}
+            <Route :to="{ name: 'provider-detail', params: { idOrName: row.providerId } }">
+              {{ providerById.get(row.providerId)?.name || row.providerId }}
             </Route>
           </TableCell>
           <TableCell>
@@ -80,11 +84,8 @@ const removal = useConfirmPopover({
               <SquarePen />
             </Button>
             <Button
-              variant="ghost"
-              class="text-destructive hover:text-destructive"
-              size="icon"
-              @click="(e: MouseEvent) => removal.open(e, row.id)"
-            >
+variant="ghost" class="text-destructive hover:text-destructive" size="icon"
+              @click="(e: MouseEvent) => removal.open(e, row.id)">
               <Trash2 />
             </Button>
           </TableCell>

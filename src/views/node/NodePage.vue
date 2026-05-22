@@ -7,19 +7,13 @@ import { PageEntry, useFormModel } from "@/components/CMS";
 const { useAll } = useNodeStore();
 const { create } = useFormModel(NodeEditor);
 
-const store = useAll();
+const [items, status, refresh] = useAll();
 </script>
 
 <template>
   <PageEntry
-    title="节点管理"
-    description="管理所有节点及其连接信息。"
-    :loading="store.loading"
-    :error="store.error"
-    :items="store.items"
-    @retry="void store.reload()"
-    @create="create()"
-  >
+title="节点管理" description="管理所有节点及其连接信息。" :loading="status.loading" :error="status.error" :items="items"
+    @retry="void refresh()" @create="create()">
     <NodeList />
   </PageEntry>
 </template>

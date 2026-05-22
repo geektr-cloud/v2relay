@@ -18,6 +18,19 @@ export default defineConfig([
   tseslint.configs.recommended,
   pluginVue.configs["flat/strongly-recommended"],
   { rules: { "vue/one-component-per-file": "off" } },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
   { files: ["**/*.vue"], languageOptions: { parserOptions: { parser: tseslint.parser } } },
   { files: ["**/*.md"], plugins: { markdown }, language: "markdown/commonmark", extends: ["markdown/recommended"] },
   { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },

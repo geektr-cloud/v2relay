@@ -9,6 +9,21 @@ generator client {
   runtime  = "cloudflare"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+generator typescriptInterfacesJson {
+  provider    = "prisma-generator-typescript-interfaces"
+  output      = "../server/generated/prisma/dto.ts"
+  dateType    = "string"
+  bigIntType  = "string"
+  decimalType = "string"
+  relations   = "none"
+  exportEnums = true
+  prettier    = true
+}
+
 datasource db {
   provider = "sqlite"
 }
@@ -28,6 +43,7 @@ model Subscription {
 
   name      String   @default("")
   remark    String   @default("")
+  /// ![string[]]
   urls      Json     @default("[]")
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -38,6 +54,7 @@ model Subscription {
 model Tag {
   id       String @id @default(uuid())
   name     String @unique
+  /// ![string[]]
   keywords Json   @default("[]")
 }
 
@@ -47,6 +64,7 @@ model Node {
   subscription   Subscription @relation(fields: [subscriptionId], references: [id])
   subscriptionId String
 
+  /// ![string[]]
   tags Json @default("[]")
 
   protocol  String @default("")
@@ -55,5 +73,6 @@ model Node {
   ip        String @default("")
   priceRate Float  @default(1)
 
+  /// ![any]
   connInfo Json @default("{}")
 }

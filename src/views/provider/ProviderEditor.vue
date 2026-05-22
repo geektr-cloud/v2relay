@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import {
   Field,
   FieldDescription,
@@ -8,23 +9,17 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-
 import { Input } from "@/components/ui/input";
-import type { CMS } from "@/components/CMS";
 import { CopyTag } from "@/components/DataView";
-import { computed } from "vue";
 import { useProviderStore } from "@/stores/providers";
 import { Button } from "@/components/ui/button";
 
-const props = defineProps<{ id: CMS.Id | undefined }>();
-const emit = defineEmits<{
-  (e: "close"): void;
-}>();
+const props = defineProps<{ id: string | undefined }>();
+const emit = defineEmits<{ (e: "close"): void }>();
 
 const id = computed(() => props.id);
 const { useUpsert } = useProviderStore();
-
-const [form, issues, upsert] = useUpsert(id);
+const [form, issues, status, submit] = useUpsert(id);
 </script>
 
 <template>
@@ -35,26 +30,22 @@ const [form, issues, upsert] = useUpsert(id);
     </FieldDescription>
     <FieldGroup>
       <Field :data-invalid="issues.errors('name').length > 0">
-        <FieldLabel for="name"> 名称 </FieldLabel>
+        <FieldLabel for="name">名称</FieldLabel>
         <Input
-          id="name"
-          v-model="form.name"
-          autocomplete="off"
-          placeholder="唯一名称，例如 company-a"
-          @focus="issues.ingore('name')"
-        />
+id="name" v-model="form.name" autocomplete="off" placeholder="唯一名称，例如 company-a"
+          @focus="issues.ingore('name')" />
         <FieldDescription>名称是唯一的，用于标识提供商。</FieldDescription>
         <FieldError :errors="issues.errors('name')" />
       </Field>
       <Field>
-        <FieldLabel for="url"> 网址 </FieldLabel>
-        <Input id="url" v-model="form.url" autocomplete="off" aria-invalid />
+        <FieldLabel for="url">网址</FieldLabel>
+        <Input id="url" v-model="form.url" autocomplete="off" @focus="issues.ingore('url')" />
         <FieldError :errors="issues.errors('url')" />
       </Field>
     </FieldGroup>
   </FieldSet>
   <div class="mt-4 flex justify-end gap-2">
-    <Button :disabled="upsert.loading" @click="upsert.submit().then(() => emit('close'))"> 保存 </Button>
-    <Button variant="secondary" :disabled="upsert.loading" @click="emit('close')"> 取消 </Button>
+    <Button :disabled="status.loading" @click="submit().then(() => emit('close'))">保存</Button>
+    <Button variant="secondary" :disabled="status.loading" @click="emit('close')">取消</Button>
   </div>
 </template>

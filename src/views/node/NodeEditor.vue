@@ -2,12 +2,12 @@
 import { computed, ref } from "vue";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
   FieldSet,
-  FieldDescription,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,16 +20,15 @@ import {
   TagsInputItemDelete,
   TagsInputItemText,
 } from "@/components/ui/tags-input";
-import type { CMS } from "@/components/CMS";
 import { useNodeStore } from "@/stores/nodes";
-import SubscriptionSelect from "./SubscriptionSelect.vue";
+import SubscriptionSelect from "@/views/subscription/SubscriptionSelect.vue";
 
-const props = defineProps<{ id: CMS.Id | undefined }>();
+const props = defineProps<{ id: string | undefined }>();
 const emit = defineEmits<{ (e: "close"): void }>();
 
 const id = computed(() => props.id);
 const { useUpsert } = useNodeStore();
-const [form, issues, upsert] = useUpsert(id);
+const [form, issues, status, submit] = useUpsert(id);
 
 const jsonInvalid = ref(false);
 </script>
@@ -43,7 +42,7 @@ const jsonInvalid = ref(false);
     <FieldGroup>
       <Field>
         <FieldLabel>所属订阅</FieldLabel>
-        <SubscriptionSelect v-model="form.subscriptionId" :disabled="upsert.loading" />
+        <SubscriptionSelect v-model="form.subscriptionId" :disabled="status.loading" />
         <FieldError :errors="issues.errors('subscriptionId')" />
       </Field>
       <Field>
@@ -54,11 +53,8 @@ const jsonInvalid = ref(false);
       <Field>
         <FieldLabel for="protocol">协议</FieldLabel>
         <Input
-          id="protocol"
-          v-model="form.protocol"
-          placeholder="vmess / vless / trojan …"
-          @focus="issues.ingore('protocol')"
-        />
+id="protocol" v-model="form.protocol" placeholder="vmess / vless / trojan …"
+          @focus="issues.ingore('protocol')" />
         <FieldError :errors="issues.errors('protocol')" />
       </Field>
       <Field>
@@ -69,13 +65,9 @@ const jsonInvalid = ref(false);
       <Field>
         <FieldLabel for="priceRate">倍率</FieldLabel>
         <Input
-          id="priceRate"
-          type="number"
-          min="0"
-          :model-value="form.priceRate"
+id="priceRate" type="number" min="0" :model-value="form.priceRate"
           @change="(e: Event) => (form.priceRate = parseFloat((e.target as HTMLInputElement).value) || 1)"
-          @focus="issues.ingore('priceRate')"
-        />
+          @focus="issues.ingore('priceRate')" />
         <FieldError :errors="issues.errors('priceRate')" />
       </Field>
       <Field>
@@ -97,16 +89,13 @@ const jsonInvalid = ref(false);
       <Field>
         <FieldLabel for="connInfo">连接信息 (JSON)</FieldLabel>
         <JsonTextArea
-          id="connInfo"
-          v-model="form.connInfo"
-          :disabled="upsert.loading"
-          @update:invalid="jsonInvalid = $event"
-        />
+id="connInfo" v-model="form.connInfo" :disabled="status.loading"
+          @update:invalid="jsonInvalid = $event" />
       </Field>
     </FieldGroup>
   </FieldSet>
   <div class="mt-4 flex justify-end gap-2">
-    <Button :disabled="upsert.loading || jsonInvalid" @click="upsert.submit().then(() => emit('close'))"> 保存 </Button>
-    <Button variant="secondary" :disabled="upsert.loading" @click="emit('close')">取消</Button>
+    <Button :disabled="status.loading || jsonInvalid" @click="submit().then(() => emit('close'))"> 保存 </Button>
+    <Button variant="secondary" :disabled="status.loading" @click="emit('close')">取消</Button>
   </div>
 </template>

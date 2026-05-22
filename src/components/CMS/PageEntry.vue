@@ -2,10 +2,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { computed } from "vue";
-import { FileX, RotateCcw, Plus, File } from "lucide-vue-next";
+import { File, FileX, Plus, RotateCcw } from "lucide-vue-next";
 import Button from "@/components/ui/button/Button.vue";
 import Spinner from "../ui/spinner/Spinner.vue";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const props = defineProps<{
   title: string;

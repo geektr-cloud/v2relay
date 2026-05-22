@@ -5,13 +5,13 @@ import { useNodeStore } from "@/stores/nodes";
 import NodeEditor from "./NodeEditor.vue";
 import Button from "@/components/ui/button/Button.vue";
 import { useConfirmPopover } from "@/components/Actions";
-import { Trash2, File, SquarePen, Copy } from "lucide-vue-next";
+import { Copy, File, SquarePen, Trash2 } from "lucide-vue-next";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useFormModel } from "@/components/CMS";
 import { Badge } from "@/components/ui/badge";
 
 const { useAll, useRemoval } = useNodeStore();
-const store = useAll();
+const [items] = useAll();
 const { update } = useFormModel(NodeEditor);
 const { copy } = useClipboard();
 
@@ -22,10 +22,10 @@ const removal = useConfirmPopover({
 </script>
 
 <template>
-  <div v-if="store.items.length > 0">
+  <div v-if="items.length > 0">
     <removal.ConfirmPopover />
     <Table>
-      <TableCaption>共 {{ store.items.length }} 个节点</TableCaption>
+      <TableCaption>共 {{ items.length }} 个节点</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>名称</TableHead>
@@ -38,7 +38,7 @@ const removal = useConfirmPopover({
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow v-for="row in store.items" :key="row.id">
+        <TableRow v-for="row in items" :key="row.id">
           <TableCell>
             <Route :to="{ name: 'node-detail', params: { id: row.id } }">
               {{ row.name || "—" }}
@@ -53,8 +53,8 @@ const removal = useConfirmPopover({
             <Badge variant="outline">x{{ row.priceRate }}</Badge>
           </TableCell>
           <TableCell>
-            <Route :to="{ name: 'subscription-detail', params: { id: row.subscription.id } }">
-              {{ row.subscription.name || row.subscription.provider.name }}
+            <Route :to="{ name: 'subscription-detail', params: { id: row.subscriptionId } }">
+              {{ row.subscription.name }}
             </Route>
           </TableCell>
           <TableCell>
@@ -73,11 +73,8 @@ const removal = useConfirmPopover({
               <SquarePen />
             </Button>
             <Button
-              variant="ghost"
-              class="text-destructive hover:text-destructive"
-              size="icon"
-              @click="(e: MouseEvent) => removal.open(e, row.id)"
-            >
+variant="ghost" class="text-destructive hover:text-destructive" size="icon"
+              @click="(e: MouseEvent) => removal.open(e, row.id)">
               <Trash2 />
             </Button>
           </TableCell>

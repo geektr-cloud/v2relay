@@ -3,8 +3,7 @@ import { defineComponent, h, nextTick, onUnmounted, ref } from "vue";
 import type { ReferenceElement } from "reka-ui";
 import type { useAsyncState } from "@vueuse/core";
 import _RemovalPopover from "./RemovalPopover.vue";
-import { useModal, VueFinalModal } from "vue-final-modal";
-import * as CMS from "./cms";
+import { VueFinalModal, useModal } from "vue-final-modal";
 import { Card, CardContent } from "../ui/card";
 
 type RefElement = MouseEvent | EventTarget | null;
@@ -48,7 +47,7 @@ export const useRemovalContext = (removalFunc: RemovalFunc) => {
 };
 
 export const useFormModel = (Form: Component) => {
-  const id = ref<CMS.Id>();
+  const id = ref<string>();
 
   const component = defineComponent({
     setup() {
@@ -90,7 +89,7 @@ export const useFormModel = (Form: Component) => {
     });
   };
 
-  const update = (_id: CMS.Id) => {
+  const update = (_id: string) => {
     close();
     nextTick(() => {
       id.value = _id;

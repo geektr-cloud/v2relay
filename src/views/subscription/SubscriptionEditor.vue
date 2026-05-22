@@ -12,18 +12,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CopyTag, MultiLineInput } from "@/components/DataView";
-import type { CMS } from "@/components/CMS";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 import ProviderSelect from "@/views/provider/ProviderSelect.vue";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
-const props = defineProps<{ id: CMS.Id | undefined }>();
+const props = defineProps<{ id: string | undefined }>();
 const emit = defineEmits<{ (e: "close"): void }>();
 
 const id = computed(() => props.id);
 const { useUpsert } = useSubscriptionStore();
-const [form, issues, upsert] = useUpsert(id);
+const [form, issues, status, submit] = useUpsert(id);
 </script>
 
 <template>
@@ -35,7 +34,7 @@ const [form, issues, upsert] = useUpsert(id);
     <FieldGroup>
       <Field>
         <FieldLabel>提供商</FieldLabel>
-        <ProviderSelect v-model="form.providerId" :disabled="upsert.loading" @focus="issues.ingore('providerId')" />
+        <ProviderSelect v-model="form.providerId" :disabled="status.loading" @focus="issues.ingore('providerId')" />
         <FieldError :errors="issues.errors('providerId')" />
       </Field>
       <Field>
@@ -51,12 +50,8 @@ const [form, issues, upsert] = useUpsert(id);
       <Field>
         <FieldLabel>订阅链接</FieldLabel>
         <MultiLineInput
-          v-model="form.urls"
-          placeholder="https://example.com/sub"
-          add-text="添加链接"
-          :disabled="upsert.loading"
-          @focusin="issues.ingore('urls')"
-        />
+v-model="form.urls" placeholder="https://example.com/sub" add-text="添加链接"
+          :disabled="status.loading" @focusin="issues.ingore('urls')" />
         <FieldError :errors="issues.errors('urls')" />
       </Field>
       <Field orientation="horizontal" class="border px-3 py-5">
@@ -66,7 +61,7 @@ const [form, issues, upsert] = useUpsert(id);
     </FieldGroup>
   </FieldSet>
   <div class="mt-4 flex justify-end gap-2">
-    <Button :disabled="upsert.loading" @click="upsert.submit().then(() => emit('close'))">保存</Button>
-    <Button variant="secondary" :disabled="upsert.loading" @click="emit('close')">取消</Button>
+    <Button :disabled="status.loading" @click="submit().then(() => emit('close'))">保存</Button>
+    <Button variant="secondary" :disabled="status.loading" @click="emit('close')">取消</Button>
   </div>
 </template>

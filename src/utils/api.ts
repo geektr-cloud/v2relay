@@ -1,20 +1,16 @@
-export async function apiFetch<T>(path: string, opts?: { method?: string; body?: unknown }): Promise<T> {
-  const init: RequestInit = { method: opts?.method };
-  if (opts?.body !== undefined) {
-    init.headers = { "Content-Type": "application/json" };
-    init.body = JSON.stringify(opts.body);
-  }
+import { type ClientResponse, hc } from "hono/client";
+import type { AppType } from "@server/index";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-  const res = await fetch(`/api${path}`, init);
+export const client = hc<AppType>("/");
+export type AppResponse<T> = Promise<ClientResponse<T, ContentfulStatusCode, "json">>;
+
+export async function rpc<T>(call: Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>): Promise<T> {
+  const res = await call;
   if (res.status === 204) return undefined as T;
-
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
   if (!res.ok) {
-    throw new Error(typeof data.error === "string" ? data.error : `HTTP ${res.status}`);
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(data.error ?? `HTTP ${res.status}`);
   }
-
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return data as T;
+  return res.json() as Promise<T>;
 }
