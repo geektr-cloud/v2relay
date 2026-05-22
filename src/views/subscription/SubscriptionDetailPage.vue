@@ -69,7 +69,7 @@ const formatSize = (bytes: number): string => {
             </DataItem>
             <DataItem label="名称">{{ item.name || "—" }}</DataItem>
             <DataItem label="提供商">
-              <Route :to="{ name: 'provider-detail', params: { idOrName: item.providerId } }">
+              <Route :to="{ name: 'provider-detail', params: { idOrName: item.providerId } }" variant="raw">
                 {{ providerName }}
               </Route>
             </DataItem>

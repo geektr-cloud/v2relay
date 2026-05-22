@@ -40,7 +40,7 @@ const removal = useRemoval(id);
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
             <DataItem label="地址">
-              <Link :href="item.url" />
+              <Link :href="item.url" variant="raw" />
             </DataItem>
           </DataView>
         </CardContent>

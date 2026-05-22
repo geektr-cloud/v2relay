@@ -1,18 +1,26 @@
 <script setup lang="ts">
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import type { RouteLocationRaw } from "vue-router";
 import { Minus } from "lucide-vue-next";
 
 defineOptions({ name: "DataRoute" });
-defineProps<{ to?: RouteLocationRaw | null }>();
+defineProps<{
+  to?: RouteLocationRaw | null;
+  variant?: BadgeVariants["variant"] | "raw";
+}>();
 </script>
 
 <template>
-  <Badge as-child v-bind="$attrs" variant="link">
-    <RouterLink :to="to ?? ''">
+  <RouterLink :to="to ?? ''" class="underline">
+    <Badge v-if="variant !== 'raw'" as-child v-bind="$attrs" :variant="variant">
       <slot>
         <Minus />
       </slot>
-    </RouterLink>
-  </Badge>
+    </Badge>
+    <template v-else>
+      <slot>
+        <Minus />
+      </slot>
+    </template>
+  </RouterLink>
 </template>
