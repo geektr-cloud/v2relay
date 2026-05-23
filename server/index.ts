@@ -7,6 +7,7 @@ import { tagRoutes } from "@server/core/tags/routes";
 import { nodeRoutes } from "@server/core/nodes/routes";
 import { systemNoticeRoutes } from "@server/core/system-notices/routes";
 import { rulesetRoutes } from "@server/core/rulesets/routes";
+import { appConfigRoutes } from "@server/core/app-configs/routes";
 import { ErrorHandler } from "@server/utils/http-errors";
 
 export const app = new Hono()
@@ -15,7 +16,8 @@ export const app = new Hono()
   .route("/api/tags", tagRoutes)
   .route("/api/nodes", nodeRoutes)
   .route("/api/system-notices", systemNoticeRoutes)
-  .route("/api/rulesets", rulesetRoutes);
+  .route("/api/rulesets", rulesetRoutes)
+  .route("/api/app-configs", appConfigRoutes);
 
 export type AppType = typeof app;
 

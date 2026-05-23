@@ -91,3 +91,12 @@ model Ruleset {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AppConfig {
+  id       String @id @default(uuid())
+  name     String @unique
+  type     String @default("")
+  template String @default("")
+  /// ![any]
+  config   Json   @default("{}")
+}
