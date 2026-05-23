@@ -8,10 +8,11 @@ import type { Provider } from "@server/generated/prisma/dto";
 const id = z.uuid();
 const name = z.string().trim().min(1).max(32);
 const url = z.union([z.literal(""), z.url()]);
+const syncTags = z.boolean();
 
 // ── single schema for create, update, and client-side form validation ─────────
 // 必须完成一个完整的 Provider 的 schema
-export const provider = z.object({ id, name, url });
+export const provider = z.object({ id, name, url, syncTags });
 // 必须断言 zod 体系和 prisma 体系的一致性
 assert<Equals<z.infer<typeof provider>, Provider>>();
 export type { Provider };
@@ -19,6 +20,7 @@ export const newItem = (): Provider => ({
   id: "",
   name: "",
   url: "",
+  syncTags: false,
 });
 
 // ── api schemas ───────────────────────────────────────────────────────────────

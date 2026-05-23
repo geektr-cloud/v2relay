@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import Link from "@/components/DataView/Link.vue";
-import Route from "@/components/DataView/Route.vue";
-import { useProviderStore } from "@/stores/providers";
-import ProviderEditor from "./ProviderEditor.vue";
-import Button from "@/components/ui/button/Button.vue";
 import { useConfirmPopover } from "@/components/Actions";
+import CopyTag from "@/components/DataView/CopyTag.vue";
+import Route from "@/components/DataView/Route.vue";
+import { useRulesetStore } from "@/stores/rulesets";
+import RulesetEditor from "./RulesetEditor.vue";
+import { DateFormatter as Date } from "@/components/DataView";
+import Button from "@/components/ui/button/Button.vue";
 import { File, SquarePen, Trash2 } from "lucide-vue-next";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useFormModel } from "@/components/CMS";
 
-const { useAll, useRemoval } = useProviderStore();
+const { useAll, useRemoval } = useRulesetStore();
 const [items] = useAll();
-const { update } = useFormModel(ProviderEditor);
 
+const { update } = useFormModel(RulesetEditor);
 const removal = useConfirmPopover({
-  message: "确定删除该提供商？若仍有订阅条目将无法删除。",
+  message: "确定删除此规则集？不可恢复。",
   useRemoval,
 });
 </script>
@@ -24,33 +24,31 @@ const removal = useConfirmPopover({
   <div v-if="items.length > 0">
     <removal.ConfirmPopover />
     <Table>
-      <TableCaption>共 {{ items.length }} 个提供商</TableCaption>
+      <TableCaption>共 {{ items.length }} 个规则集</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>名称</TableHead>
-          <TableHead>地址</TableHead>
-          <TableHead>同步标签</TableHead>
+          <TableHead>URL</TableHead>
+          <TableHead>更新于</TableHead>
           <TableHead class="w-[120px]">操作</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow v-for="row in items" :key="row.id">
           <TableCell>
-            <Route :to="{ name: 'provider-detail', params: { idOrName: row.id } }">
+            <Route :to="{ name: 'ruleset-detail', params: { idOrName: row.id } }">
               {{ row.name }}
             </Route>
           </TableCell>
           <TableCell>
-            <Link :href="row.url" class="max-w-[40ch]" />
+            <CopyTag :value="row.url" />
           </TableCell>
           <TableCell>
-            <Badge :variant="row.syncTags ? 'default' : 'secondary'">
-              {{ row.syncTags ? "开启" : "关闭" }}
-            </Badge>
+            <Date :value="row.updatedAt" />
           </TableCell>
           <TableCell>
             <Button variant="ghost" size="icon" as-child>
-              <RouterLink :to="{ name: 'provider-detail', params: { idOrName: row.id } }">
+              <RouterLink :to="{ name: 'ruleset-detail', params: { idOrName: row.id } }">
                 <File />
               </RouterLink>
             </Button>

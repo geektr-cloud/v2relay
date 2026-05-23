@@ -20,7 +20,12 @@ const errorMessage = computed(() =>
 );
 
 const isRmAllOpen = ref(false);
-const doRemoveAll = () => removeAll().then(() => { isRmAllOpen.value = false; }).catch(() => {});
+const doRemoveAll = () =>
+  removeAll()
+    .then(() => {
+      isRmAllOpen.value = false;
+    })
+    .catch(() => {});
 </script>
 
 <template>

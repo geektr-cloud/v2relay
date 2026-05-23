@@ -120,7 +120,7 @@ export const fromYaml = (content: string): ClashYamlParseResult => {
       try {
         const node = parseClash(item);
         if (node) {
-          protocols.push(node)
+          protocols.push(node);
         } else {
           if (item?.type) notices.add(`Failed to parse proxy: type=${JSON.stringify(item?.type)}`);
         }
@@ -143,7 +143,7 @@ export const fromYaml = (content: string): ClashYamlParseResult => {
       if (!groupName) continue;
       const items = g["proxies"];
       if (!Array.isArray(items)) continue;
-      groupToProxy.set(groupName, new Set(items))
+      groupToProxy.set(groupName, new Set(items));
     }
   }
 

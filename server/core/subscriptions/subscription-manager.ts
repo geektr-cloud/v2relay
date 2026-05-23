@@ -28,7 +28,7 @@ export class SubscriptionManager {
   constructor(
     readonly id: string,
     readonly urls: string[],
-  ) { }
+  ) {}
 
   async get(
     options: { forceReload?: boolean } = {},
@@ -104,38 +104,38 @@ export class SubscriptionManager {
   private async syncNodes(body: ArrayBuffer, contentType: string): Promise<void> {
     const ct = contentType.toLowerCase();
     let protocols: Protocol[];
-    let groupToProxy: Map<string, Set<string>> = new Map()
+    let groupToProxy: Map<string, Set<string>> = new Map();
 
     if (ct.includes("nodelist")) {
       protocols = fromNodelist(new TextDecoder().decode(body));
     } else if (ct.includes("yaml") || ct.includes("yml")) {
       const result = fromYaml(new TextDecoder().decode(body));
-      protocols = result.protocols
-      groupToProxy = result.groupToProxy
+      protocols = result.protocols;
+      groupToProxy = result.groupToProxy;
     } else {
-      createNotice(`subscription ${this.id}: unrecognized content type: ${ct}`)
+      createNotice(`subscription ${this.id}: unrecognized content type: ${ct}`);
       return;
     }
 
-    const notices: Set<string> = new Set()
-    const tagMatcher = await TagMatcher.loadDb()
+    const notices: Set<string> = new Set();
+    const tagMatcher = await TagMatcher.loadDb();
 
-    const nodeNameToTags = new Map<string, Set<string>>()
+    const nodeNameToTags = new Map<string, Set<string>>();
     for (const [groupName, nodeNames] of groupToProxy) {
-      const tag = tagMatcher.match(groupName)
+      const tag = tagMatcher.match(groupName);
       if (!tag) {
-        notices.add(`subscription ${this.id}: unrecognized group: ${groupName}`)
-        continue
+        notices.add(`subscription ${this.id}: unrecognized group: ${groupName}`);
+        continue;
       }
 
       for (const nodeName of nodeNames) {
-        const set = nodeNameToTags.get(nodeName) ?? new Set<string>()
-        set.add(tag)
-        nodeNameToTags.set(nodeName, set)
+        const set = nodeNameToTags.get(nodeName) ?? new Set<string>();
+        set.add(tag);
+        nodeNameToTags.set(nodeName, set);
       }
     }
 
-    if (notices.size > 0) createNotices(notices)
+    if (notices.size > 0) createNotices(notices);
 
     const nodes: Node[] = protocols.map((p) => {
       const { name, ip } = p.getServerInfo();

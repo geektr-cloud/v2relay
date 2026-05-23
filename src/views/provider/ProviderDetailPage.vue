@@ -42,6 +42,7 @@ const removal = useRemoval(id);
             <DataItem label="地址">
               <Link :href="item.url" variant="raw" />
             </DataItem>
+            <DataItem label="同步标签">{{ item.syncTags ? "开启" : "关闭" }}</DataItem>
           </DataView>
         </CardContent>
       </Card>
