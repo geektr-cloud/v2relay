@@ -1,5 +1,5 @@
 import { base64UrlEncode, tryBase64UrlDecode } from "./base64";
-import { Protocol, ProtocolStatic } from "./types";
+import type { Protocol, ProtocolStatic } from "./types";
 
 // ─── 常量定义 ─────────────────────────────────────────────────────────────────
 // VMess 加密方式（scy）和传输层（net）跟随主流客户端实现（v2rayN / mihomo）
@@ -89,9 +89,35 @@ export class VMess implements Protocol {
     return typeof url === "string" && url.trim().toLowerCase().startsWith("vmess://");
   }
 
-  static testObject(object: object): boolean {
+  static testClash(object: object): boolean {
     const o = object as Record<string, unknown>;
     return o.type === "vmess" && typeof o.server === "string" && typeof o.uuid === "string";
+  }
+
+  /** 从 clash / mihomo vmess 节点对象构造实例（toClash 的反向操作） */
+  static fromClash(object: object): VMess {
+    const o = object as Record<string, unknown>;
+    const network = typeof o["network"] === "string" ? o["network"] : "tcp";
+    const { host, path, headerType } = pickVmessTransportOpts(o, network);
+    const alpn = Array.isArray(o["alpn"]) ? (o["alpn"] as unknown[]).map(String).join(",") : "";
+    return new VMess({
+      server: String(o["server"] ?? ""),
+      port: Number(o["port"] ?? 0),
+      uuid: String(o["uuid"] ?? ""),
+      alterId: Number(o["alterId"] ?? 0),
+      name: typeof o["name"] === "string" ? o["name"] : undefined,
+      security: typeof o["cipher"] === "string" ? o["cipher"] : "auto",
+      network,
+      headerType,
+      host,
+      path,
+      tls: o["tls"] === true ? "tls" : "",
+      sni: typeof o["servername"] === "string" ? o["servername"] : "",
+      alpn,
+      fingerprint: typeof o["client-fingerprint"] === "string" ? o["client-fingerprint"] : "",
+      allowInsecure: o["skip-cert-verify"] === true,
+      udp: typeof o["udp"] === "boolean" ? o["udp"] : undefined,
+    });
   }
 
   /**
@@ -310,5 +336,36 @@ const splitCsv = (s: string): string[] =>
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
+
+/** 从 clash vmess 节点对象中按 network 提取 host/path/headerType */
+const pickVmessTransportOpts = (
+  o: Record<string, unknown>,
+  network: string,
+): { host: string; path: string; headerType: string } => {
+  let host = "";
+  let path = "";
+  let headerType = "none";
+
+  if (network === "ws") {
+    const ws = (o["ws-opts"] ?? {}) as { path?: string; headers?: Record<string, string> };
+    path = ws.path ?? "";
+    host = ws.headers?.["Host"] ?? ws.headers?.["host"] ?? "";
+  } else if (network === "grpc") {
+    const grpc = (o["grpc-opts"] ?? {}) as { "grpc-service-name"?: string };
+    path = grpc["grpc-service-name"] ?? "";
+  } else if (network === "h2" || network === "http") {
+    const h2 = (o["h2-opts"] ?? {}) as { host?: string[]; path?: string };
+    host = h2.host?.[0] ?? "";
+    path = h2.path ?? "";
+  } else if (network === "tcp") {
+    const http = (o["http-opts"] ?? {}) as { path?: string[]; headers?: Record<string, string[]> };
+    if (http.path || http.headers) {
+      headerType = "http";
+      path = http.path?.[0] ?? "";
+      host = http.headers?.["Host"]?.[0] ?? "";
+    }
+  }
+  return { host, path, headerType };
+};
 
 VMess satisfies ProtocolStatic;

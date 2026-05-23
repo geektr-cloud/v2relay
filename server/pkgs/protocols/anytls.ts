@@ -1,4 +1,4 @@
-import { Protocol, ProtocolStatic } from "./types";
+import type { Protocol, ProtocolStatic } from "./types";
 
 // 参考 anytls-go URI 规范：https://github.com/anytls/anytls-go/blob/main/docs/uri_scheme.md
 // 形如：anytls://[auth@]hostname[:port]/?sni=...&insecure=0#name
@@ -53,9 +53,26 @@ export class AnyTls implements Protocol {
     return typeof url === "string" && url.trim().toLowerCase().startsWith("anytls://");
   }
 
-  static testObject(object: object): boolean {
+  static testClash(object: object): boolean {
     const o = object as Record<string, unknown>;
     return o.type === "anytls" && typeof o.server === "string" && typeof o.password === "string";
+  }
+
+  /** 从 clash / mihomo anytls 节点对象构造实例（toClash 的反向操作） */
+  static fromClash(object: object): AnyTls {
+    const o = object as Record<string, unknown>;
+    const alpn = Array.isArray(o["alpn"]) ? (o["alpn"] as unknown[]).map(String).join(",") : "";
+    return new AnyTls({
+      server: String(o["server"] ?? ""),
+      port: typeof o["port"] === "number" ? o["port"] : Number(o["port"] ?? 443),
+      password: String(o["password"] ?? ""),
+      name: typeof o["name"] === "string" ? o["name"] : undefined,
+      sni: typeof o["sni"] === "string" ? o["sni"] : "",
+      insecure: o["skip-cert-verify"] === true,
+      alpn,
+      fingerprint: typeof o["client-fingerprint"] === "string" ? o["client-fingerprint"] : "",
+      udp: typeof o["udp"] === "boolean" ? o["udp"] : undefined,
+    });
   }
 
   /**

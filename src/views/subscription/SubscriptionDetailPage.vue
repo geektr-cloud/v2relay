@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, defineAsyncComponent } from "vue";
 import { useRouteParams } from "@vueuse/router";
 import { Edit } from "lucide-vue-next";
 import { useProviderStore } from "@/stores/providers";
@@ -11,8 +11,9 @@ import Route from "@/components/DataView/Route.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import Button from "@/components/ui/button/Button.vue";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SubscriptionContentViewer from "./SubscriptionContentViewer.vue";
 import SubscriptionEditor from "./SubscriptionEditor.vue";
+
+const SubscriptionContentViewer = defineAsyncComponent(() => import("./SubscriptionContentViewer.vue"));
 
 const id = useRouteParams<string>("id");
 const { useItem, useRemoval } = useSubscriptionStore();

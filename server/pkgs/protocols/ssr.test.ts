@@ -27,7 +27,7 @@ const buildSsrUrl = (opts: {
   return `ssr://${base64UrlEncode(payload)}`;
 };
 
-describe("ShadowsocksR.testUrl / testObject", () => {
+describe("ShadowsocksR.testUrl / testClash", () => {
   it("matches ssr:// prefix", () => {
     expect(ShadowsocksR.testUrl("ssr://abc")).toBe(true);
     expect(ShadowsocksR.testUrl("SSR://abc")).toBe(true);
@@ -35,8 +35,8 @@ describe("ShadowsocksR.testUrl / testObject", () => {
   });
 
   it("matches clash ssr shape", () => {
-    expect(ShadowsocksR.testObject({ type: "ssr", server: "x", password: "p" })).toBe(true);
-    expect(ShadowsocksR.testObject({ type: "ss", server: "x", password: "p" })).toBe(false);
+    expect(ShadowsocksR.testClash({ type: "ssr", server: "x", password: "p" })).toBe(true);
+    expect(ShadowsocksR.testClash({ type: "ss", server: "x", password: "p" })).toBe(false);
   });
 });
 

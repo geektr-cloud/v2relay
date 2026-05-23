@@ -6,7 +6,7 @@ import { client } from "@/utils/api";
 import { useAsyncState, useHonoApi } from "@/lib/acrux";
 import { DateFormatter as DateView, VSeparator } from "@/components/DataView";
 import CopyTag from "@/components/DataView/CopyTag.vue";
-import type { SubscriptionCacheStatus } from "@server/core/subscriptions/raw-content";
+import type { SubscriptionCacheStatus } from "@server/core/subscriptions/subscription-manager";
 import { sniffContentType } from "@server/utils/sniff-content-type";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,12 +195,21 @@ const doDownload = async () => {
         <Button variant="secondary" size="icon" :disabled="status.loading" title="强制刷新" @click="doForceReload">
           <RefreshCw :class="status.loading ? 'animate-spin' : ''" />
         </Button>
-        <Button variant="secondary" size="icon" :disabled="uploadStatus.loading" title="上传订阅" @click="openFileDialog()">
+        <Button
+          variant="secondary"
+          size="icon"
+          :disabled="uploadStatus.loading"
+          title="上传订阅"
+          @click="openFileDialog()"
+        >
           <Upload />
         </Button>
         <Button
-variant="secondary" size="icon" :title="showContent ? '收起内容' : '查看内容'"
-          @click="showContent = !showContent">
+          variant="secondary"
+          size="icon"
+          :title="showContent ? '收起内容' : '查看内容'"
+          @click="showContent = !showContent"
+        >
           <component :is="showContent ? EyeOff : Eye" />
         </Button>
       </CardAction>

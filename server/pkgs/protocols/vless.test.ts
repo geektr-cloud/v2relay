@@ -18,7 +18,7 @@ const GRPC_URL =
   "?encryption=none&security=tls&sni=grpc.example.com&type=grpc&serviceName=GrpcSrv&mode=multi" +
   "#grpc-node";
 
-describe("VLess.testUrl / testObject", () => {
+describe("VLess.testUrl / testClash", () => {
   it("matches vless:// prefix", () => {
     expect(VLess.testUrl("vless://abc")).toBe(true);
     expect(VLess.testUrl("VLESS://abc")).toBe(true);
@@ -26,8 +26,8 @@ describe("VLess.testUrl / testObject", () => {
   });
 
   it("matches clash vless shape", () => {
-    expect(VLess.testObject({ type: "vless", server: "x", uuid: "u" })).toBe(true);
-    expect(VLess.testObject({ type: "vmess", server: "x", uuid: "u" })).toBe(false);
+    expect(VLess.testClash({ type: "vless", server: "x", uuid: "u" })).toBe(true);
+    expect(VLess.testClash({ type: "vmess", server: "x", uuid: "u" })).toBe(false);
   });
 });
 

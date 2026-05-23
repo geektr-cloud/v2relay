@@ -1,6 +1,14 @@
 import { env } from "cloudflare:workers";
+import { NIL, v5 as uuidv5 } from "uuid";
 import { HttpErr } from "@server/utils/http-errors";
 import { isStructuredContentType, sniffContentType } from "@server/utils/sniff-content-type";
+import { fromNodelist, fromYaml, type Protocol } from "@server/pkgs/protocols";
+import { batchUpdate } from "@server/core/nodes/batch-update";
+import type { Node } from "@server/generated/prisma/dto";
+import { dnsResolve } from "@server/utils/dns-resolve";
+
+/** uuid v5 namespace for deterministic node ids (derived once from NIL UUID) */
+const uuidNodeNS = uuidv5("nodes", NIL);
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36";
@@ -14,7 +22,7 @@ export type SubscriptionCacheStatus = {
 
 const kvKey = (id: string): string => `subscription:${id}`;
 
-export class SubscriptionRawContent {
+export class SubscriptionManager {
   constructor(
     readonly id: string,
     readonly urls: string[],
@@ -65,6 +73,8 @@ export class SubscriptionRawContent {
     contentType: string,
     sourceUrl: string,
   ): Promise<{ response: Response; cacheStatus: SubscriptionCacheStatus }> {
+    await this.syncNodes(body, contentType);
+
     const newStatus: SubscriptionCacheStatus = {
       sourceUrl,
       size: body.byteLength,
@@ -82,6 +92,45 @@ export class SubscriptionRawContent {
       },
     });
     return { response, cacheStatus: newStatus };
+  }
+
+  /**
+   * 按 content-type 从原始内容中提取协议节点，并整体替换该订阅在 Node 表里的记录。
+   * 只处理 yaml / nodelist；json 与其他类型不动 Node 表。
+   * 调用 batchUpdate 在 KV 写入之前完成，DB 写失败时整体抛错、KV 不会被覆盖。
+   */
+  private async syncNodes(body: ArrayBuffer, contentType: string): Promise<void> {
+    const ct = contentType.toLowerCase();
+    let protocols: Protocol[];
+    if (ct.includes("nodelist")) {
+      protocols = fromNodelist(new TextDecoder().decode(body));
+    } else if (ct.includes("yaml") || ct.includes("yml")) {
+      protocols = fromYaml(new TextDecoder().decode(body)).protocols;
+    } else {
+      return;
+    }
+
+    const nodes: Node[] = protocols.map((p) => {
+      const { name, ip } = p.getServerInfo();
+      return {
+        id: uuidv5(`${this.id}\n${p.toUrl()}`, uuidNodeNS),
+        subscriptionId: this.id,
+        tags: [],
+        protocol: p.protocol,
+        name,
+        remark: "",
+        ip,
+        priceRate: 1,
+        connInfo: p.toClash() ?? {},
+      };
+    });
+
+    const resolvedIps = await dnsResolve(nodes.map((n) => n.ip));
+    nodes.forEach((n) => {
+      n.ip = resolvedIps.get(n.ip) ?? n.ip;
+    });
+
+    await batchUpdate(this.id, nodes);
   }
 
   private async fetchFirstWorking(): Promise<{ url: string; body: ArrayBuffer; contentType: string } | null> {

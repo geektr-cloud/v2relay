@@ -1,5 +1,5 @@
 import { base64UrlEncode, tryBase64UrlDecode } from "./base64";
-import { Protocol, ProtocolStatic } from "./types";
+import type { Protocol, ProtocolStatic } from "./types";
 
 // ─── 常量定义 ─────────────────────────────────────────────────────────────────
 // 参考 ShadowsocksR-Live wiki：https://github.com/ShadowsocksR-Live/shadowsocksr-native/wiki/QR-code-scheme
@@ -118,9 +118,27 @@ export class ShadowsocksR implements Protocol {
     return typeof url === "string" && url.trim().toLowerCase().startsWith("ssr://");
   }
 
-  static testObject(object: object): boolean {
+  static testClash(object: object): boolean {
     const o = object as Record<string, unknown>;
     return o.type === "ssr" && typeof o.server === "string" && typeof o.password === "string";
+  }
+
+  /** 从 clash / mihomo 节点对象构造实例（toClash 的反向操作） */
+  static fromClash(object: object): ShadowsocksR {
+    const o = object as Record<string, unknown>;
+    return new ShadowsocksR({
+      server: String(o["server"] ?? ""),
+      port: Number(o["port"] ?? 0),
+      password: String(o["password"] ?? ""),
+      method: String(o["cipher"] ?? ""),
+      obfs: String(o["obfs"] ?? "plain"),
+      ssrProtocol: String(o["protocol"] ?? "origin"),
+      obfsParam: typeof o["obfs-param"] === "string" ? o["obfs-param"] : undefined,
+      protoParam: typeof o["protocol-param"] === "string" ? o["protocol-param"] : undefined,
+      name: typeof o["name"] === "string" ? o["name"] : undefined,
+      group: typeof o["group"] === "string" ? o["group"] : undefined,
+      udp: typeof o["udp"] === "boolean" ? o["udp"] : undefined,
+    });
   }
 
   /**

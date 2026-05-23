@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AnyTls } from "./anytls";
 
-describe("AnyTls.testUrl / testObject", () => {
+describe("AnyTls.testUrl / testClash", () => {
   it("matches anytls:// prefix", () => {
     expect(AnyTls.testUrl("anytls://abc")).toBe(true);
     expect(AnyTls.testUrl("ANYTLS://abc")).toBe(true);
@@ -9,8 +9,8 @@ describe("AnyTls.testUrl / testObject", () => {
   });
 
   it("matches clash anytls shape", () => {
-    expect(AnyTls.testObject({ type: "anytls", server: "x", password: "p" })).toBe(true);
-    expect(AnyTls.testObject({ type: "ss", server: "x", password: "p" })).toBe(false);
+    expect(AnyTls.testClash({ type: "anytls", server: "x", password: "p" })).toBe(true);
+    expect(AnyTls.testClash({ type: "ss", server: "x", password: "p" })).toBe(false);
   });
 });
 

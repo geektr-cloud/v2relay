@@ -3,10 +3,12 @@ export interface ProtocolStatic {
   readonly protocol: string;
   // test if the url is a valid protocol url
   testUrl(url: string): boolean;
-  // test if the object is a valid protocol object
-  testObject(object: object): boolean;
+  // test if the object is a valid clash-style protocol object
+  testClash(object: object): boolean;
   // form the protocol from the url
   formUrl(url: string): Protocol;
+  // form the protocol from a clash-style node object
+  fromClash(object: object): Protocol;
 }
 
 export interface Protocol {

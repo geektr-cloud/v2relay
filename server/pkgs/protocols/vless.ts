@@ -1,4 +1,4 @@
-import { Protocol, ProtocolStatic } from "./types";
+import type { Protocol, ProtocolStatic } from "./types";
 
 // ─── 常量定义 ─────────────────────────────────────────────────────────────────
 
@@ -104,9 +104,39 @@ export class VLess implements Protocol {
     return typeof url === "string" && url.trim().toLowerCase().startsWith("vless://");
   }
 
-  static testObject(object: object): boolean {
+  static testClash(object: object): boolean {
     const o = object as Record<string, unknown>;
     return o.type === "vless" && typeof o.server === "string" && typeof o.uuid === "string";
+  }
+
+  /** 从 clash / mihomo vless 节点对象构造实例（toClash 的反向操作） */
+  static fromClash(object: object): VLess {
+    const o = object as Record<string, unknown>;
+    const network = typeof o["network"] === "string" ? o["network"] : "tcp";
+    const reality = o["reality-opts"] as { "public-key"?: string; "short-id"?: string; spx?: string } | undefined;
+    const security = reality ? "reality" : o["tls"] === true ? "tls" : "";
+    const { host, path, serviceName } = pickVlessTransportOpts(o, network);
+    const alpn = Array.isArray(o["alpn"]) ? (o["alpn"] as unknown[]).map(String).join(",") : "";
+    return new VLess({
+      server: String(o["server"] ?? ""),
+      port: Number(o["port"] ?? 0),
+      uuid: String(o["uuid"] ?? ""),
+      name: typeof o["name"] === "string" ? o["name"] : undefined,
+      flow: typeof o["flow"] === "string" ? o["flow"] : "",
+      security,
+      sni: typeof o["servername"] === "string" ? o["servername"] : "",
+      fingerprint: typeof o["client-fingerprint"] === "string" ? o["client-fingerprint"] : "",
+      alpn,
+      publicKey: reality?.["public-key"] ?? "",
+      shortId: reality?.["short-id"] ?? "",
+      spiderX: reality?.spx ?? "",
+      network,
+      host,
+      path,
+      serviceName,
+      allowInsecure: o["skip-cert-verify"] === true,
+      udp: typeof o["udp"] === "boolean" ? o["udp"] : undefined,
+    });
   }
 
   /**
@@ -316,6 +346,30 @@ const splitCsv = (s: string): string[] =>
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
+
+/** 从 clash vless 节点对象中按 network 提取 host/path/serviceName */
+const pickVlessTransportOpts = (
+  o: Record<string, unknown>,
+  network: string,
+): { host: string; path: string; serviceName: string } => {
+  let host = "";
+  let path = "";
+  let serviceName = "";
+
+  if (network === "ws") {
+    const ws = (o["ws-opts"] ?? {}) as { path?: string; headers?: Record<string, string> };
+    path = ws.path ?? "";
+    host = ws.headers?.["Host"] ?? ws.headers?.["host"] ?? "";
+  } else if (network === "grpc") {
+    const grpc = (o["grpc-opts"] ?? {}) as { "grpc-service-name"?: string };
+    serviceName = grpc["grpc-service-name"] ?? "";
+  } else if (network === "h2" || network === "http") {
+    const h2 = (o["h2-opts"] ?? {}) as { host?: string[]; path?: string };
+    host = h2.host?.[0] ?? "";
+    path = h2.path ?? "";
+  }
+  return { host, path, serviceName };
+};
 
 const splitHostPort = (hostport: string, defaultPort: number): { host: string; port: number } => {
   // 处理 IPv6 [::]:443 / [::] 形式

@@ -83,7 +83,7 @@ describe("Shadowsocks plugin string parsing", () => {
   });
 });
 
-describe("Shadowsocks.testUrl / testObject", () => {
+describe("Shadowsocks.testUrl / testClash", () => {
   it("testUrl matches ss:// prefix", () => {
     expect(Shadowsocks.testUrl("ss://abc@host:443")).toBe(true);
     expect(Shadowsocks.testUrl("  ss://abc  ")).toBe(true);
@@ -92,9 +92,9 @@ describe("Shadowsocks.testUrl / testObject", () => {
     expect(Shadowsocks.testUrl("")).toBe(false);
   });
 
-  it("testObject matches clash ss shape", () => {
+  it("testClash matches clash ss shape", () => {
     expect(
-      Shadowsocks.testObject({
+      Shadowsocks.testClash({
         type: "ss",
         server: "1.2.3.4",
         port: 8388,
@@ -102,8 +102,8 @@ describe("Shadowsocks.testUrl / testObject", () => {
         password: "pw",
       }),
     ).toBe(true);
-    expect(Shadowsocks.testObject({ type: "vmess", server: "x", port: 1, cipher: "auto", password: "p" })).toBe(false);
-    expect(Shadowsocks.testObject({ type: "ss" })).toBe(false);
+    expect(Shadowsocks.testClash({ type: "vmess", server: "x", port: 1, cipher: "auto", password: "p" })).toBe(false);
+    expect(Shadowsocks.testClash({ type: "ss" })).toBe(false);
   });
 });
 
@@ -166,7 +166,13 @@ describe("Shadowsocks.formUrl error handling", () => {
 
 describe("Shadowsocks.toUrl", () => {
   it("produces base64url userinfo for legacy AEAD ciphers", () => {
-    const ss = new Shadowsocks({ server: "1.2.3.4", port: 8388, method: "aes-256-gcm", password: "secret", name: "tag" });
+    const ss = new Shadowsocks({
+      server: "1.2.3.4",
+      port: 8388,
+      method: "aes-256-gcm",
+      password: "secret",
+      name: "tag",
+    });
     const url = ss.toUrl();
     const parsed = Shadowsocks.formUrl(url);
     expect(parsed.method).toBe("aes-256-gcm");
@@ -275,7 +281,9 @@ describe("Shadowsocks.toV2Ray", () => {
     const out = ss.toV2Ray() as Record<string, unknown>;
     const stream = out["streamSettings"] as Record<string, unknown>;
     expect(stream["network"]).toBe("tcp");
-    const tcpSettings = stream["tcpSettings"] as { header: { type: string; request: { headers: Record<string, string[]> } } };
+    const tcpSettings = stream["tcpSettings"] as {
+      header: { type: string; request: { headers: Record<string, string[]> } };
+    };
     expect(tcpSettings.header.type).toBe("http");
     expect(tcpSettings.header.request.headers["Host"]).toEqual(["example.com"]);
   });

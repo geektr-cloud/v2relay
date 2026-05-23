@@ -3,7 +3,7 @@ import { prisma } from "@server/db";
 import * as mid from "@server/middlewares";
 import { zValidator } from "@hono/zod-validator";
 import * as schema from "./schema";
-import { type SubscriptionCacheStatus, SubscriptionRawContent } from "./raw-content";
+import { type SubscriptionCacheStatus, SubscriptionManager } from "./subscription-manager";
 import { HttpErr } from "@server/utils/http-errors";
 
 async function loadSubscriptionContent(
@@ -14,7 +14,7 @@ async function loadSubscriptionContent(
   if (!sub) throw HttpErr(404, "Subscription not found");
   if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-  const handle = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
+  const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? []);
   return handle.get(options);
 }
 
@@ -96,7 +96,7 @@ export const subscriptionRoutes = new Hono()
     if (body.byteLength === 0) throw HttpErr(400, "Empty body");
     const contentType = c.req.header("content-type") ?? "text/plain; charset=utf-8";
 
-    const handle = new SubscriptionRawContent(sub.id, (sub.urls as string[]) ?? []);
+    const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? []);
     const { cacheStatus } = await handle.put(body, contentType);
     return c.json(cacheStatus);
   });

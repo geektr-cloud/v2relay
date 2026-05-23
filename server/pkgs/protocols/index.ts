@@ -1,3 +1,5 @@
+import YAML from "yaml";
+
 import { AnyTls } from "./anytls";
 import { Shadowsocks } from "./shadowsocks";
 import { ShadowsocksR } from "./ssr";
@@ -29,9 +31,9 @@ export const findProtocol = (url: string): ProtocolStatic | null => {
 };
 
 /** 找到能识别该 clash 节点对象的协议类，找不到返回 null */
-export const findProtocolByObject = (object: object): ProtocolStatic | null => {
+export const findProtocolByClash = (object: object): ProtocolStatic | null => {
   for (const P of Protocols) {
-    if (P.testObject(object)) return P;
+    if (P.testClash(object)) return P;
   }
   return null;
 };
@@ -43,4 +45,105 @@ export const findProtocolByObject = (object: object): ProtocolStatic | null => {
 export const parseUrl = (url: string): Protocol | null => {
   const P = findProtocol(url);
   return P ? P.formUrl(url) : null;
+};
+
+/**
+ * 将 clash / mihomo 节点对象解析成协议实例；未命中任何已知 `type` 时返回 null。
+ * `fromClash` 自身的解析错误仍会抛出。
+ */
+export const parseClash = (object: unknown): Protocol | null => {
+  if (!object || typeof object !== "object") return null;
+  const P = findProtocolByClash(object);
+  return P ? P.fromClash(object) : null;
+};
+
+/**
+ * 解析 v2rayN / nodelist 风格的纯文本订阅：按行拆分，逐行 {@link parseUrl}。
+ * 空行、注释行（以 `#` 开头）、未知前缀以及解析失败的行都会被静默跳过——
+ * 一条坏节点不应让整条订阅作废。
+ */
+export const fromNodelist = (content: string): Protocol[] => {
+  const out: Protocol[] = [];
+  for (const raw of content.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    try {
+      const node = parseUrl(line);
+      if (node) out.push(node);
+    } catch {
+      // 单条解析失败不影响其他节点
+    }
+  }
+  return out;
+};
+
+/** {@link fromYaml} 的返回值 */
+export interface ClashYamlParseResult {
+  /** 已成功解析的 clash `proxies` 节点 */
+  protocols: Protocol[];
+  /**
+   * 从 `proxy-groups` 中 `type: select` 的分组归纳出的隶属关系：
+   * key 为 proxy-item 名称（既可能是某个 proxy 名，也可能是另一个 group 名），
+   * value 为引用了该 item 的所有 select 分组的名称集合。
+   */
+  groups: Map<string, Set<string>>;
+}
+
+/**
+ * 解析 clash / mihomo YAML：
+ * - `proxies` 数组逐项 {@link parseClash}，得到 `protocols`；
+ * - `proxy-groups` 中 `type: select` 的分组逐个展开 `proxies` 列表，
+ *   反向得到 `groups: Map<itemName, Set<groupName>>`。
+ *
+ * 缺失或非数组的字段会被静默忽略；YAML 解析失败时返回空结果。
+ * 单个节点 / 分组构造失败不会中断其他条目。
+ */
+export const fromYaml = (content: string): ClashYamlParseResult => {
+  const empty: ClashYamlParseResult = { protocols: [], groups: new Map() };
+
+  let doc: unknown;
+  try {
+    doc = YAML.parse(content);
+  } catch {
+    return empty;
+  }
+  if (!doc || typeof doc !== "object") return empty;
+
+  const protocols: Protocol[] = [];
+  const proxies = (doc as { proxies?: unknown }).proxies;
+  if (Array.isArray(proxies)) {
+    for (const item of proxies) {
+      try {
+        const node = parseClash(item);
+        if (node) protocols.push(node);
+      } catch {
+        // 单条解析失败不影响其他节点
+      }
+    }
+  }
+
+  const groups = new Map<string, Set<string>>();
+  const proxyGroups = (doc as Record<string, unknown>)["proxy-groups"];
+  if (Array.isArray(proxyGroups)) {
+    for (const raw of proxyGroups) {
+      if (!raw || typeof raw !== "object") continue;
+      const g = raw as Record<string, unknown>;
+      if (g["type"] !== "select") continue;
+      const groupName = typeof g["name"] === "string" ? g["name"] : "";
+      if (!groupName) continue;
+      const items = g["proxies"];
+      if (!Array.isArray(items)) continue;
+      for (const it of items) {
+        if (typeof it !== "string" || !it) continue;
+        let set = groups.get(it);
+        if (!set) {
+          set = new Set<string>();
+          groups.set(it, set);
+        }
+        set.add(groupName);
+      }
+    }
+  }
+
+  return { protocols, groups };
 };

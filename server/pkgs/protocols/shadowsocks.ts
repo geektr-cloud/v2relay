@@ -1,5 +1,5 @@
 import { base64UrlEncode, tryBase64UrlDecode } from "./base64";
-import { Protocol, ProtocolStatic } from "./types";
+import type { Protocol, ProtocolStatic } from "./types";
 
 // ─── Ciphers ──────────────────────────────────────────────────────────────────
 // 列表跟踪自 shadowsocks-org 最新规范：
@@ -49,12 +49,7 @@ export const STREAM_CIPHERS = [
 /** 无加密模式，常配合 plugin/obfs 使用 */
 export const NULL_CIPHERS = ["none", "plain"] as const;
 
-export const SUPPORTED_CIPHERS = [
-  ...AEAD2022_CIPHERS,
-  ...AEAD_CIPHERS,
-  ...STREAM_CIPHERS,
-  ...NULL_CIPHERS,
-] as const;
+export const SUPPORTED_CIPHERS = [...AEAD2022_CIPHERS, ...AEAD_CIPHERS, ...STREAM_CIPHERS, ...NULL_CIPHERS] as const;
 
 export type Aead2022Cipher = (typeof AEAD2022_CIPHERS)[number];
 export type AeadCipher = (typeof AEAD_CIPHERS)[number];
@@ -171,7 +166,7 @@ export class Shadowsocks implements Protocol {
     return typeof url === "string" && url.trim().toLowerCase().startsWith("ss://");
   }
 
-  static testObject(object: object): boolean {
+  static testClash(object: object): boolean {
     const o = object as Record<string, unknown>;
     return (
       o.type === "ss" &&
@@ -180,6 +175,29 @@ export class Shadowsocks implements Protocol {
       typeof o.password === "string" &&
       typeof o.cipher === "string"
     );
+  }
+
+  /** 从 clash / mihomo 节点对象构造实例（toClash 的反向操作） */
+  static fromClash(object: object): Shadowsocks {
+    const o = object as Record<string, unknown>;
+    const rawOpts = o["plugin-opts"];
+    let pluginOpts: PluginOptions | undefined;
+    if (rawOpts && typeof rawOpts === "object") {
+      pluginOpts = {};
+      for (const [k, v] of Object.entries(rawOpts as Record<string, unknown>)) {
+        if (v !== null && v !== undefined) pluginOpts[k] = String(v);
+      }
+    }
+    return new Shadowsocks({
+      server: String(o["server"] ?? ""),
+      port: Number(o["port"] ?? 0),
+      password: String(o["password"] ?? ""),
+      method: String(o["cipher"] ?? ""),
+      name: typeof o["name"] === "string" ? o["name"] : undefined,
+      udp: typeof o["udp"] === "boolean" ? o["udp"] : undefined,
+      plugin: typeof o["plugin"] === "string" ? o["plugin"] : undefined,
+      pluginOpts,
+    });
   }
 
   /**

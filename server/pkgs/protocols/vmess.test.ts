@@ -20,7 +20,7 @@ const sampleJson = {
   fp: "chrome",
 };
 
-describe("VMess.testUrl / testObject", () => {
+describe("VMess.testUrl / testClash", () => {
   it("matches vmess:// prefix", () => {
     expect(VMess.testUrl("vmess://anything")).toBe(true);
     expect(VMess.testUrl("VMESS://anything")).toBe(true);
@@ -28,9 +28,9 @@ describe("VMess.testUrl / testObject", () => {
   });
 
   it("matches clash vmess shape", () => {
-    expect(VMess.testObject({ type: "vmess", server: "x", uuid: "u" })).toBe(true);
-    expect(VMess.testObject({ type: "vless", server: "x", uuid: "u" })).toBe(false);
-    expect(VMess.testObject({ type: "vmess" })).toBe(false);
+    expect(VMess.testClash({ type: "vmess", server: "x", uuid: "u" })).toBe(true);
+    expect(VMess.testClash({ type: "vless", server: "x", uuid: "u" })).toBe(false);
+    expect(VMess.testClash({ type: "vmess" })).toBe(false);
   });
 });
 
