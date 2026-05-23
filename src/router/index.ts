@@ -7,6 +7,7 @@ import TagPage from "../views/tag/TagPage.vue";
 import TagDetailPage from "../views/tag/TagDetailPage.vue";
 import NodePage from "../views/node/NodePage.vue";
 import NodeDetailPage from "../views/node/NodeDetailPage.vue";
+import SystemNoticePage from "../views/system-notice/SystemNoticePage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,11 @@ const router = createRouter({
       path: "/nodes/:id",
       name: "node-detail",
       component: NodeDetailPage,
+    },
+    {
+      path: "/system-notices",
+      name: "system-notices",
+      component: SystemNoticePage,
     },
   ],
 });

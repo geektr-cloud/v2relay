@@ -6,6 +6,7 @@ import { ShadowsocksR } from "./ssr";
 import type { Protocol, ProtocolStatic } from "./types";
 import { VLess } from "./vless";
 import { VMess } from "./vmess";
+import { createNotices } from "@server/core/system-notices/create-notices";
 
 export { AnyTls } from "./anytls";
 export { Shadowsocks } from "./shadowsocks";
@@ -86,7 +87,7 @@ export interface ClashYamlParseResult {
    * key 为 proxy-item 名称（既可能是某个 proxy 名，也可能是另一个 group 名），
    * value 为引用了该 item 的所有 select 分组的名称集合。
    */
-  groups: Map<string, Set<string>>;
+  groupToProxy: Map<string, Set<string>>;
 }
 
 /**
@@ -99,7 +100,7 @@ export interface ClashYamlParseResult {
  * 单个节点 / 分组构造失败不会中断其他条目。
  */
 export const fromYaml = (content: string): ClashYamlParseResult => {
-  const empty: ClashYamlParseResult = { protocols: [], groups: new Map() };
+  const empty: ClashYamlParseResult = { protocols: [], groupToProxy: new Map() };
 
   let doc: unknown;
   try {
@@ -111,18 +112,27 @@ export const fromYaml = (content: string): ClashYamlParseResult => {
 
   const protocols: Protocol[] = [];
   const proxies = (doc as { proxies?: unknown }).proxies;
+
+  const notices: Set<string> = new Set();
+
   if (Array.isArray(proxies)) {
     for (const item of proxies) {
       try {
         const node = parseClash(item);
-        if (node) protocols.push(node);
+        if (node) {
+          protocols.push(node)
+        } else {
+          if (item?.type) notices.add(`Failed to parse proxy: type=${JSON.stringify(item?.type)}`);
+        }
       } catch {
-        // 单条解析失败不影响其他节点
+        notices.add(`Failed to parse proxy: json=${JSON.stringify(item)}`);
       }
     }
   }
 
-  const groups = new Map<string, Set<string>>();
+  if (notices.size > 0) createNotices(notices);
+
+  const groupToProxy = new Map<string, Set<string>>();
   const proxyGroups = (doc as Record<string, unknown>)["proxy-groups"];
   if (Array.isArray(proxyGroups)) {
     for (const raw of proxyGroups) {
@@ -133,17 +143,9 @@ export const fromYaml = (content: string): ClashYamlParseResult => {
       if (!groupName) continue;
       const items = g["proxies"];
       if (!Array.isArray(items)) continue;
-      for (const it of items) {
-        if (typeof it !== "string" || !it) continue;
-        let set = groups.get(it);
-        if (!set) {
-          set = new Set<string>();
-          groups.set(it, set);
-        }
-        set.add(groupName);
-      }
+      groupToProxy.set(groupName, new Set(items))
     }
   }
 
-  return { protocols, groups };
+  return { protocols, groupToProxy };
 };

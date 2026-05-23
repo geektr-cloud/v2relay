@@ -76,3 +76,9 @@ model Node {
   /// ![any]
   connInfo Json @default("{}")
 }
+
+model SystemNotice {
+  id        String   @id @default(uuid())
+  message   String   @default("")
+  createdAt DateTime @default(now())
+}

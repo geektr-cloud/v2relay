@@ -10,6 +10,7 @@ const providersActive = computed(() => route.name === "home" || route.name === "
 const subscriptionsActive = computed(() => route.name === "subscriptions" || route.name === "subscription-detail");
 const tagsActive = computed(() => route.name === "tags" || route.name === "tag-detail");
 const nodesActive = computed(() => route.name === "nodes" || route.name === "node-detail");
+const systemNoticesActive = computed(() => route.name === "system-notices");
 </script>
 
 <template>
@@ -29,6 +30,7 @@ const nodesActive = computed(() => route.name === "nodes" || route.name === "nod
         <RouterLink to="/subscriptions" :class="navLinkClass(subscriptionsActive)"> 订阅 </RouterLink>
         <RouterLink to="/nodes" :class="navLinkClass(nodesActive)"> 节点 </RouterLink>
         <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
+        <RouterLink to="/system-notices" :class="navLinkClass(systemNoticesActive)"> 通知 </RouterLink>
       </nav>
     </header>
     <main class="bg-zinc-950">

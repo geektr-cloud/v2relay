@@ -6,6 +6,8 @@ import { fromNodelist, fromYaml, type Protocol } from "@server/pkgs/protocols";
 import { batchUpdate } from "@server/core/nodes/batch-update";
 import type { Node } from "@server/generated/prisma/dto";
 import { dnsResolve } from "@server/utils/dns-resolve";
+import { createNotice, createNotices } from "../system-notices/create-notices";
+import { TagMatcher } from "../tags/tag-matcher";
 
 /** uuid v5 namespace for deterministic node ids (derived once from NIL UUID) */
 const uuidNodeNS = uuidv5("nodes", NIL);
@@ -26,7 +28,7 @@ export class SubscriptionManager {
   constructor(
     readonly id: string,
     readonly urls: string[],
-  ) {}
+  ) { }
 
   async get(
     options: { forceReload?: boolean } = {},
@@ -102,20 +104,45 @@ export class SubscriptionManager {
   private async syncNodes(body: ArrayBuffer, contentType: string): Promise<void> {
     const ct = contentType.toLowerCase();
     let protocols: Protocol[];
+    let groupToProxy: Map<string, Set<string>> = new Map()
+
     if (ct.includes("nodelist")) {
       protocols = fromNodelist(new TextDecoder().decode(body));
     } else if (ct.includes("yaml") || ct.includes("yml")) {
-      protocols = fromYaml(new TextDecoder().decode(body)).protocols;
+      const result = fromYaml(new TextDecoder().decode(body));
+      protocols = result.protocols
+      groupToProxy = result.groupToProxy
     } else {
+      createNotice(`subscription ${this.id}: unrecognized content type: ${ct}`)
       return;
     }
+
+    const notices: Set<string> = new Set()
+    const tagMatcher = await TagMatcher.loadDb()
+
+    const nodeNameToTags = new Map<string, Set<string>>()
+    for (const [groupName, nodeNames] of groupToProxy) {
+      const tag = tagMatcher.match(groupName)
+      if (!tag) {
+        notices.add(`subscription ${this.id}: unrecognized group: ${groupName}`)
+        continue
+      }
+
+      for (const nodeName of nodeNames) {
+        const set = nodeNameToTags.get(nodeName) ?? new Set<string>()
+        set.add(tag)
+        nodeNameToTags.set(nodeName, set)
+      }
+    }
+
+    if (notices.size > 0) createNotices(notices)
 
     const nodes: Node[] = protocols.map((p) => {
       const { name, ip } = p.getServerInfo();
       return {
         id: uuidv5(`${this.id}\n${p.toUrl()}`, uuidNodeNS),
         subscriptionId: this.id,
-        tags: [],
+        tags: Array.from(nodeNameToTags.get(name) ?? []),
         protocol: p.protocol,
         name,
         remark: "",

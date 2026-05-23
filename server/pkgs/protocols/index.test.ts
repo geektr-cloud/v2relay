@@ -278,22 +278,22 @@ proxies:
   it("returns empty result when proxies field is missing", () => {
     const a = fromYaml("rules: []");
     expect(a.protocols).toEqual([]);
-    expect(a.groups.size).toBe(0);
+    expect(a.groupToProxy.size).toBe(0);
     const b = fromYaml("proxy-groups: []");
     expect(b.protocols).toEqual([]);
-    expect(b.groups.size).toBe(0);
+    expect(b.groupToProxy.size).toBe(0);
   });
 
   it("returns empty result for invalid YAML", () => {
     // 不闭合的引号 → YAML parser 抛错
-    const { protocols, groups } = fromYaml('proxies: ["unterminated');
+    const { protocols, groupToProxy: groups } = fromYaml('proxies: ["unterminated');
     expect(protocols).toEqual([]);
     expect(groups.size).toBe(0);
   });
 
   it("returns empty result for empty / null input", () => {
     for (const input of ["", "null", "[]"]) {
-      const { protocols, groups } = fromYaml(input);
+      const { protocols, groupToProxy: groups } = fromYaml(input);
       expect(protocols).toEqual([]);
       expect(groups.size).toBe(0);
     }
@@ -326,7 +326,7 @@ proxy-groups:
     proxies:
       - ss-node
 `;
-    const { protocols, groups } = fromYaml(yaml);
+    const { protocols, groupToProxy: groups } = fromYaml(yaml);
     expect(protocols).toHaveLength(1);
     expect(groups.size).toBe(2);
     expect(groups.get("ss-node")).toEqual(new Set(["手动选择", "备用"]));
@@ -351,7 +351,7 @@ proxy-groups:
     type: select
     proxies: not-an-array
 `;
-    const { groups } = fromYaml(yaml);
+    const { groupToProxy: groups } = fromYaml(yaml);
     expect(groups.get("a")).toEqual(new Set(["G2"]));
     expect(groups.get("c")).toEqual(new Set(["G2"]));
     expect(groups.has("b")).toBe(false);
