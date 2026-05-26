@@ -26,3 +26,9 @@ export const create = {
 export const upsert = {
   body: ruleset.omit({ createdAt: true, updatedAt: true }).extend({ id: z.union([id, z.literal("")]).optional() }),
 };
+
+const forceReload = z.stringbool().optional().default(false);
+
+export const content = {
+  query: z.object({ force_reload: forceReload }).optional().default({ force_reload: false }),
+};

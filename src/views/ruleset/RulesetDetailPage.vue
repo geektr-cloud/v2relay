@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import { useRouteParams } from "@vueuse/router";
 import { Edit } from "lucide-vue-next";
 import { useRulesetStore } from "@/stores/rulesets";
@@ -8,6 +9,8 @@ import CopyTag from "@/components/DataView/CopyTag.vue";
 import Button from "@/components/ui/button/Button.vue";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RulesetEditor from "./RulesetEditor.vue";
+
+const RulesetContentViewer = defineAsyncComponent(() => import("./RulesetContentViewer.vue"));
 
 const id = useRouteParams<string>("idOrName");
 const { useItem, useRemoval } = useRulesetStore();
@@ -49,6 +52,8 @@ const removal = useRemoval(id);
           </DataView>
         </CardContent>
       </Card>
+
+      <RulesetContentViewer :id="item.id" />
     </template>
   </DetailPage>
 </template>

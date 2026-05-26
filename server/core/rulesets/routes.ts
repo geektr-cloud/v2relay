@@ -5,6 +5,7 @@ import * as mid from "@server/middlewares";
 import { zValidator } from "@hono/zod-validator";
 import * as schema from "./schema";
 import { HttpErr } from "@server/utils/http-errors";
+import { RulesetManager } from "./ruleset-manager";
 
 function idOrNameWhere(idOrName: string) {
   return z.uuid().safeParse(idOrName).success ? { id: idOrName } : { name: idOrName };
@@ -41,4 +42,21 @@ export const rulesetRoutes = new Hono()
     const existing = await prisma.ruleset.findUnique({ where: { id } });
     if (!existing) throw HttpErr(404, "Ruleset not found");
     return c.json(await prisma.ruleset.delete({ where: { id } }));
+  })
+  .get("/:id/status", mid.paramId, async (c) => {
+    const { id } = c.req.valid("param");
+    const item = await prisma.ruleset.findUnique({ where: { id } });
+    if (!item) throw HttpErr(404, "Ruleset not found");
+    const handle = new RulesetManager(item.id, item.url);
+    const result = await handle.get();
+    return c.json(result.cacheStatus);
+  })
+  .get("/:id/content", mid.paramId, zValidator("query", schema.content.query), async (c) => {
+    const { id } = c.req.valid("param");
+    const { force_reload } = c.req.valid("query");
+    const item = await prisma.ruleset.findUnique({ where: { id } });
+    if (!item) throw HttpErr(404, "Ruleset not found");
+    const handle = new RulesetManager(item.id, item.url);
+    const { response } = await handle.get({ forceReload: force_reload });
+    return new Response(response.body, { headers: response.headers });
   });
