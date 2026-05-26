@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CopyTag, JsonTextArea } from "@/components/DataView";
 import { useAppConfigStore } from "@/stores/app-configs";
 import { appConfig } from "@server/core/app-configs";
+import ClashConfig from "./ClashConfig.vue";
 
 const props = defineProps<{ id: string | undefined }>();
 const emit = defineEmits<{ (e: "close"): void }>();
@@ -63,8 +64,9 @@ const [form, issues, status, submit] = useUpsert(id);
         <FieldError :errors="issues.errors('template')" />
       </Field>
       <Field>
-        <FieldLabel>配置 (JSON)</FieldLabel>
-        <JsonTextArea v-model="form.config" />
+        <FieldLabel>配置</FieldLabel>
+        <ClashConfig v-if="form.type === 'clash'" v-model="form.config" />
+        <JsonTextArea v-else v-model="form.config" />
         <FieldError :errors="issues.errors('config')" />
       </Field>
     </FieldGroup>
