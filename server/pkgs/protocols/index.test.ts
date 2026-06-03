@@ -314,7 +314,7 @@ proxy-groups:
   - name: 自动选择
     type: url-test
     proxies: [ss-node]
-    url: http://www.gstatic.com/generate_204
+    url: https://www.gstatic.com/generate_204
     interval: 300
   - name: 手动选择
     type: select
