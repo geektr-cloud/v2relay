@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import YAML from "yaml";
+import { useClipboard } from "@vueuse/core";
 import { DetailPage, RemovalButton, useFormModel } from "@/components/CMS";
 import { CopyBtn, DataItem, DataView, VSeparator } from "@/components/DataView";
 import { useRouteParams } from "@vueuse/router";
@@ -9,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Route from "@/components/DataView/Route.vue";
 import NodeEditor from "./NodeEditor.vue";
+import { parseClash } from "@/utils/protocols";
 
 const id = useRouteParams<string>("id");
 const { useRemoval, useItem } = useNodeStore();
@@ -17,6 +21,24 @@ const { update } = useFormModel(NodeEditor);
 const [item, status, reload] = useItem(id);
 
 const removal = useRemoval(id);
+
+const protocol = computed(() => (item.value ? parseClash(item.value.connInfo) : null));
+
+const { copy } = useClipboard();
+
+const copyAs = (format: "url" | "clash" | "v2ray") => {
+  const p = protocol.value;
+  if (!p) return;
+  if (format === "url") {
+    copy(p.toUrl());
+  } else if (format === "clash") {
+    const c = p.toClash();
+    if (c) copy(YAML.stringify(c));
+  } else {
+    const v = p.toV2Ray();
+    if (v) copy(JSON.stringify(v, null, 2));
+  }
+};
 </script>
 
 <template>
@@ -69,6 +91,11 @@ const removal = useRemoval(id);
       <Card>
         <CardHeader>
           <CardTitle class="text-base">连接信息</CardTitle>
+          <CardAction>
+            <Button variant="ghost" size="sm" :disabled="!protocol" @click="copyAs('url')">Url</Button>
+            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toClash()" @click="copyAs('clash')">Clash</Button>
+            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toV2Ray()" @click="copyAs('v2ray')">V2Ray</Button>
+          </CardAction>
         </CardHeader>
         <CardContent>
           <pre class="bg-muted rounded-md p-4 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all">{{
