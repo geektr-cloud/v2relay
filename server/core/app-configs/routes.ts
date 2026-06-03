@@ -5,6 +5,7 @@ import * as mid from "@server/middlewares";
 import { zValidator } from "@hono/zod-validator";
 import * as schema from "./schema";
 import { HttpErr } from "@server/utils/http-errors";
+import { ClashConfigAdapter, type ClashConfigData } from "./adapter/clash";
 
 function idOrNameWhere(idOrName: string) {
   return z.uuid().safeParse(idOrName).success ? { id: idOrName } : { name: idOrName };
@@ -41,4 +42,12 @@ export const appConfigRoutes = new Hono()
     const existing = await prisma.appConfig.findUnique({ where: { id } });
     if (!existing) throw HttpErr(404, "AppConfig not found");
     return c.json(await prisma.appConfig.delete({ where: { id } }));
+  })
+  .get("/:id/sub", mid.paramId, async (c) => {
+    const { id } = c.req.valid("param");
+    const item = await prisma.appConfig.findUnique({ where: { id } });
+    if (!item) throw HttpErr(404, "AppConfig not found");
+    if (item.type !== "clash") throw HttpErr(400, "Only clash type supported");
+    const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData);
+    return adapter.send();
   });
