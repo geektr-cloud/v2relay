@@ -4,16 +4,27 @@ import { Check, Pencil } from "lucide-vue-next";
 import { Input } from "@/components/ui/input";
 
 const modelValue = defineModel<string>({ default: "" });
-defineProps<{ placeholder?: string }>();
+const props = withDefaults(defineProps<{ placeholder?: string; editable?: boolean }>(), { editable: true });
 
 const editing = ref(false);
 
-watch(modelValue, (v) => { if (!v) editing.value = true; }, { immediate: true });
+watch(
+  modelValue,
+  (v) => {
+    if (!v && props.editable) editing.value = true;
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <div class="flex items-center gap-1 shrink-0">
-    <template v-if="editing">
+    <template v-if="!editable">
+      <span class="bg-zinc-700 text-xs px-1.5 py-0.5 rounded truncate max-w-[8rem]">{{
+        modelValue || placeholder
+      }}</span>
+    </template>
+    <template v-else-if="editing">
       <slot name="edit">
         <Input
           v-model="modelValue"

@@ -7,18 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const props = withDefaults(defineProps<{
-  modelValue: string[];
-  items: T[];
-  status?: AsyncStatus;
-  preFilterFn?: (item: T) => boolean;
-  transformFn: (item: T) => { id: string; searchText: string; title: string; summary?: string };
-  placeholder?: string;
-}>(), {
-  preFilterFn: undefined,
-  status: () => ({ loading: false, error: null }),
-  placeholder: "未选择",
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue: string[];
+    items: T[];
+    status?: AsyncStatus;
+    preFilterFn?: (item: T) => boolean;
+    transformFn: (item: T) => { id: string; searchText: string; title: string; summary?: string };
+    placeholder?: string;
+    editable?: boolean;
+  }>(),
+  {
+    preFilterFn: undefined,
+    status: () => ({ loading: false, error: null }),
+    placeholder: "未选择",
+    editable: true,
+  },
+);
 const emit = defineEmits<{ "update:modelValue": [value: string[]] }>();
 
 const search = ref("");
@@ -58,6 +63,17 @@ const selectAll = () => {
 <template>
   <div class="flex-1 min-w-0">
     <Skeleton v-if="status.loading" class="h-6 w-full" />
+    <div v-else-if="!editable" class="flex flex-wrap items-center gap-1 w-full max-h-[3.25rem] overflow-y-auto">
+      <template v-if="selectedLabels.length">
+        <span
+          v-for="(label, i) in selectedLabels"
+          :key="i"
+          class="bg-zinc-700 text-xs px-1.5 py-0.5 rounded truncate max-w-full"
+          >{{ label }}</span
+        >
+      </template>
+      <span v-else class="text-xs text-muted-foreground">{{ placeholder ?? "未选择" }}</span>
+    </div>
     <Popover v-else v-model:open="open">
       <PopoverTrigger as-child>
         <button class="flex flex-wrap items-center gap-1 w-full text-left max-h-[3.25rem] overflow-y-auto">

@@ -4,6 +4,7 @@ import { EntitySelect } from "@/components/DataView";
 import { node } from "@server/core/nodes";
 
 const modelValue = defineModel<string[]>({ default: () => [] });
+withDefaults(defineProps<{ editable?: boolean }>(), { editable: true });
 
 const { useAll } = useNodeStore();
 const [items, status] = useAll();
@@ -23,5 +24,6 @@ const transformFn = (n: node.AggregatedNode) => ({
     :status="status"
     :transform-fn="transformFn"
     placeholder="选择节点"
+    :editable="editable"
   />
 </template>

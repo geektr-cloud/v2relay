@@ -4,6 +4,7 @@ import { EntitySelect } from "@/components/DataView";
 import { ruleset } from "@server/core/rulesets";
 
 const modelValue = defineModel<string[]>({ default: () => [] });
+withDefaults(defineProps<{ editable?: boolean }>(), { editable: true });
 
 const { useAll } = useRulesetStore();
 const [items, status] = useAll();
@@ -23,5 +24,6 @@ const transformFn = (r: ruleset.Ruleset) => ({
     :status="status"
     :transform-fn="transformFn"
     placeholder="选择规则集"
+    :editable="editable"
   />
 </template>
