@@ -1,6 +1,7 @@
 allowBuilds:
   '@prisma/engines': true
   esbuild: true
+  opencc: true
   prisma: true
   sharp: true
   vue-demi: true
