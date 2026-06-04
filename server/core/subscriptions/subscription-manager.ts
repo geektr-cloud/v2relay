@@ -7,13 +7,30 @@ import { batchUpdate } from "@server/core/nodes/batch-update";
 import type { Node } from "@server/generated/prisma/dto";
 import { dnsResolve } from "@server/utils/dns-resolve";
 import { createNotice, createNotices } from "../system-notices/create-notices";
-import { TagMatcher } from "../tags/tag-matcher";
+import { tagMatcher } from "../tags/tag-matcher";
 
 /** uuid v5 namespace for deterministic node ids (derived once from NIL UUID) */
 const uuidNodeNS = uuidv5("nodes", NIL);
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36";
+
+/** Well-known public DNS / placeholder IPs that providers sometimes use as bogus node addresses. */
+const IGNORED_IPS = new Set([
+  "0.0.0.0",
+  "127.0.0.1",
+  "1.1.1.1",
+  "1.0.0.1",
+  "8.8.8.8",
+  "8.8.4.4",
+  "9.9.9.9",
+  "223.5.5.5",
+  "223.6.6.6",
+  "114.114.114.114",
+  "114.114.115.115",
+  "119.29.29.29",
+  "180.76.76.76",
+]);
 
 export type SubscriptionCacheStatus = {
   sourceUrl: string;
@@ -28,6 +45,7 @@ export class SubscriptionManager {
   constructor(
     readonly id: string,
     readonly urls: string[],
+    readonly syncTags: boolean,
   ) {}
 
   async get(
@@ -117,32 +135,37 @@ export class SubscriptionManager {
       return;
     }
 
-    const notices: Set<string> = new Set();
-    const tagMatcher = await TagMatcher.loadDb();
+    await tagMatcher.ready();
 
     const nodeNameToTags = new Map<string, Set<string>>();
-    for (const [groupName, nodeNames] of groupToProxy) {
-      const tag = tagMatcher.match(groupName);
-      if (!tag) {
-        notices.add(`subscription ${this.id}: unrecognized group: ${groupName}`);
-        continue;
+    if (this.syncTags) {
+      const notices: Set<string> = new Set();
+
+      for (const [groupName, nodeNames] of groupToProxy) {
+        const tags = tagMatcher.match(groupName);
+        if (tags.length === 0) {
+          notices.add(`subscription ${this.id}: unrecognized group: ${groupName}`);
+          continue;
+        }
+
+        for (const nodeName of nodeNames) {
+          const set = nodeNameToTags.get(nodeName) ?? new Set<string>();
+          for (const tag of tags) set.add(tag);
+          nodeNameToTags.set(nodeName, set);
+        }
       }
 
-      for (const nodeName of nodeNames) {
-        const set = nodeNameToTags.get(nodeName) ?? new Set<string>();
-        set.add(tag);
-        nodeNameToTags.set(nodeName, set);
-      }
+      if (notices.size > 0) createNotices(notices);
     }
-
-    if (notices.size > 0) createNotices(notices);
 
     const nodes: Node[] = protocols.map((p) => {
       const { name, ip } = p.getServerInfo();
+      const tagSet = new Set(nodeNameToTags.get(name) ?? []);
+      for (const t of tagMatcher.match(name)) tagSet.add(t);
       return {
         id: uuidv5(`${this.id}\n${p.toUrl()}`, uuidNodeNS),
         subscriptionId: this.id,
-        tags: Array.from(nodeNameToTags.get(name) ?? []),
+        tags: Array.from(tagSet),
         protocol: p.protocol,
         name,
         remark: "",
@@ -157,7 +180,16 @@ export class SubscriptionManager {
       n.ip = resolvedIps.get(n.ip) ?? n.ip;
     });
 
-    await batchUpdate(this.id, nodes);
+    const deduped = nodes.filter((node, i) => {
+      if (IGNORED_IPS.has(node.ip)) return false;
+      const next = nodes[i + 1];
+      if (!next) return true;
+      const { name: _na, ...a } = node;
+      const { name: _nb, ...b } = next;
+      return JSON.stringify(a) !== JSON.stringify(b);
+    });
+
+    await batchUpdate(this.id, deduped);
   }
 
   private async fetchFirstWorking(): Promise<{ url: string; body: ArrayBuffer; contentType: string } | null> {

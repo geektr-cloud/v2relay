@@ -10,11 +10,11 @@ async function loadSubscriptionContent(
   id: string,
   options: { forceReload?: boolean } = {},
 ): Promise<{ response: Response; cacheStatus: SubscriptionCacheStatus }> {
-  const sub = await prisma.subscription.findUnique({ where: { id } });
+  const sub = await prisma.subscription.findUnique({ where: { id }, include: { provider: true } });
   if (!sub) throw HttpErr(404, "Subscription not found");
   if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-  const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? []);
+  const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? [], sub.provider.syncTags);
   return handle.get(options);
 }
 
@@ -88,7 +88,7 @@ export const subscriptionRoutes = new Hono()
   })
   .put("/:id/content", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
-    const sub = await prisma.subscription.findUnique({ where: { id } });
+    const sub = await prisma.subscription.findUnique({ where: { id }, include: { provider: true } });
     if (!sub) throw HttpErr(404, "Subscription not found");
     if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
@@ -96,7 +96,7 @@ export const subscriptionRoutes = new Hono()
     if (body.byteLength === 0) throw HttpErr(400, "Empty body");
     const contentType = c.req.header("content-type") ?? "text/plain; charset=utf-8";
 
-    const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? []);
+    const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? [], sub.provider.syncTags);
     const { cacheStatus } = await handle.put(body, contentType);
     return c.json(cacheStatus);
   });
