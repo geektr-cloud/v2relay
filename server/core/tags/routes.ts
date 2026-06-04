@@ -4,6 +4,7 @@ import * as mid from "@server/middlewares";
 import { zValidator } from "@hono/zod-validator";
 import * as schema from "./schema";
 import { HttpErr } from "@server/utils/http-errors";
+import { tagMatcher } from "./tag-matcher";
 
 export const tagRoutes = new Hono()
   .get("/", async (c) => c.json(await prisma.tag.findMany({ orderBy: { name: "asc" } })))
@@ -16,6 +17,7 @@ export const tagRoutes = new Hono()
   .post("/", zValidator("json", schema.create.body), async (c) => {
     try {
       const tag = await prisma.tag.create({ data: c.req.valid("json") });
+      tagMatcher.refresh();
       return c.json(tag, 201 as const);
     } catch {
       throw HttpErr(400, "Tag creation failed (duplicate name?)");
@@ -27,13 +29,17 @@ export const tagRoutes = new Hono()
       const existing = await prisma.tag.findUnique({ where: { id } });
       if (!existing) throw HttpErr(404, "Tag not found");
       try {
-        return c.json(await prisma.tag.update({ where: { id }, data }));
+        const tag = await prisma.tag.update({ where: { id }, data });
+        tagMatcher.refresh();
+        return c.json(tag);
       } catch {
         throw HttpErr(400, "Update failed (duplicate name?)");
       }
     }
     try {
-      return c.json(await prisma.tag.create({ data }));
+      const tag = await prisma.tag.create({ data });
+      tagMatcher.refresh();
+      return c.json(tag);
     } catch {
       throw HttpErr(400, "Tag creation failed (duplicate name?)");
     }
@@ -44,6 +50,7 @@ export const tagRoutes = new Hono()
     if (!existing) throw HttpErr(404, "Tag not found");
     try {
       const tag = await prisma.tag.update({ where: { id }, data: c.req.valid("json") });
+      tagMatcher.refresh();
       return c.json(tag);
     } catch {
       throw HttpErr(400, "Update failed (duplicate name?)");
@@ -52,7 +59,9 @@ export const tagRoutes = new Hono()
   .delete("/:id", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
     try {
-      return c.json(await prisma.tag.delete({ where: { id } }));
+      const tag = await prisma.tag.delete({ where: { id } });
+      tagMatcher.refresh();
+      return c.json(tag);
     } catch {
       throw HttpErr(404, "Tag not found");
     }
