@@ -3,6 +3,7 @@ import { computed, reactive, watch } from "vue";
 import { useThrottleFn } from "@vueuse/core";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EntitySelect } from "@/components/DataView";
 import TargetSelect from "./TargetSelect.vue";
 import InlineEditText from "./InlineEditText.vue";
@@ -10,12 +11,17 @@ import RulesetMultiSelect from "./RulesetMultiSelect.vue";
 import NodeFilter from "@/views/node/NodeFilter.vue";
 import type { ClashConfigData } from "@server/core/app-configs/adapter/clash";
 import type { nodeFilter } from "@server/core/nodes";
+import { route } from "@server/core/routes";
 
 const emptyFilter = (): nodeFilter.Filter => ({ type: "none" });
 
 function normalizeFilter(v: unknown): nodeFilter.Filter {
   if (v && typeof v === "object" && "type" in v) return v as nodeFilter.Filter;
   return emptyFilter();
+}
+
+function normalizeOutbound(v: unknown): route.Outbound {
+  return (route.OUTBOUND_VALUES as readonly string[]).includes(v as string) ? (v as route.Outbound) : "PROXY";
 }
 
 function normalize(input: ClashConfigData | undefined): ClashConfigData {
@@ -31,6 +37,7 @@ function normalize(input: ClashConfigData | undefined): ClashConfigData {
     rulesetGroups: input.rulesetGroups ?? [],
     routing: (input.routing ?? []).map((r) => ({
       target: r.target,
+      outbound: normalizeOutbound(r.outbound),
       nodeGroups: r.nodeGroups ?? [],
       filter: normalizeFilter(r.filter),
     })),
@@ -136,7 +143,7 @@ const groupItems = computed(() =>
           variant="ghost"
           size="icon"
           class="h-6 w-6"
-          @click="config.routing.push({ target: '', nodeGroups: [], filter: emptyFilter() })"
+          @click="config.routing.push({ target: '', outbound: 'PROXY', nodeGroups: [], filter: emptyFilter() })"
         >
           <Plus class="size-3.5" />
         </Button>
@@ -149,14 +156,23 @@ const groupItems = computed(() =>
         </InlineEditText>
         <ArrowRight class="size-3.5 shrink-0 text-muted-foreground mt-1.5" />
         <div class="flex flex-col gap-1 flex-1 min-w-0">
-          <EntitySelect
-            v-model="r.nodeGroups"
-            :items="groupItems"
-            :transform-fn="(i) => i"
-            placeholder="选择节点组"
-            :editable="editable"
-          />
-          <NodeFilter v-model="r.filter" :editable="editable" />
+          <Select v-if="editable" v-model="r.outbound">
+            <SelectTrigger class="h-7 text-xs"><SelectValue placeholder="出站类型" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="v in route.OUTBOUND_VALUES" :key="v" :value="v">{{ v }}</SelectItem>
+            </SelectContent>
+          </Select>
+          <span v-else class="bg-zinc-700 text-xs px-1.5 py-0.5 rounded self-start">{{ r.outbound }}</span>
+          <template v-if="r.outbound === 'PROXY'">
+            <EntitySelect
+              v-model="r.nodeGroups"
+              :items="groupItems"
+              :transform-fn="(i) => i"
+              placeholder="选择节点组"
+              :editable="editable"
+            />
+            <NodeFilter v-model="r.filter" :editable="editable" />
+          </template>
         </div>
         <Button
           v-if="editable"

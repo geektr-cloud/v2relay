@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CopyTag } from "@/components/DataView";
 import { useRouteStore } from "@/stores/routes";
+import { route } from "@server/core/routes";
 import NodeFilter from "@/views/node/NodeFilter.vue";
 import RulesetMultiSelect from "@/views/app-config/RulesetMultiSelect.vue";
 
@@ -37,11 +39,21 @@ const [form, issues, status, submit] = useUpsert(id);
         <FieldError :errors="issues.errors('name')" />
       </Field>
       <Field>
+        <FieldLabel>出站类型</FieldLabel>
+        <Select v-model="form.outbound">
+          <SelectTrigger><SelectValue placeholder="选择出站类型" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="v in route.OUTBOUND_VALUES" :key="v" :value="v">{{ v }}</SelectItem>
+          </SelectContent>
+        </Select>
+        <FieldError :errors="issues.errors('outbound')" />
+      </Field>
+      <Field>
         <FieldLabel>规则集</FieldLabel>
         <RulesetMultiSelect v-model="form.rulesets" />
         <FieldError :errors="issues.errors('rulesets')" />
       </Field>
-      <Field>
+      <Field v-if="form.outbound === 'PROXY'">
         <FieldLabel>节点筛选</FieldLabel>
         <NodeFilter v-model="form.filter" />
         <FieldError :errors="issues.errors('filter')" />

@@ -3,6 +3,7 @@ import { prisma } from "@server/db";
 import { RulesetManager } from "@server/core/rulesets/ruleset-manager";
 import { filterNodes, type Filter } from "@server/core/nodes/node-filter";
 import type { Node } from "@server/core/nodes/schema";
+import type { Outbound } from "@server/core/routes/schema";
 import type { AppConfigAdapter } from "./base";
 
 export interface NodeGroup {
@@ -15,6 +16,7 @@ export interface RulesetGroup {
 }
 export interface Routing {
   target: string;
+  outbound: Outbound;
   nodeGroups: string[];
   filter: Filter;
 }
@@ -67,13 +69,17 @@ export class ClashConfigAdapter implements AppConfigAdapter {
 
     // Build routing proxy-groups
     for (const r of this.config.routing) {
-      const members: string[] = [...r.nodeGroups];
-      const matched = filterNodes(allNodes, r.filter);
-      for (const n of matched) {
-        addProxy(n);
-        members.push(n.name);
+      if (r.outbound === "PROXY") {
+        const members: string[] = [...r.nodeGroups];
+        const matched = filterNodes(allNodes, r.filter);
+        for (const n of matched) {
+          addProxy(n);
+          members.push(n.name);
+        }
+        proxyGroups.push({ name: r.target, type: "select", proxies: members });
+      } else {
+        proxyGroups.push({ name: r.target, type: "select", proxies: [r.outbound] });
       }
-      proxyGroups.push({ name: r.target, type: "select", proxies: members });
     }
 
     // Build rules from rulesetGroups

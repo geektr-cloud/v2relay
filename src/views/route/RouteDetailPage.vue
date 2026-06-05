@@ -51,6 +51,9 @@ const filterModel = computed({
               <CopyBtn :value="item.id" />
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
+            <DataItem label="出站">
+              <Badge variant="secondary">{{ item.outbound }}</Badge>
+            </DataItem>
             <DataItem label="规则集">
               <div v-if="item.rulesets.length" class="flex flex-wrap gap-1">
                 <RouteLink
@@ -68,7 +71,7 @@ const filterModel = computed({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card v-if="item.outbound === 'PROXY'">
         <CardHeader>
           <CardTitle class="text-base">节点筛选</CardTitle>
         </CardHeader>
@@ -77,7 +80,7 @@ const filterModel = computed({
         </CardContent>
       </Card>
 
-      <RoutePreviewCard :id="item.id" />
+      <RoutePreviewCard v-if="item.outbound === 'PROXY'" :id="item.id" />
     </template>
   </DetailPage>
 </template>

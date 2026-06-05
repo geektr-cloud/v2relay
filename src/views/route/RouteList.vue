@@ -27,6 +27,7 @@ const removal = useConfirmPopover({
       <TableHeader>
         <TableRow>
           <TableHead>名称</TableHead>
+          <TableHead>出站</TableHead>
           <TableHead>规则集数</TableHead>
           <TableHead>筛选类型</TableHead>
           <TableHead class="w-[120px]">操作</TableHead>
@@ -40,10 +41,14 @@ const removal = useConfirmPopover({
             </Route>
           </TableCell>
           <TableCell>
+            <Badge variant="secondary">{{ row.outbound }}</Badge>
+          </TableCell>
+          <TableCell>
             <Badge variant="outline">{{ row.rulesets.length }}</Badge>
           </TableCell>
           <TableCell>
-            <Badge variant="secondary">{{ row.filter.type }}</Badge>
+            <Badge v-if="row.outbound === 'PROXY'" variant="secondary">{{ row.filter.type }}</Badge>
+            <span v-else class="text-muted-foreground">—</span>
           </TableCell>
           <TableCell>
             <Button variant="ghost" size="icon" as-child>

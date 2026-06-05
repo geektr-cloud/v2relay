@@ -105,10 +105,11 @@ model AppConfig {
 }
 
 model Route {
-  id   String @id @default(uuid())
-  name String @unique
+  id       String @id @default(uuid())
+  name     String @unique
+  outbound String @default("PROXY")
   /// ![string[]]
-  rulesets Json @default("[]")
+  rulesets Json   @default("[]")
   /// ![import("../../core/nodes/node-filter").Filter]
-  filter   Json @default("{\"type\":\"none\"}")
+  filter   Json   @default("{\"type\":\"none\"}")
 }
