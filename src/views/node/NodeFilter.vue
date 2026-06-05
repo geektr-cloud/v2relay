@@ -38,6 +38,7 @@ const TYPE_LABELS: Record<FilterType, string> = {
   tag: "标签",
   protocol: "协议",
   name: "名称",
+  price: "最大价格",
 };
 
 function blankFilter(type: FilterType): Filter {
@@ -60,6 +61,8 @@ function blankFilter(type: FilterType): Filter {
       return { type: "protocol", value: "" };
     case "name":
       return { type: "name", value: {} };
+    case "price":
+      return { type: "price", value: 0 };
   }
 }
 
@@ -92,8 +95,7 @@ function updateGroupItem(i: number, v: Filter) {
 
 // ── not helpers ───────────────────────────────────────────────────────────────
 const notInner = computed<Filter>({
-  get: (): Filter =>
-    model.value.type === "not" ? model.value.value : { type: "none" },
+  get: (): Filter => (model.value.type === "not" ? model.value.value : { type: "none" }),
   set: (v: Filter) => {
     if (model.value.type === "not") model.value = { type: "not", value: v };
   },
@@ -126,6 +128,19 @@ function setNameField(key: "exact" | "include" | "exclude", v: string) {
   if (v) next[key] = v;
   else delete next[key];
   nameValue.value = next;
+}
+
+// ── price helpers ─────────────────────────────────────────────────────────────
+const priceValue = computed<number>({
+  get: () => (model.value.type === "price" ? model.value.value : 0),
+  set: (v: number) => {
+    if (model.value.type === "price") model.value = { type: "price", value: v };
+  },
+});
+
+function setPrice(v: string) {
+  const n = parseFloat(v);
+  priceValue.value = Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 // ── tag / protocol options ────────────────────────────────────────────────────
@@ -232,6 +247,22 @@ const indentClass = computed(() => (depth.value > 0 ? "border-l-2 pl-3" : ""));
           :disabled="!editable"
           placeholder="exclude"
           @update:model-value="(v) => setNameField('exclude', String(v ?? ''))"
+        />
+      </Field>
+    </div>
+
+    <!-- price -->
+    <div v-if="model.type === 'price'" class="grid grid-cols-1 gap-2">
+      <Field>
+        <FieldLabel>最大价格 (¥/GiB)</FieldLabel>
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          :model-value="priceValue"
+          :disabled="!editable"
+          placeholder="0"
+          @change="(e: Event) => setPrice((e.target as HTMLInputElement).value)"
         />
       </Field>
     </div>

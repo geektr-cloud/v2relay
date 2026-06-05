@@ -41,6 +41,7 @@ const removal = useConfirmPopover({
           <TableHead>备注</TableHead>
           <TableHead>提供商</TableHead>
           <TableHead>订阅链接</TableHead>
+          <TableHead>价格</TableHead>
           <TableHead>状态</TableHead>
           <TableHead>更新于</TableHead>
           <TableHead class="w-[120px]">操作</TableHead>
@@ -65,6 +66,10 @@ const removal = useConfirmPopover({
             <div class="flex max-w-[40ch] flex-col gap-1">
               <CopyTag v-for="(url, i) in row.urls" :key="i" :value="url" />
             </div>
+          </TableCell>
+          <TableCell>
+            <span class="tabular-nums">{{ row.price.toFixed(2) }}</span>
+            <span class="text-muted-foreground ml-0.5 text-xs">¥/GiB</span>
           </TableCell>
           <TableCell>
             <Badge :variant="row.enabled ? 'secondary' : 'destructive'">

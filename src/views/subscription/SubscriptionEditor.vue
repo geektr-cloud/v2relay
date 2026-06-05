@@ -58,6 +58,20 @@ const [form, issues, status, submit] = useUpsert(id);
         />
         <FieldError :errors="issues.errors('urls')" />
       </Field>
+      <Field>
+        <FieldLabel for="price">价格 (¥/GiB)</FieldLabel>
+        <Input
+          id="price"
+          type="number"
+          min="0"
+          step="0.01"
+          :model-value="form.price"
+          @change="(e: Event) => (form.price = parseFloat((e.target as HTMLInputElement).value) || 0)"
+          @focus="issues.ingore('price')"
+        />
+        <FieldDescription>订阅单价，格式 N.NN ¥/GiB</FieldDescription>
+        <FieldError :errors="issues.errors('price')" />
+      </Field>
       <Field orientation="horizontal" class="border px-3 py-5">
         <FieldLabel>启用</FieldLabel>
         <Switch v-model="form.enabled" />

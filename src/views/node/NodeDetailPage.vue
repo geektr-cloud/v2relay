@@ -72,6 +72,10 @@ const copyAs = (format: "url" | "clash" | "v2ray") => {
             <DataItem label="倍率">
               <Badge variant="outline">x{{ item.priceRate }}</Badge>
             </DataItem>
+            <DataItem label="价格">
+              <span class="tabular-nums">{{ item.price.toFixed(2) }}</span>
+              <span class="text-muted-foreground ml-1 text-xs">¥/GiB</span>
+            </DataItem>
             <DataItem label="标签">
               <div v-if="item.tags.length" class="flex flex-wrap gap-1">
                 <Badge v-for="(tag, i) in item.tags" :key="i" variant="outline">{{ tag }}</Badge>
@@ -93,8 +97,12 @@ const copyAs = (format: "url" | "clash" | "v2ray") => {
           <CardTitle class="text-base">连接信息</CardTitle>
           <CardAction>
             <Button variant="ghost" size="sm" :disabled="!protocol" @click="copyAs('url')">Url</Button>
-            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toClash()" @click="copyAs('clash')">Clash</Button>
-            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toV2Ray()" @click="copyAs('v2ray')">V2Ray</Button>
+            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toClash()" @click="copyAs('clash')"
+              >Clash</Button
+            >
+            <Button variant="ghost" size="sm" :disabled="!protocol || !protocol.toV2Ray()" @click="copyAs('v2ray')"
+              >V2Ray</Button
+            >
           </CardAction>
         </CardHeader>
         <CardContent>

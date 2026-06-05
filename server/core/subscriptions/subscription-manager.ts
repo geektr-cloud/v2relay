@@ -41,12 +41,27 @@ export type SubscriptionCacheStatus = {
 
 const kvKey = (id: string): string => `subscription:${id}`;
 
+/** Subscription + provider 聚合体 — 调用方需提供给 manager 以避免重复查库
+ *  结构性类型，不依赖 dto 体系（避免 prisma runtime 的 Date 与 dto 的 string 冲突） */
+export type SubscriptionWithProvider = {
+  id: string;
+  urls: unknown;
+  price: number;
+  provider: { syncTags: boolean };
+};
+
 export class SubscriptionManager {
-  constructor(
-    readonly id: string,
-    readonly urls: string[],
-    readonly syncTags: boolean,
-  ) {}
+  readonly id: string;
+  readonly urls: string[];
+  readonly syncTags: boolean;
+  readonly price: number;
+
+  constructor(readonly sub: SubscriptionWithProvider) {
+    this.id = sub.id;
+    this.urls = (sub.urls as string[]) ?? [];
+    this.syncTags = sub.provider.syncTags;
+    this.price = sub.price;
+  }
 
   async get(
     options: { forceReload?: boolean } = {},
@@ -162,6 +177,11 @@ export class SubscriptionManager {
       const { name, ip } = p.getServerInfo();
       const tagSet = new Set(nodeNameToTags.get(name) ?? []);
       for (const t of tagMatcher.match(name)) tagSet.add(t);
+      // 从节点名提取倍率（"数字x" 或 "x数字"，如 "3x" / "1.5X"），无则默认 1
+      const rateMatch = name.match(/(\d+(?:\.\d+)?)\s*[xX]|[xX]\s*(\d+(?:\.\d+)?)/);
+      const rateRaw = rateMatch ? parseFloat(rateMatch[1] ?? rateMatch[2] ?? "1") : 1;
+      const priceRate = Number.isFinite(rateRaw) && rateRaw >= 0 ? rateRaw : 1;
+      const price = Math.round(this.price * priceRate * 100) / 100;
       return {
         id: uuidv5(`${this.id}\n${p.toUrl()}`, uuidNodeNS),
         subscriptionId: this.id,
@@ -170,7 +190,8 @@ export class SubscriptionManager {
         name,
         remark: "",
         ip,
-        priceRate: 1,
+        priceRate,
+        price,
         connInfo: p.toClash() ?? {},
       };
     });

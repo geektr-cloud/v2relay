@@ -78,6 +78,20 @@ const jsonInvalid = ref(false);
         <FieldError :errors="issues.errors('priceRate')" />
       </Field>
       <Field>
+        <FieldLabel for="price">价格 (¥/GiB)</FieldLabel>
+        <Input
+          id="price"
+          type="number"
+          min="0"
+          step="0.01"
+          :model-value="form.price"
+          @change="(e: Event) => (form.price = parseFloat((e.target as HTMLInputElement).value) || 0)"
+          @focus="issues.ingore('price')"
+        />
+        <FieldDescription>由订阅单价 × 倍率自动计算；同步订阅时会覆盖。</FieldDescription>
+        <FieldError :errors="issues.errors('price')" />
+      </Field>
+      <Field>
         <FieldLabel>标签</FieldLabel>
         <TagsInput v-model="form.tags" @focusin="issues.ingore('tags')">
           <TagsInputItem v-for="(tag, i) in form.tags" :key="`${tag}-${i}`" :value="tag">

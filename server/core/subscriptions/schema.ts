@@ -11,12 +11,13 @@ const name = z.string().trim().max(64);
 const remark = z.string().trim().max(512);
 const urls = z.array(z.string().trim().url()).min(1);
 const enabled = z.boolean();
+const price = z.number().min(0);
 const createdAt = z.string();
 const updatedAt = z.string();
 
 // ── single schema for create, update, and client-side form validation ─────────
 // 必须完成一个完整的 Subscription 的 schema
-export const subscription = z.object({ id, providerId, name, remark, urls, enabled, createdAt, updatedAt });
+export const subscription = z.object({ id, providerId, name, remark, urls, enabled, price, createdAt, updatedAt });
 // 必须断言 zod 体系和 prisma 体系的一致性
 assert<Equals<z.infer<typeof subscription>, Subscription>>();
 export type { Subscription };
@@ -27,6 +28,7 @@ export const newItem = (): Subscription => ({
   remark: "",
   urls: [],
   enabled: true,
+  price: 0,
   createdAt: "",
   updatedAt: "",
 });

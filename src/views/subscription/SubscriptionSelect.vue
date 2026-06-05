@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 
-defineProps<{ disabled?: boolean, size?: "sm" | "md" | "lg" }>();
+defineProps<{ disabled?: boolean; size?: "sm" | "md" | "lg" }>();
 const modelValue = defineModel<string | undefined>();
 
 const { useAll } = useSubscriptionStore();

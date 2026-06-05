@@ -34,9 +34,7 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     const base: Record<string, unknown> = this.template ? (YAML.parse(this.template) ?? {}) : {};
 
     let allNodes = await prisma.node.findMany();
-    allNodes = allNodes.sort((a, b) =>
-      `${a.subscriptionId}-${a.name}`.localeCompare(`${b.subscriptionId}-${b.name}`),
-    );
+    allNodes = allNodes.sort((a, b) => `${a.subscriptionId}-${a.name}`.localeCompare(`${b.subscriptionId}-${b.name}`));
 
     const proxies: unknown[] = [];
     const seenProxy = new Set<string>();

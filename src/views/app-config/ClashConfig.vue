@@ -66,8 +66,12 @@ const groupItems = computed(() =>
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">规则组</span>
         <Button
-v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
-          @click="config.rulesetGroups.push({ target: '', rulesets: [] })">
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6"
+          @click="config.rulesetGroups.push({ target: '', rulesets: [] })"
+        >
           <Plus class="size-3.5" />
         </Button>
       </div>
@@ -80,8 +84,12 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
         <ArrowLeft class="size-3.5 shrink-0 text-muted-foreground" />
         <RulesetMultiSelect v-model="g.rulesets" :editable="editable" />
         <Button
-v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destructive"
-          @click="config.rulesetGroups.splice(i, 1)">
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6 shrink-0 text-destructive"
+          @click="config.rulesetGroups.splice(i, 1)"
+        >
           <Trash2 class="size-3.5" />
         </Button>
       </div>
@@ -91,7 +99,13 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destruc
     <section>
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">节点组</span>
-        <Button v-if="editable" variant="ghost" size="icon" class="h-6 w-6" @click="config.nodeGroups.push({ name: '', filter: emptyFilter() })">
+        <Button
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6"
+          @click="config.nodeGroups.push({ name: '', filter: emptyFilter() })"
+        >
           <Plus class="size-3.5" />
         </Button>
       </div>
@@ -102,8 +116,12 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destruc
           <NodeFilter v-model="g.filter" :editable="editable" />
         </div>
         <Button
-v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destructive"
-          @click="config.nodeGroups.splice(i, 1)">
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6 shrink-0 text-destructive"
+          @click="config.nodeGroups.splice(i, 1)"
+        >
           <Trash2 class="size-3.5" />
         </Button>
       </div>
@@ -114,8 +132,12 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destruc
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">路由策略</span>
         <Button
-v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
-          @click="config.routing.push({ target: '', nodeGroups: [], filter: emptyFilter() })">
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6"
+          @click="config.routing.push({ target: '', nodeGroups: [], filter: emptyFilter() })"
+        >
           <Plus class="size-3.5" />
         </Button>
       </div>
@@ -127,12 +149,22 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
         </InlineEditText>
         <ArrowRight class="size-3.5 shrink-0 text-muted-foreground mt-1.5" />
         <div class="flex flex-col gap-1 flex-1 min-w-0">
-          <EntitySelect v-model="r.nodeGroups" :items="groupItems" :transform-fn="(i) => i" placeholder="选择节点组" :editable="editable" />
+          <EntitySelect
+            v-model="r.nodeGroups"
+            :items="groupItems"
+            :transform-fn="(i) => i"
+            placeholder="选择节点组"
+            :editable="editable"
+          />
           <NodeFilter v-model="r.filter" :editable="editable" />
         </div>
         <Button
-v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destructive"
-          @click="config.routing.splice(i, 1)">
+          v-if="editable"
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6 shrink-0 text-destructive"
+          @click="config.routing.splice(i, 1)"
+        >
           <Trash2 class="size-3.5" />
         </Button>
       </div>

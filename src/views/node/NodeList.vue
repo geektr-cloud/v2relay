@@ -32,6 +32,7 @@ const removal = useConfirmPopover({
           <TableHead>协议</TableHead>
           <TableHead>IP</TableHead>
           <TableHead>倍率</TableHead>
+          <TableHead>价格</TableHead>
           <TableHead>订阅</TableHead>
           <TableHead>连接信息</TableHead>
           <TableHead class="w-[120px]">操作</TableHead>
@@ -51,6 +52,10 @@ const removal = useConfirmPopover({
           <TableCell class="font-mono text-xs">{{ row.ip || "—" }}</TableCell>
           <TableCell>
             <Badge variant="outline">x{{ row.priceRate }}</Badge>
+          </TableCell>
+          <TableCell>
+            <span class="tabular-nums">{{ row.price.toFixed(2) }}</span>
+            <span class="text-muted-foreground ml-0.5 text-xs">¥/GiB</span>
           </TableCell>
           <TableCell>
             <Route :to="{ name: 'subscription-detail', params: { id: row.subscriptionId } }">

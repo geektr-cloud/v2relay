@@ -13,12 +13,13 @@ const protocol = z.string().trim().max(32);
 const remark = z.string().trim().max(512);
 const ip = z.union([z.ipv4(), z.ipv6()]);
 const priceRate = z.number().min(0);
+const price = z.number().min(0);
 const tags = z.array(z.string().trim());
 const connInfo = z.any();
 
 // ── single schema for create, update, and client-side form validation ─────────
 // 必须完成一个完整的 Node 的 schema
-export const node = z.object({ id, subscriptionId, name, protocol, remark, ip, priceRate, tags, connInfo });
+export const node = z.object({ id, subscriptionId, name, protocol, remark, ip, priceRate, price, tags, connInfo });
 // 必须断言 zod 体系和 prisma 体系的一致性
 assert<Equals<z.infer<typeof node>, Node>>();
 export type { Node };
@@ -31,6 +32,7 @@ export const newItem = (): Node => ({
   remark: "",
   ip: "",
   priceRate: 1,
+  price: 0,
   connInfo: {},
 });
 

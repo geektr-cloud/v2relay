@@ -14,7 +14,7 @@ async function loadSubscriptionContent(
   if (!sub) throw HttpErr(404, "Subscription not found");
   if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-  const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? [], sub.provider.syncTags);
+  const handle = new SubscriptionManager(sub);
   return handle.get(options);
 }
 
@@ -96,7 +96,7 @@ export const subscriptionRoutes = new Hono()
     if (body.byteLength === 0) throw HttpErr(400, "Empty body");
     const contentType = c.req.header("content-type") ?? "text/plain; charset=utf-8";
 
-    const handle = new SubscriptionManager(sub.id, (sub.urls as string[]) ?? [], sub.provider.syncTags);
+    const handle = new SubscriptionManager(sub);
     const { cacheStatus } = await handle.put(body, contentType);
     return c.json(cacheStatus);
   });

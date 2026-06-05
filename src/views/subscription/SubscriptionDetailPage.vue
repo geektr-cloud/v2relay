@@ -58,6 +58,10 @@ const providerName = computed(
                 {{ item.enabled ? "启用" : "停用" }}
               </Badge>
             </DataItem>
+            <DataItem label="价格">
+              <span class="tabular-nums">{{ item.price.toFixed(2) }}</span>
+              <span class="text-muted-foreground ml-1 text-xs">¥/GiB</span>
+            </DataItem>
             <DataItem label="备注">
               <MultiLine :value="item.remark" />
             </DataItem>
