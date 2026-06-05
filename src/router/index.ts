@@ -12,6 +12,8 @@ import RulesetPage from "../views/ruleset/RulesetPage.vue";
 import RulesetDetailPage from "../views/ruleset/RulesetDetailPage.vue";
 import AppConfigPage from "../views/app-config/AppConfigPage.vue";
 import AppConfigDetailPage from "../views/app-config/AppConfigDetailPage.vue";
+import RoutePage from "../views/route/RoutePage.vue";
+import RouteDetailPage from "../views/route/RouteDetailPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,6 +82,16 @@ const router = createRouter({
       path: "/app-configs/:idOrName",
       name: "app-config-detail",
       component: AppConfigDetailPage,
+    },
+    {
+      path: "/routes",
+      name: "routes",
+      component: RoutePage,
+    },
+    {
+      path: "/routes/:idOrName",
+      name: "route-detail",
+      component: RouteDetailPage,
     },
   ],
 });

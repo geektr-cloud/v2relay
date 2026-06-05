@@ -12,6 +12,7 @@ const tagsActive = computed(() => route.name === "tags" || route.name === "tag-d
 const nodesActive = computed(() => route.name === "nodes" || route.name === "node-detail");
 const systemNoticesActive = computed(() => route.name === "system-notices");
 const rulesetsActive = computed(() => route.name === "rulesets" || route.name === "ruleset-detail");
+const routesActive = computed(() => route.name === "routes" || route.name === "route-detail");
 const appConfigsActive = computed(() => route.name === "app-configs" || route.name === "app-config-detail");
 </script>
 
@@ -32,6 +33,7 @@ const appConfigsActive = computed(() => route.name === "app-configs" || route.na
         <RouterLink to="/subscriptions" :class="navLinkClass(subscriptionsActive)"> 订阅 </RouterLink>
         <RouterLink to="/nodes" :class="navLinkClass(nodesActive)"> 节点 </RouterLink>
         <RouterLink to="/rulesets" :class="navLinkClass(rulesetsActive)"> 规则集 </RouterLink>
+        <RouterLink to="/routes" :class="navLinkClass(routesActive)"> 路由 </RouterLink>
         <RouterLink to="/app-configs" :class="navLinkClass(appConfigsActive)"> 配置 </RouterLink>
         <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
         <RouterLink to="/system-notices" :class="navLinkClass(systemNoticesActive)"> 通知 </RouterLink>

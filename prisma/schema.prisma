@@ -47,6 +47,7 @@ model Subscription {
   /// ![string[]]
   urls      Json     @default("[]")
   enabled   Boolean  @default(true)
+  price     Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   nodes     Node[]
@@ -73,6 +74,7 @@ model Node {
   remark    String @default("")
   ip        String @default("")
   priceRate Float  @default(1)
+  price     Float  @default(0)
 
   /// ![any]
   connInfo Json @default("{}")
@@ -99,4 +101,13 @@ model AppConfig {
   template String @default("")
   /// ![any]
   config   Json   @default("{}")
+}
+
+model Route {
+  id   String @id @default(uuid())
+  name String @unique
+  /// ![string[]]
+  rulesets Json @default("[]")
+  /// ![import("../../core/nodes/node-filter").Filter]
+  filter   Json @default("{\"type\":\"none\"}")
 }

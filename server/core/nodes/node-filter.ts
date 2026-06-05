@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { Node } from "./schema";
 
 export interface None {
@@ -47,7 +48,34 @@ export interface Name {
   };
 }
 
-export type Filter = None | All | And | Or | Not | Subscription | Tag | Protocol | Name;
+export interface Price {
+  type: "price";
+  value: number;
+}
+
+export type Filter = None | All | And | Or | Not | Subscription | Tag | Protocol | Name | Price;
+
+export const filterSchema: z.ZodType<Filter> = z.lazy(() =>
+  z.union([
+    z.object({ type: z.literal("none") }),
+    z.object({ type: z.literal("all") }),
+    z.object({ type: z.literal("and"), value: z.array(filterSchema) }),
+    z.object({ type: z.literal("or"), value: z.array(filterSchema) }),
+    z.object({ type: z.literal("not"), value: filterSchema }),
+    z.object({ type: z.literal("subscription"), value: z.string() }),
+    z.object({ type: z.literal("tag"), value: z.string() }),
+    z.object({ type: z.literal("protocol"), value: z.string() }),
+    z.object({
+      type: z.literal("name"),
+      value: z.object({
+        exact: z.string().optional(),
+        include: z.string().optional(),
+        exclude: z.string().optional(),
+      }),
+    }),
+    z.object({ type: z.literal("price"), value: z.number() }),
+  ]),
+);
 
 export function match(node: Node, rules: Filter): boolean {
   switch (rules.type) {
@@ -74,6 +102,8 @@ export function match(node: Node, rules: Filter): boolean {
       if (rules.value.include && !node.name.includes(rules.value.include)) return false;
       if (rules.value.exclude && node.name.includes(rules.value.exclude)) return false;
       return true;
+    case "price":
+      return node.price <= rules.value;
   }
 }
 
