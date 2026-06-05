@@ -110,6 +110,7 @@ model Route {
   outbound String @default("PROXY")
   /// ![string[]]
   rulesets Json   @default("[]")
+  rules    String @default("")
   /// ![import("../../core/nodes/node-filter").Filter]
   filter   Json   @default("{\"type\":\"none\"}")
 }

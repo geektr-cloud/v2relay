@@ -67,6 +67,10 @@ const filterModel = computed({
               </div>
               <span v-else class="text-muted-foreground">—</span>
             </DataItem>
+            <DataItem label="附加规则">
+              <pre v-if="item.rules" class="font-mono text-xs whitespace-pre-wrap">{{ item.rules }}</pre>
+              <span v-else class="text-muted-foreground">—</span>
+            </DataItem>
           </DataView>
         </CardContent>
       </Card>

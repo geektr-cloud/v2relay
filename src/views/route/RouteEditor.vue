@@ -10,6 +10,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CopyTag } from "@/components/DataView";
@@ -52,6 +53,19 @@ const [form, issues, status, submit] = useUpsert(id);
         <FieldLabel>规则集</FieldLabel>
         <RulesetMultiSelect v-model="form.rulesets" />
         <FieldError :errors="issues.errors('rulesets')" />
+      </Field>
+      <Field>
+        <FieldLabel for="rules">附加规则</FieldLabel>
+        <Textarea
+          id="rules"
+          v-model="form.rules"
+          rows="6"
+          placeholder="DOMAIN-SUFFIX,example.com&#10;IP-CIDR,10.0.0.0/8"
+          class="font-mono text-xs"
+          @focus="issues.ingore('rules')"
+        />
+        <FieldDescription>每行一条规则，追加于规则集之后</FieldDescription>
+        <FieldError :errors="issues.errors('rules')" />
       </Field>
       <Field v-if="form.outbound === 'PROXY'">
         <FieldLabel>节点筛选</FieldLabel>

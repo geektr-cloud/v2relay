@@ -12,9 +12,10 @@ const outbound = z.string().refine((v) => (OUTBOUND_VALUES as readonly string[])
   message: "invalid outbound",
 });
 const rulesets = z.array(z.uuid());
+const rules = z.string();
 const filter = filterSchema;
 
-export const route = z.object({ id, name, outbound, rulesets, filter });
+export const route = z.object({ id, name, outbound, rulesets, rules, filter });
 assert<Equals<z.infer<typeof route>, Route>>();
 export type { Route };
 export const newItem = (): Route => ({
@@ -22,6 +23,7 @@ export const newItem = (): Route => ({
   name: "",
   outbound: "PROXY",
   rulesets: [],
+  rules: "",
   filter: { type: "none" },
 });
 
