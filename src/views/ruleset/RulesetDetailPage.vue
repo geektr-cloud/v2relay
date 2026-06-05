@@ -7,6 +7,7 @@ import { DetailPage, RemovalButton, useFormModel } from "@/components/CMS";
 import { CopyBtn, DataItem, DataView, DateFormatter as DateView, VSeparator } from "@/components/DataView";
 import CopyTag from "@/components/DataView/CopyTag.vue";
 import Button from "@/components/ui/button/Button.vue";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RulesetEditor from "./RulesetEditor.vue";
 
@@ -40,7 +41,12 @@ const removal = useRemoval(id);
               <CopyBtn :value="item.id" />
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
-            <DataItem label="URL">
+            <DataItem label="来源">
+              <Badge v-if="item.rules" variant="secondary">内联</Badge>
+              <Badge v-else-if="item.url" variant="outline">URL</Badge>
+              <span v-else class="text-muted-foreground">未配置</span>
+            </DataItem>
+            <DataItem v-if="item.url" label="URL">
               <CopyTag :value="item.url" />
             </DataItem>
             <DataItem label="创建时间">
@@ -53,7 +59,7 @@ const removal = useRemoval(id);
         </CardContent>
       </Card>
 
-      <RulesetContentViewer :id="item.id" />
+      <RulesetContentViewer :id="item.id" :inline="!!item.rules" />
     </template>
   </DetailPage>
 </template>

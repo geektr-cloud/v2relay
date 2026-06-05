@@ -9,7 +9,7 @@ import type { RulesetCacheStatus } from "@server/core/rulesets/ruleset-manager";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const props = defineProps<{ id: string }>();
+const props = defineProps<{ id: string; inline?: boolean }>();
 const showContent = ref(false);
 
 const getCacheStatus = useHonoApi<RulesetCacheStatus, RulesetCacheStatus, [string]>((rulesetId: string) =>
@@ -95,7 +95,14 @@ const doDownload = () => {
           </Button>
           <VSeparator class="h-5" />
         </template>
-        <Button variant="secondary" size="icon" :disabled="status.loading" title="强制刷新" @click="doForceReload">
+        <Button
+          v-if="!inline"
+          variant="secondary"
+          size="icon"
+          :disabled="status.loading"
+          title="强制刷新"
+          @click="doForceReload"
+        >
           <RefreshCw :class="status.loading ? 'animate-spin' : ''" />
         </Button>
         <Button

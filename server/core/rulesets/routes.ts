@@ -47,7 +47,7 @@ export const rulesetRoutes = new Hono()
     const { id } = c.req.valid("param");
     const item = await prisma.ruleset.findUnique({ where: { id } });
     if (!item) throw HttpErr(404, "Ruleset not found");
-    const handle = new RulesetManager(item.id, item.url);
+    const handle = new RulesetManager(item);
     const result = await handle.get();
     return c.json(result.cacheStatus);
   })
@@ -56,7 +56,7 @@ export const rulesetRoutes = new Hono()
     const { force_reload } = c.req.valid("query");
     const item = await prisma.ruleset.findUnique({ where: { id } });
     if (!item) throw HttpErr(404, "Ruleset not found");
-    const handle = new RulesetManager(item.id, item.url);
+    const handle = new RulesetManager(item);
     const { response } = await handle.get({ forceReload: force_reload });
     return new Response(response.body, { headers: response.headers });
   });

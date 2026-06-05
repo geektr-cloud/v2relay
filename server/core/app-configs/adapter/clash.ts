@@ -81,7 +81,7 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     for (const rg of this.config.rulesetGroups) {
       const rulesets = await prisma.ruleset.findMany({ where: { id: { in: rg.rulesets } } });
       for (const rs of rulesets) {
-        const mgr = new RulesetManager(rs.id, rs.url);
+        const mgr = new RulesetManager(rs);
         const generated = await mgr.genClashRulesWithPolicy(rg.target);
         rules.push(...generated);
       }

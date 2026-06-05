@@ -14,20 +14,61 @@ export type RulesetCacheStatus = {
 
 const kvKey = (id: string): string => `ruleset:${id}`;
 
+type RulesetRef = { id: string; url: string; rules: string };
+
 export class RulesetManager {
-  constructor(
-    readonly id: string,
-    readonly url: string,
-  ) {}
+  readonly id: string;
+  readonly url: string;
+  readonly rules: string;
+
+  constructor(ref: RulesetRef);
+  constructor(id: string, url: string, rules?: string);
+  constructor(idOrRef: string | RulesetRef, url?: string, rules?: string) {
+    if (typeof idOrRef === "string") {
+      this.id = idOrRef;
+      this.url = url ?? "";
+      this.rules = rules ?? "";
+    } else {
+      this.id = idOrRef.id;
+      this.url = idOrRef.url;
+      this.rules = idOrRef.rules;
+    }
+  }
+
+  private get inline(): boolean {
+    return this.rules !== "";
+  }
 
   async get(options: { forceReload?: boolean } = {}): Promise<{ response: Response; cacheStatus: RulesetCacheStatus }> {
+    if (this.inline) return this.buildInline();
+
     if (!options.forceReload) {
       const cached = await this.readCached();
       if (cached) return cached;
     }
 
+    if (!this.url) throw HttpErr(400, "Ruleset has neither url nor rules");
+
     const upstream = await this.fetchUpstream();
     return this.write(upstream.body, upstream.contentType, this.url);
+  }
+
+  private buildInline(): { response: Response; cacheStatus: RulesetCacheStatus } {
+    const body = new TextEncoder().encode(this.rules).buffer as ArrayBuffer;
+    const contentType = "text/plain; charset=utf-8";
+    const cacheStatus: RulesetCacheStatus = {
+      sourceUrl: "inline",
+      size: body.byteLength,
+      cachedAt: new Date().toISOString(),
+      contentType,
+    };
+    const response = new Response(body, {
+      headers: {
+        "content-type": contentType,
+        "content-length": String(body.byteLength),
+      },
+    });
+    return { response, cacheStatus };
   }
 
   private async readCached(): Promise<{ response: Response; cacheStatus: RulesetCacheStatus } | null> {

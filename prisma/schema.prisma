@@ -90,6 +90,7 @@ model Ruleset {
   id        String   @id @default(uuid())
   name      String   @unique
   url       String   @default("")
+  rules     String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
