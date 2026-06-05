@@ -14,6 +14,7 @@ defineOptions({
 
 const props = defineProps<
   ComboboxInputProps & {
+    inputGroupClass?: HTMLAttributes["class"];
     class?: HTMLAttributes["class"];
   }
 >();
@@ -26,7 +27,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>
-  <InputGroup>
+  <InputGroup :class="props.inputGroupClass">
     <InputGroupAddon>
       <SearchIcon class="size-4 shrink-0 opacity-50" />
     </InputGroupAddon>

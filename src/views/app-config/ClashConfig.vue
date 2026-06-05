@@ -1,28 +1,49 @@
 <script setup lang="ts">
-import { computed, reactive, watch, toRaw } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useThrottleFn } from "@vueuse/core";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { EntitySelect } from "@/components/DataView";
 import TargetSelect from "./TargetSelect.vue";
 import InlineEditText from "./InlineEditText.vue";
-import NodeMultiSelect from "./NodeMultiSelect.vue";
 import RulesetMultiSelect from "./RulesetMultiSelect.vue";
+import NodeFilter from "@/views/node/NodeFilter.vue";
 import type { ClashConfigData } from "@server/core/app-configs/adapter/clash";
+import type { nodeFilter } from "@server/core/nodes";
 
-const defaultConfig = (): ClashConfigData => ({
-  nodeGroups: [{ name: "all", nodes: [] }],
-  rulesetGroups: [],
-  routing: [],
-});
+const emptyFilter = (): nodeFilter.Filter => ({ type: "none" });
+
+function normalizeFilter(v: unknown): nodeFilter.Filter {
+  if (v && typeof v === "object" && "type" in v) return v as nodeFilter.Filter;
+  return emptyFilter();
+}
+
+function normalize(input: ClashConfigData | undefined): ClashConfigData {
+  if (!input) {
+    return {
+      nodeGroups: [{ name: "all", filter: emptyFilter() }],
+      rulesetGroups: [],
+      routing: [],
+    };
+  }
+  return {
+    nodeGroups: (input.nodeGroups ?? []).map((g) => ({ name: g.name, filter: normalizeFilter(g.filter) })),
+    rulesetGroups: input.rulesetGroups ?? [],
+    routing: (input.routing ?? []).map((r) => ({
+      target: r.target,
+      nodeGroups: r.nodeGroups ?? [],
+      filter: normalizeFilter(r.filter),
+    })),
+  };
+}
 
 const props = withDefaults(defineProps<{ modelValue: ClashConfigData; editable?: boolean }>(), { editable: true });
 const emit = defineEmits<{ "update:modelValue": [value: ClashConfigData] }>();
 
-const config = reactive<ClashConfigData>(props.modelValue ? structuredClone(toRaw(props.modelValue)) : defaultConfig());
+const config = reactive<ClashConfigData>(normalize(JSON.parse(JSON.stringify(props.modelValue ?? null))));
 
 const throttledEmit = useThrottleFn(() => {
-  emit("update:modelValue", structuredClone(toRaw(config)));
+  emit("update:modelValue", JSON.parse(JSON.stringify(config)));
 }, 700);
 
 watch(config, throttledEmit, { deep: true });
@@ -70,14 +91,16 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destruc
     <section>
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">节点组</span>
-        <Button v-if="editable" variant="ghost" size="icon" class="h-6 w-6" @click="config.nodeGroups.push({ name: '', nodes: [] })">
+        <Button v-if="editable" variant="ghost" size="icon" class="h-6 w-6" @click="config.nodeGroups.push({ name: '', filter: emptyFilter() })">
           <Plus class="size-3.5" />
         </Button>
       </div>
       <div v-for="(g, i) in config.nodeGroups" :key="i" class="flex items-center gap-2 mb-2">
         <InlineEditText v-model="g.name" placeholder="组名" :editable="editable" />
-        <ArrowRight class="size-3.5 shrink-0 text-muted-foreground" />
-        <NodeMultiSelect v-model="g.nodes" :editable="editable" />
+        <ArrowRight class="size-3.5 shrink-0 text-muted-foreground mt-1.5" />
+        <div class="flex-1 min-w-0">
+          <NodeFilter v-model="g.filter" :editable="editable" />
+        </div>
         <Button
 v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destructive"
           @click="config.nodeGroups.splice(i, 1)">
@@ -92,7 +115,7 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destruc
         <span class="text-sm font-medium">路由策略</span>
         <Button
 v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
-          @click="config.routing.push({ target: '', nodeGroups: [], nodes: [] })">
+          @click="config.routing.push({ target: '', nodeGroups: [], filter: emptyFilter() })">
           <Plus class="size-3.5" />
         </Button>
       </div>
@@ -105,7 +128,7 @@ v-if="editable" variant="ghost" size="icon" class="h-6 w-6"
         <ArrowRight class="size-3.5 shrink-0 text-muted-foreground mt-1.5" />
         <div class="flex flex-col gap-1 flex-1 min-w-0">
           <EntitySelect v-model="r.nodeGroups" :items="groupItems" :transform-fn="(i) => i" placeholder="选择节点组" :editable="editable" />
-          <NodeMultiSelect v-model="r.nodes" :editable="editable" />
+          <NodeFilter v-model="r.filter" :editable="editable" />
         </div>
         <Button
 v-if="editable" variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-destructive"

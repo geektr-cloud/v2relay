@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubscriptionStore } from "@/stores/subscriptions";
 
-defineProps<{ disabled?: boolean }>();
+defineProps<{ disabled?: boolean, size?: "sm" | "md" | "lg" }>();
 const modelValue = defineModel<string | undefined>();
 
 const { useAll } = useSubscriptionStore();
@@ -13,7 +13,7 @@ const [items, status] = useAll();
 <template>
   <Skeleton v-if="status.loading" class="h-8 w-full" />
   <Select v-else v-model="modelValue" :disabled="disabled">
-    <SelectTrigger>
+    <SelectTrigger size="sm">
       <SelectValue placeholder="选择订阅" />
     </SelectTrigger>
     <SelectContent :use-portal="false">

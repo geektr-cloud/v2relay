@@ -1,11 +1,13 @@
 import YAML from "yaml";
 import { prisma } from "@server/db";
 import { RulesetManager } from "@server/core/rulesets/ruleset-manager";
+import { filterNodes, type Filter } from "@server/core/nodes/node-filter";
+import type { Node } from "@server/core/nodes/schema";
 import type { AppConfigAdapter } from "./base";
 
 export interface NodeGroup {
   name: string;
-  nodes: string[];
+  filter: Filter;
 }
 export interface RulesetGroup {
   target: string;
@@ -14,7 +16,7 @@ export interface RulesetGroup {
 export interface Routing {
   target: string;
   nodeGroups: string[];
-  nodes: string[];
+  filter: Filter;
 }
 export interface ClashConfigData {
   nodeGroups: NodeGroup[];
@@ -31,19 +33,15 @@ export class ClashConfigAdapter implements AppConfigAdapter {
   async build(): Promise<Record<string, unknown>> {
     const base: Record<string, unknown> = this.template ? (YAML.parse(this.template) ?? {}) : {};
 
-    const nodeIds = new Set<string>();
-    for (const g of this.config.nodeGroups) for (const id of g.nodes) nodeIds.add(id);
-    for (const r of this.config.routing) for (const id of r.nodes) nodeIds.add(id);
-
-    let nodes = nodeIds.size ? await prisma.node.findMany({ where: { id: { in: [...nodeIds] } } }) : [];
-    nodes = nodes.sort((a, b) => `${a.subscriptionId}-${a.name}`.localeCompare(`${b.subscriptionId}-${b.name}`));
-    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    let allNodes = await prisma.node.findMany();
+    allNodes = allNodes.sort((a, b) =>
+      `${a.subscriptionId}-${a.name}`.localeCompare(`${b.subscriptionId}-${b.name}`),
+    );
 
     const proxies: unknown[] = [];
     const seenProxy = new Set<string>();
-    const addProxy = (id: string) => {
-      const n = nodeMap.get(id);
-      if (!n || !n.connInfo || seenProxy.has(n.name)) return;
+    const addProxy = (n: Node) => {
+      if (!n.connInfo || seenProxy.has(n.name)) return;
       seenProxy.add(n.name);
       proxies.push(n.connInfo);
     };
@@ -51,11 +49,11 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     // Build proxy-groups from nodeGroups
     const proxyGroups: unknown[] = [];
     for (const g of this.config.nodeGroups) {
+      const matched = filterNodes(allNodes, g.filter);
       const names: string[] = [];
-      for (const id of g.nodes) {
-        addProxy(id);
-        const n = nodeMap.get(id);
-        if (n) names.push(n.name);
+      for (const n of matched) {
+        addProxy(n);
+        names.push(n.name);
       }
 
       proxyGroups.push({
@@ -72,10 +70,10 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     // Build routing proxy-groups
     for (const r of this.config.routing) {
       const members: string[] = [...r.nodeGroups];
-      for (const id of r.nodes) {
-        addProxy(id);
-        const n = nodeMap.get(id);
-        if (n) members.push(n.name);
+      const matched = filterNodes(allNodes, r.filter);
+      for (const n of matched) {
+        addProxy(n);
+        members.push(n.name);
       }
       proxyGroups.push({ name: r.target, type: "select", proxies: members });
     }
