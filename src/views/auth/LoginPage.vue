@@ -30,7 +30,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950 px-4">
     <form class="w-full max-w-sm" @submit.prevent="submit">
       <FieldSet>
         <FieldLegend>登录</FieldLegend>

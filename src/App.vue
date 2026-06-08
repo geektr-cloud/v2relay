@@ -30,6 +30,7 @@ const onLogout = async () => {
   <div class="min-h-screen bg-zinc-950 text-zinc-100">
     <ModalsContainer />
     <header
+      v-if="auth.authenticated"
       class="sticky top-0 z-10 flex h-14 items-center gap-6 border-b border-zinc-800/80 bg-zinc-950/95 px-4 backdrop-blur supports-backdrop-filter:bg-zinc-950/80"
     >
       <RouterLink
@@ -61,7 +62,7 @@ const onLogout = async () => {
       </div>
     </header>
     <main class="bg-zinc-950">
-      <RouterView />
+      <RouterView v-if="auth.authenticated || route.name === 'login'" />
     </main>
   </div>
 </template>

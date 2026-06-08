@@ -1,4 +1,4 @@
-import { Protocol } from "@server/pkgs/protocols";
+import type { Protocol } from "@server/pkgs/protocols";
 import type { Node } from "../../nodes/schema";
 import type { AggregatedSubscription } from "../schema";
 
