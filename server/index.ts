@@ -10,6 +10,7 @@ import { rulesetRoutes } from "@server/core/rulesets/routes";
 import { appConfigRoutes } from "@server/core/app-configs/routes";
 import { routeRoutes } from "@server/core/routes/routes";
 import { authRoutes } from "@server/core/auth/routes";
+import { staticFileRoutes, publicStaticFileRoutes } from "@server/core/static-files/routes";
 import { ClashConfigAdapter, type ClashConfigData } from "@server/core/app-configs/adapter/clash";
 import { prisma } from "@server/db";
 import { requireAuth } from "@server/middlewares/auth";
@@ -26,6 +27,8 @@ export const app = new Hono()
   .route("/api/rulesets", rulesetRoutes)
   .route("/api/app-configs", appConfigRoutes)
   .route("/api/routes", routeRoutes)
+  .route("/api/static-files", staticFileRoutes)
+  .route("/files", publicStaticFileRoutes)
   .get("/sub/:token", async (c) => {
     const token = c.req.param("token");
     if (!token) throw HttpErr(404, "not found");

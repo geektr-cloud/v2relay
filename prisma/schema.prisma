@@ -119,3 +119,10 @@ model Route {
   /// ![import("../../core/nodes/node-filter").Filter]
   filter       Json   @default("{\"type\":\"none\"}")
 }
+
+model StaticFile {
+  id     String @id @default(uuid())
+  name   String @unique
+  url    String @default("")
+  expire Int    @default(86400)
+}

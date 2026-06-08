@@ -19,6 +19,7 @@ const systemNoticesActive = computed(() => route.name === "system-notices");
 const rulesetsActive = computed(() => route.name === "rulesets" || route.name === "ruleset-detail");
 const routesActive = computed(() => route.name === "routes" || route.name === "route-detail");
 const appConfigsActive = computed(() => route.name === "app-configs" || route.name === "app-config-detail");
+const staticFilesActive = computed(() => route.name === "static-files" || route.name === "static-file-detail");
 
 const onLogout = async () => {
   await auth.logout();
@@ -46,6 +47,7 @@ const onLogout = async () => {
         <RouterLink to="/rulesets" :class="navLinkClass(rulesetsActive)"> 规则集 </RouterLink>
         <RouterLink to="/routes" :class="navLinkClass(routesActive)"> 路由 </RouterLink>
         <RouterLink to="/app-configs" :class="navLinkClass(appConfigsActive)"> 配置 </RouterLink>
+        <RouterLink to="/static-files" :class="navLinkClass(staticFilesActive)"> 文件 </RouterLink>
         <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
         <RouterLink to="/system-notices" :class="navLinkClass(systemNoticesActive)"> 通知 </RouterLink>
       </nav>

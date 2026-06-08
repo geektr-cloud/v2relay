@@ -15,6 +15,8 @@ import AppConfigPage from "../views/app-config/AppConfigPage.vue";
 import AppConfigDetailPage from "../views/app-config/AppConfigDetailPage.vue";
 import RoutePage from "../views/route/RoutePage.vue";
 import RouteDetailPage from "../views/route/RouteDetailPage.vue";
+import StaticFilePage from "../views/static-file/StaticFilePage.vue";
+import StaticFileDetailPage from "../views/static-file/StaticFileDetailPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -99,6 +101,16 @@ const router = createRouter({
       path: "/routes/:idOrName",
       name: "route-detail",
       component: RouteDetailPage,
+    },
+    {
+      path: "/static-files",
+      name: "static-files",
+      component: StaticFilePage,
+    },
+    {
+      path: "/static-files/:idOrName",
+      name: "static-file-detail",
+      component: StaticFileDetailPage,
     },
   ],
 });
