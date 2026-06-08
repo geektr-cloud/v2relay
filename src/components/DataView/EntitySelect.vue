@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T">
 import { computed, ref } from "vue";
-import { Check, Pencil, SquareCheck } from "lucide-vue-next";
+import { Check, Pencil, SquareCheck, Trash2 } from "lucide-vue-next";
 import type { AsyncStatus } from "@/lib/acrux";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,10 @@ const filtered = computed(() => {
   if (!term) return transformed.value;
   return transformed.value.filter((t) => t.searchText.toLowerCase().includes(term));
 });
+
+const knownIds = computed(() => new Set(transformed.value.map((t) => t.id)));
+const staleIds = computed(() => props.modelValue.filter((id) => !knownIds.value.has(id)));
+const cleanupStale = () => emit("update:modelValue", props.modelValue.filter((id) => knownIds.value.has(id)));
 
 const selectedLabels = computed(() =>
   props.modelValue.map((id) => transformed.value.find((t) => t.id === id)?.title ?? id.slice(0, 8)),
@@ -87,6 +91,16 @@ const selectAll = () => {
           </template>
           <span v-else class="text-xs text-muted-foreground">{{ placeholder ?? "未选择" }}</span>
           <Pencil class="size-3 shrink-0 text-muted-foreground" />
+          <span
+            v-if="staleIds.length"
+            role="button"
+            class="ml-1 inline-flex items-center gap-0.5 text-xs text-destructive hover:underline shrink-0"
+            title="清理失效项"
+            @click.stop="cleanupStale"
+          >
+            <Trash2 class="size-3" />
+            清理失效项
+          </span>
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" side="bottom" class="w-80 max-h-80 flex flex-col">

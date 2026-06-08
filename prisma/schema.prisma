@@ -87,12 +87,13 @@ model SystemNotice {
 }
 
 model Ruleset {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  url       String   @default("")
-  rules     String   @default("")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String   @default("")
+  url         String   @default("")
+  rules       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model AppConfig {
@@ -105,12 +106,15 @@ model AppConfig {
 }
 
 model Route {
-  id       String @id @default(uuid())
-  name     String @unique
-  outbound String @default("PROXY")
+  id           String @id @default(uuid())
+  name         String @unique
+  overrideName String @default("")
+  outbound     String @default("PROXY")
   /// ![string[]]
-  rulesets Json   @default("[]")
-  rules    String @default("")
+  rulesets     Json   @default("[]")
+  rules        String @default("")
+  /// ![string[]]
+  features     Json   @default("[]")
   /// ![import("../../core/nodes/node-filter").Filter]
-  filter   Json   @default("{\"type\":\"none\"}")
+  filter       Json   @default("{\"type\":\"none\"}")
 }

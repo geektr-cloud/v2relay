@@ -5,6 +5,7 @@ import { zValidator } from "@hono/zod-validator";
 import * as schema from "./schema";
 import { type SubscriptionCacheStatus, SubscriptionManager } from "./subscription-manager";
 import { HttpErr } from "@server/utils/http-errors";
+import type { AggregatedSubscription } from "./schema";
 
 async function loadSubscriptionContent(
   id: string,
@@ -14,7 +15,7 @@ async function loadSubscriptionContent(
   if (!sub) throw HttpErr(404, "Subscription not found");
   if (!sub.enabled) throw HttpErr(403, "Subscription disabled");
 
-  const handle = new SubscriptionManager(sub);
+  const handle = new SubscriptionManager(sub as unknown as AggregatedSubscription);
   return handle.get(options);
 }
 
@@ -96,7 +97,7 @@ export const subscriptionRoutes = new Hono()
     if (body.byteLength === 0) throw HttpErr(400, "Empty body");
     const contentType = c.req.header("content-type") ?? "text/plain; charset=utf-8";
 
-    const handle = new SubscriptionManager(sub);
+    const handle = new SubscriptionManager(sub as unknown as AggregatedSubscription);
     const { cacheStatus } = await handle.put(body, contentType);
     return c.json(cacheStatus);
   });

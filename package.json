@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@countrystatecity/countries": "^1.0.5",
+    "@formkit/drag-and-drop": "^0.5.3",
     "@guolao/vue-monaco-editor": "^1.6.0",
     "@hono/zod-validator": "^0.7.6",
     "@monyone/aho-corasick": "^1.1.11",

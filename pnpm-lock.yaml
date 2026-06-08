@@ -11,6 +11,9 @@ importers:
       '@countrystatecity/countries':
         specifier: ^1.0.5
         version: 1.0.5
+      '@formkit/drag-and-drop':
+        specifier: ^0.5.3
+        version: 0.5.3
       '@guolao/vue-monaco-editor':
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.34(typescript@5.9.3))
@@ -833,6 +836,9 @@ packages:
 
   '@floating-ui/vue@1.1.11':
     resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
+
+  '@formkit/drag-and-drop@0.5.3':
+    resolution: {integrity: sha512-VGQsKYc350OOMbz7wYt69YqDbn49x7RJ32eqiJieNke54nGZYmx18XEqTw0lBiJmH3RaiH6V45gB1u+tvI/TNw==}
 
   '@guolao/vue-monaco-editor@1.6.0':
     resolution: {integrity: sha512-w2IiJ6eJGGeuIgCK6EKZOAfhHTTUB5aZwslzwGbZ5e89Hb4avx6++GkLTW8p84Sng/arFMjLPPxSBI56cFudyQ==}
@@ -4843,6 +4849,8 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+
+  '@formkit/drag-and-drop@0.5.3': {}
 
   '@guolao/vue-monaco-editor@1.6.0(monaco-editor@0.55.1)(vue@3.5.34(typescript@5.9.3))':
     dependencies:

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type Equals, assert } from "tsafe";
+import { provider } from "../providers/schema";
 import type { Subscription } from "@server/generated/prisma/dto";
 
 // ── field definitions ─────────────────────────────────────────────────────────
@@ -32,6 +33,11 @@ export const newItem = (): Subscription => ({
   createdAt: "",
   updatedAt: "",
 });
+
+// 对于业务中实际需要的每一类变体，都应该有对应的 schema，只允许在这个文件里派生 Schema
+// 此处的用于 aggregate 查询
+export const aggregatedSubscription = subscription.extend({ provider });
+export type AggregatedSubscription = z.infer<typeof aggregatedSubscription>;
 
 // ── api schemas ───────────────────────────────────────────────────────────────
 

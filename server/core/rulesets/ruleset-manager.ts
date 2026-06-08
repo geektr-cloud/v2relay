@@ -109,23 +109,27 @@ export class RulesetManager {
     return { response, cacheStatus: status };
   }
 
-  async genClashRulesWithPolicy(policy: string): Promise<string[]> {
+  async *genClashRulesWithPolicy(policy: string): AsyncGenerator<string> {
     const { response } = await this.get();
     const text = await response.text();
-    return text
-      .split("\n")
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith("#"))
-      .map((l) => Rule.parseTemplate(l))
-      .filter((r): r is Rule => r !== null)
-      .map((r) => {
-        r.policy = policy;
-        return r.stringify();
-      });
+    for (const raw of text.split("\n")) {
+      const l = raw.trim();
+      if (!l || l.startsWith("#")) continue;
+      const r = Rule.parseTemplate(l);
+      if (!r) continue;
+      r.policy = policy;
+      yield r.stringify();
+    }
   }
 
   private async fetchUpstream(): Promise<{ body: ArrayBuffer; contentType: string }> {
-    const res = await fetch(this.url, { headers: { "user-agent": USER_AGENT } });
+    let url = this.url;
+    if (env.GITHUB_PROXY && url.includes("github")) {
+      url = `${env.GITHUB_PROXY}${url}`;
+      console.log(`Using GitHub proxy for ruleset ${this.id}: ${url}`);
+    }
+
+    const res = await fetch(url, { headers: { "user-agent": USER_AGENT } });
     if (!res.ok) throw HttpErr(502, `Upstream returned ${res.status}`);
     const body = await res.arrayBuffer();
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";

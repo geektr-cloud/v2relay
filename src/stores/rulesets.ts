@@ -6,6 +6,7 @@ import { defineStore } from "pinia";
 export const useRulesetStore = defineStore("rulesets", () =>
   useSortedCollection({
     newItem: ruleset.newItem,
+    sortFn: (a, b) => a.name.localeCompare(b.name),
     fetchFn: useHonoApi(() => client.api.rulesets.$get()),
     removeFn: useHonoApi((id: string) => client.api.rulesets[":id"].$delete({ param: { id } })),
     upsertFn: useHonoApi((json: ruleset.Ruleset) => client.api.rulesets.$put({ json })),

@@ -11,9 +11,9 @@ const [items, status] = useAll();
 
 const transformFn = (r: ruleset.Ruleset) => ({
   id: r.id,
-  searchText: `${r.id} ${r.name} ${r.url}`,
+  searchText: `${r.id} ${r.name} ${r.description} ${r.url}`,
   title: r.name,
-  summary: r.url,
+  summary: r.description || r.url,
 });
 </script>
 

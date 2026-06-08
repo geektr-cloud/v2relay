@@ -1,29 +1,13 @@
 import YAML from "yaml";
 import { prisma } from "@server/db";
 import { RulesetManager } from "@server/core/rulesets/ruleset-manager";
-import { filterNodes, type Filter } from "@server/core/nodes/node-filter";
+import { filterNodes } from "@server/core/nodes/node-filter";
 import type { Node } from "@server/core/nodes/schema";
-import type { Outbound } from "@server/core/routes/schema";
+import type { Route } from "@server/core/routes/schema";
 import type { AppConfigAdapter } from "./base";
 
-export interface NodeGroup {
-  name: string;
-  filter: Filter;
-}
-export interface RulesetGroup {
-  target: string;
-  rulesets: string[];
-}
-export interface Routing {
-  target: string;
-  outbound: Outbound;
-  nodeGroups: string[];
-  filter: Filter;
-}
 export interface ClashConfigData {
-  nodeGroups: NodeGroup[];
-  rulesetGroups: RulesetGroup[];
-  routing: Routing[];
+  routes: string[];
 }
 
 export class ClashConfigAdapter implements AppConfigAdapter {
@@ -46,53 +30,84 @@ export class ClashConfigAdapter implements AppConfigAdapter {
       proxies.push(n.connInfo);
     };
 
-    // Build proxy-groups from nodeGroups
+    const routeRows: Route[] = this.config.routes.length
+      ? ((await prisma.route.findMany({ where: { id: { in: this.config.routes } } })) as Route[])
+      : [];
+    const routeById = new Map<string, Route>(routeRows.map((r) => [r.id, r]));
+
+    const allRulesetIds = new Set<string>();
+    for (const r of routeRows) for (const id of r.rulesets) allRulesetIds.add(id);
+    const rulesetRows = allRulesetIds.size
+      ? await prisma.ruleset.findMany({ where: { id: { in: [...allRulesetIds] } } })
+      : [];
+    const rulesetById = new Map(rulesetRows.map((rs) => [rs.id, rs]));
+
     const proxyGroups: unknown[] = [];
-    for (const g of this.config.nodeGroups) {
-      const matched = filterNodes(allNodes, g.filter);
-      const names: string[] = [];
-      for (const n of matched) {
-        addProxy(n);
-        names.push(n.name);
-      }
+    const rules: string[] = [];
 
-      proxyGroups.push({
-        name: `${g.name}-auto`,
-        type: "url-test",
-        proxies: names,
-        url: "https://www.gstatic.com/generate_204",
-        interval: 300,
-      });
+    for (const id of this.config.routes) {
+      const r = routeById.get(id);
+      if (!r) continue;
 
-      proxyGroups.push({ name: g.name, type: "select", proxies: [`${g.name}-auto`, ...names] });
-    }
+      const target = r.overrideName || r.name;
+      const policy = r.outbound === "PROXY" ? target : r.outbound;
 
-    // Build routing proxy-groups
-    for (const r of this.config.routing) {
       if (r.outbound === "PROXY") {
-        const members: string[] = [...r.nodeGroups];
         const matched = filterNodes(allNodes, r.filter);
+        matched.sort((a, b) => a.price - b.price || a.name.localeCompare(b.name));
+        const nodeNames: string[] = [];
         for (const n of matched) {
           addProxy(n);
-          members.push(n.name);
+          nodeNames.push(n.name);
         }
-        proxyGroups.push({ name: r.target, type: "select", proxies: members });
-      } else {
-        proxyGroups.push({ name: r.target, type: "select", proxies: [r.outbound] });
+
+        const features = new Set(r.features);
+        const members: string[] = [];
+
+        if (features.has("lb")) {
+          const lbName = `${target}-LB`;
+          proxyGroups.push({
+            name: lbName,
+            type: "load-balance",
+            proxies: nodeNames,
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+          });
+          members.push(lbName);
+        }
+        if (features.has("auto")) {
+          const autoName = `${target}-Auto`;
+          proxyGroups.push({
+            name: autoName,
+            type: "url-test",
+            proxies: nodeNames,
+            url: "https://www.gstatic.com/generate_204",
+            interval: 300,
+          });
+          members.push(autoName);
+        }
+        members.push(...nodeNames);
+        members.push("DIRECT", "REJECT");
+
+        proxyGroups.push({ name: target, type: "select", proxies: members });
+      }
+
+      for (const rsId of r.rulesets) {
+        const rs = rulesetById.get(rsId);
+        if (!rs) continue;
+        const mgr = new RulesetManager(rs);
+        for await (const rule of mgr.genClashRulesWithPolicy(policy)) rules.push(rule);
+      }
+
+      if (r.rules) {
+        const inline = new RulesetManager({ id: `inline-${r.id}`, url: "", rules: r.rules });
+        for await (const rule of inline.genClashRulesWithPolicy(policy)) rules.push(rule);
       }
     }
 
-    // Build rules from rulesetGroups
-    const rules: string[] = [];
-    for (const rg of this.config.rulesetGroups) {
-      const rulesets = await prisma.ruleset.findMany({ where: { id: { in: rg.rulesets } } });
-      for (const rs of rulesets) {
-        const mgr = new RulesetManager(rs);
-        const generated = await mgr.genClashRulesWithPolicy(rg.target);
-        rules.push(...generated);
-      }
+    if (!rules.find((r) => r.startsWith("MATCH"))) {
+      rules.push("MATCH,DIRECT");
     }
-    rules.push("MATCH,DIRECT");
 
     return { ...base, proxies, "proxy-groups": proxyGroups, rules };
   }

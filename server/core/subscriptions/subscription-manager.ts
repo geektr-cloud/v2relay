@@ -8,6 +8,8 @@ import type { Node } from "@server/generated/prisma/dto";
 import { dnsResolve } from "@server/utils/dns-resolve";
 import { createNotice, createNotices } from "../system-notices/create-notices";
 import { tagMatcher } from "../tags/tag-matcher";
+import type { AggregatedSubscription } from "./schema";
+import { getProviderHooks } from "./provider-hooks";
 
 /** uuid v5 namespace for deterministic node ids (derived once from NIL UUID) */
 const uuidNodeNS = uuidv5("nodes", NIL);
@@ -41,24 +43,15 @@ export type SubscriptionCacheStatus = {
 
 const kvKey = (id: string): string => `subscription:${id}`;
 
-/** Subscription + provider 聚合体 — 调用方需提供给 manager 以避免重复查库
- *  结构性类型，不依赖 dto 体系（避免 prisma runtime 的 Date 与 dto 的 string 冲突） */
-export type SubscriptionWithProvider = {
-  id: string;
-  urls: unknown;
-  price: number;
-  provider: { syncTags: boolean };
-};
-
 export class SubscriptionManager {
   readonly id: string;
   readonly urls: string[];
   readonly syncTags: boolean;
   readonly price: number;
 
-  constructor(readonly sub: SubscriptionWithProvider) {
+  constructor(readonly sub: AggregatedSubscription) {
     this.id = sub.id;
-    this.urls = (sub.urls as string[]) ?? [];
+    this.urls = sub.urls;
     this.syncTags = sub.provider.syncTags;
     this.price = sub.price;
   }
@@ -135,6 +128,8 @@ export class SubscriptionManager {
    * 调用 batchUpdate 在 KV 写入之前完成，DB 写失败时整体抛错、KV 不会被覆盖。
    */
   private async syncNodes(body: ArrayBuffer, contentType: string): Promise<void> {
+    const hook = getProviderHooks(this.sub.provider.name);
+
     const ct = contentType.toLowerCase();
     let protocols: Protocol[];
     let groupToProxy: Map<string, Set<string>> = new Map();
@@ -173,7 +168,9 @@ export class SubscriptionManager {
       if (notices.size > 0) createNotices(notices);
     }
 
-    const nodes: Node[] = protocols.map((p) => {
+    if (hook?.rewriteProtocols) protocols = hook.rewriteProtocols(this.sub, protocols);
+
+    let nodes: Node[] = protocols.map((p) => {
       const { name, ip } = p.getServerInfo();
       const tagSet = new Set(nodeNameToTags.get(name) ?? []);
       for (const t of tagMatcher.match(name)) tagSet.add(t);
@@ -201,16 +198,18 @@ export class SubscriptionManager {
       n.ip = resolvedIps.get(n.ip) ?? n.ip;
     });
 
-    const deduped = nodes.filter((node, i) => {
+    nodes = nodes.filter((node, i) => {
       if (IGNORED_IPS.has(node.ip)) return false;
       const next = nodes[i + 1];
       if (!next) return true;
-      const { name: _na, ...a } = node;
-      const { name: _nb, ...b } = next;
+      const { name: _na, ...a } = node.connInfo;
+      const { name: _nb, ...b } = next.connInfo;
       return JSON.stringify(a) !== JSON.stringify(b);
     });
 
-    await batchUpdate(this.id, deduped);
+    if (hook?.rewriteNodes) nodes = hook.rewriteNodes(this.sub, nodes);
+
+    await batchUpdate(this.id, nodes);
   }
 
   private async fetchFirstWorking(): Promise<{ url: string; body: ArrayBuffer; contentType: string } | null> {

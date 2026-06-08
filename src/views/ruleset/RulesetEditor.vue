@@ -40,6 +40,16 @@ const rulesDisabled = computed(() => form.url.length > 0);
         <FieldError :errors="issues.errors('name')" />
       </Field>
       <Field>
+        <FieldLabel for="description">描述</FieldLabel>
+        <Input
+          id="description"
+          v-model="form.description"
+          placeholder="可选描述"
+          @focus="issues.ingore('description')"
+        />
+        <FieldError :errors="issues.errors('description')" />
+      </Field>
+      <Field>
         <FieldLabel for="url">URL</FieldLabel>
         <Input
           id="url"

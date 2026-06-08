@@ -4,17 +4,19 @@ import type { Ruleset } from "@server/generated/prisma/dto";
 
 const id = z.uuid();
 const name = z.string().trim().min(1).max(64);
+const description = z.string().default("");
 const url = z.union([z.literal(""), z.string().trim().url()]);
 const rules = z.string();
 const createdAt = z.string();
 const updatedAt = z.string();
 
-export const ruleset = z.object({ id, name, url, rules, createdAt, updatedAt });
+export const ruleset = z.object({ id, name, description, url, rules, createdAt, updatedAt });
 assert<Equals<z.infer<typeof ruleset>, Ruleset>>();
 export type { Ruleset };
 export const newItem = (): Ruleset => ({
   id: "",
   name: "",
+  description: "",
   url: "",
   rules: "",
   createdAt: "",

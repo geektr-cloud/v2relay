@@ -25,6 +25,18 @@ const emit = defineEmits<{ (e: "close"): void }>();
 const id = computed(() => props.id);
 const { useUpsert } = useRouteStore();
 const [form, issues, status, submit] = useUpsert(id);
+
+const FEATURE_OPTIONS: { value: route.Feature; label: string }[] = [
+  { value: "auto", label: "URL测试" },
+  { value: "lb", label: "负载均衡" },
+];
+
+const toggleFeature = (v: route.Feature, on: boolean) => {
+  const set = new Set(form.features);
+  if (on) set.add(v);
+  else set.delete(v);
+  form.features = [...set];
+};
 </script>
 
 <template>
@@ -38,6 +50,17 @@ const [form, issues, status, submit] = useUpsert(id);
         <FieldLabel for="name">名称</FieldLabel>
         <Input id="name" v-model="form.name" placeholder="路由名称" @focus="issues.ingore('name')" />
         <FieldError :errors="issues.errors('name')" />
+      </Field>
+      <Field>
+        <FieldLabel for="overrideName">显示名（可选）</FieldLabel>
+        <Input
+          id="overrideName"
+          v-model="form.overrideName"
+          placeholder="留空则用名称"
+          @focus="issues.ingore('overrideName')"
+        />
+        <FieldDescription>生成订阅时优先用此名</FieldDescription>
+        <FieldError :errors="issues.errors('overrideName')" />
       </Field>
       <Field>
         <FieldLabel>出站类型</FieldLabel>
@@ -71,6 +94,20 @@ const [form, issues, status, submit] = useUpsert(id);
         <FieldLabel>节点筛选</FieldLabel>
         <NodeFilter v-model="form.filter" />
         <FieldError :errors="issues.errors('filter')" />
+      </Field>
+      <Field v-if="form.outbound === 'PROXY'">
+        <FieldLabel>组特性</FieldLabel>
+        <div class="flex flex-wrap gap-3">
+          <label v-for="opt in FEATURE_OPTIONS" :key="opt.value" class="flex items-center gap-1.5 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="form.features.includes(opt.value)"
+              @change="toggleFeature(opt.value, ($event.target as HTMLInputElement).checked)"
+            />
+            {{ opt.label }}
+          </label>
+        </div>
+        <FieldError :errors="issues.errors('features')" />
       </Field>
     </FieldGroup>
   </FieldSet>

@@ -41,6 +41,7 @@ const removal = useRemoval(id);
               <CopyBtn :value="item.id" />
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
+            <DataItem v-if="item.description" label="描述">{{ item.description }}</DataItem>
             <DataItem label="来源">
               <Badge v-if="item.rules" variant="secondary">内联</Badge>
               <Badge v-else-if="item.url" variant="outline">URL</Badge>

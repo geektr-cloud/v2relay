@@ -51,6 +51,10 @@ const filterModel = computed({
               <CopyBtn :value="item.id" />
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
+            <DataItem label="显示名">
+              <span v-if="item.overrideName">{{ item.overrideName }}</span>
+              <span v-else class="text-muted-foreground">—</span>
+            </DataItem>
             <DataItem label="出站">
               <Badge variant="secondary">{{ item.outbound }}</Badge>
             </DataItem>
@@ -69,6 +73,12 @@ const filterModel = computed({
             </DataItem>
             <DataItem label="附加规则">
               <pre v-if="item.rules" class="font-mono text-xs whitespace-pre-wrap">{{ item.rules }}</pre>
+              <span v-else class="text-muted-foreground">—</span>
+            </DataItem>
+            <DataItem v-if="item.outbound === 'PROXY'" label="组特性">
+              <div v-if="item.features.length" class="flex flex-wrap gap-1">
+                <Badge v-for="f in item.features" :key="f" variant="secondary">{{ f }}</Badge>
+              </div>
               <span v-else class="text-muted-foreground">—</span>
             </DataItem>
           </DataView>

@@ -28,6 +28,7 @@ const removal = useConfirmPopover({
       <TableHeader>
         <TableRow>
           <TableHead>名称</TableHead>
+          <TableHead>描述</TableHead>
           <TableHead>URL</TableHead>
           <TableHead>更新于</TableHead>
           <TableHead class="w-[120px]">操作</TableHead>
@@ -39,6 +40,10 @@ const removal = useConfirmPopover({
             <Route :to="{ name: 'ruleset-detail', params: { idOrName: row.id } }">
               {{ row.name }}
             </Route>
+          </TableCell>
+          <TableCell>
+            <span v-if="row.description" class="text-muted-foreground">{{ row.description }}</span>
+            <span v-else class="text-muted-foreground">—</span>
           </TableCell>
           <TableCell>
             <div class="max-w-[40ch]">

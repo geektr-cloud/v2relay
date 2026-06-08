@@ -14,6 +14,8 @@ export interface ProtocolStatic {
 export interface Protocol {
   // protocol name, e.g. "shadowsocks"
   readonly protocol: string;
+  // name of the server, used for display and clash config
+  name: string;
   // convert the protocol to the url
   toUrl(): string;
   // convert the protocol to the clash config
