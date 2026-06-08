@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useRouteParams } from "@vueuse/router";
-import { Edit } from "lucide-vue-next";
+import { Edit, RefreshCw } from "lucide-vue-next";
 import { VueMonacoEditor } from "@guolao/vue-monaco-editor";
 import { useAppConfigStore } from "@/stores/app-configs";
 import { DetailPage, RemovalButton, useFormModel } from "@/components/CMS";
@@ -8,6 +9,7 @@ import { CopyBtn, DataItem, DataView, VSeparator } from "@/components/DataView";
 import CopyTag from "@/components/DataView/CopyTag.vue";
 import Button from "@/components/ui/button/Button.vue";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { client, rpc } from "@/utils/api";
 import AppConfigEditor from "./AppConfigEditor.vue";
 import ClashConfig from "./ClashConfig.vue";
 
@@ -49,6 +51,15 @@ const { useItem, useRemoval } = useAppConfigStore();
 const { update } = useFormModel(AppConfigEditor);
 const [item, status, reload] = useItem(id);
 const removal = useRemoval(id);
+
+const subUrl = computed(() => (item.value?.apiToken ? `${location.origin}/sub/${item.value.apiToken}` : ""));
+
+const rotate = async () => {
+  if (!item.value) return;
+  if (!confirm("轮换后旧订阅链接立即失效，确认轮换？")) return;
+  await rpc(client.api["app-configs"][":id"]["rotate-api-token"].$post({ param: { id: item.value.id } }));
+  await reload();
+};
 </script>
 
 <template>
@@ -73,6 +84,20 @@ const removal = useRemoval(id);
             </DataItem>
             <DataItem label="名称">{{ item.name }}</DataItem>
             <DataItem label="类型">{{ item.type || "—" }}</DataItem>
+            <DataItem label="API Token">
+              <template v-if="item.apiToken">
+                <CopyTag :value="item.apiToken" />
+              </template>
+              <span v-else class="text-muted-foreground text-xs">未生成，点击轮换</span>
+              <VSeparator />
+              <Button variant="ghost" size="icon" class="size-3.5 cursor-pointer" title="轮换 API Token" @click="rotate">
+                <RefreshCw class="size-3.5 shrink-0" />
+              </Button>
+            </DataItem>
+            <DataItem label="订阅链接">
+              <CopyTag v-if="subUrl" :value="subUrl" />
+              <span v-else class="text-muted-foreground text-xs">需先轮换生成 API Token</span>
+            </DataItem>
             <DataItem label="模板">
               <VueMonacoEditor
                 :value="item.template"

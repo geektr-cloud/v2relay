@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import { ModalsContainer } from "vue-final-modal";
+import { LogOut } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/stores/auth";
 
 const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
 const navLinkClass = (active: boolean) =>
   ["no-underline transition-colors", active ? "text-cyan-400" : "text-zinc-400 hover:text-cyan-400"].join(" ");
 const providersActive = computed(() => route.name === "home" || route.name === "provider-detail");
@@ -14,6 +19,11 @@ const systemNoticesActive = computed(() => route.name === "system-notices");
 const rulesetsActive = computed(() => route.name === "rulesets" || route.name === "ruleset-detail");
 const routesActive = computed(() => route.name === "routes" || route.name === "route-detail");
 const appConfigsActive = computed(() => route.name === "app-configs" || route.name === "app-config-detail");
+
+const onLogout = async () => {
+  await auth.logout();
+  router.push("/login");
+};
 </script>
 
 <template>
@@ -38,6 +48,17 @@ const appConfigsActive = computed(() => route.name === "app-configs" || route.na
         <RouterLink to="/tags" :class="navLinkClass(tagsActive)"> 标签 </RouterLink>
         <RouterLink to="/system-notices" :class="navLinkClass(systemNoticesActive)"> 通知 </RouterLink>
       </nav>
+      <div class="ml-auto">
+        <Button
+          v-if="auth.authenticated && route.name !== 'login'"
+          variant="ghost"
+          size="icon"
+          title="登出"
+          @click="onLogout"
+        >
+          <LogOut />
+        </Button>
+      </div>
     </header>
     <main class="bg-zinc-950">
       <RouterView />

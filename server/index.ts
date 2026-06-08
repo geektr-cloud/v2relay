@@ -9,9 +9,15 @@ import { systemNoticeRoutes } from "@server/core/system-notices/routes";
 import { rulesetRoutes } from "@server/core/rulesets/routes";
 import { appConfigRoutes } from "@server/core/app-configs/routes";
 import { routeRoutes } from "@server/core/routes/routes";
-import { ErrorHandler } from "@server/utils/http-errors";
+import { authRoutes } from "@server/core/auth/routes";
+import { ClashConfigAdapter, type ClashConfigData } from "@server/core/app-configs/adapter/clash";
+import { prisma } from "@server/db";
+import { requireAuth } from "@server/middlewares/auth";
+import { ErrorHandler, HttpErr } from "@server/utils/http-errors";
 
 export const app = new Hono()
+  .use("/api/*", requireAuth)
+  .route("/api/auth", authRoutes)
   .route("/api/providers", providerRoutes)
   .route("/api/subscriptions", subscriptionRoutes)
   .route("/api/tags", tagRoutes)
@@ -19,7 +25,18 @@ export const app = new Hono()
   .route("/api/system-notices", systemNoticeRoutes)
   .route("/api/rulesets", rulesetRoutes)
   .route("/api/app-configs", appConfigRoutes)
-  .route("/api/routes", routeRoutes);
+  .route("/api/routes", routeRoutes)
+  .get("/sub/:token", async (c) => {
+    const token = c.req.param("token");
+    if (!token) throw HttpErr(404, "not found");
+    const item = await prisma.appConfig.findFirst({ where: { apiToken: token } });
+    if (!item) throw HttpErr(404, "not found");
+    if (item.type === "clash") {
+      const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData);
+      return adapter.send();
+    }
+    throw HttpErr(400, "type not supported");
+  });
 
 export type AppType = typeof app;
 

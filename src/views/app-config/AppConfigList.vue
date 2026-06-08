@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { ref } from "vue";
+import { useClipboard } from "@vueuse/core";
 import { useConfirmPopover } from "@/components/Actions";
 import Route from "@/components/DataView/Route.vue";
 import { useAppConfigStore } from "@/stores/app-configs";
 import AppConfigEditor from "./AppConfigEditor.vue";
 import Button from "@/components/ui/button/Button.vue";
-import { File, SquarePen, Trash2 } from "lucide-vue-next";
+import { Check, File, Share2, SquarePen, Trash2 } from "lucide-vue-next";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useFormModel } from "@/components/CMS";
 
@@ -16,6 +18,16 @@ const removal = useConfirmPopover({
   message: "确定删除此配置？不可恢复。",
   useRemoval,
 });
+
+const { copy } = useClipboard();
+const copiedId = ref<string | null>(null);
+const copySub = (id: string, token: string) => {
+  copy(`${location.origin}/sub/${token}`);
+  copiedId.value = id;
+  setTimeout(() => {
+    if (copiedId.value === id) copiedId.value = null;
+  }, 1500);
+};
 </script>
 
 <template>
@@ -46,6 +58,16 @@ const removal = useConfirmPopover({
             </Button>
             <Button variant="ghost" size="icon" @click="update(row.id)">
               <SquarePen />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              :disabled="!row.apiToken"
+              :title="row.apiToken ? '复制订阅链接' : '需先在详情页轮换生成 API Token'"
+              @click="copySub(row.id, row.apiToken)"
+            >
+              <Check v-if="copiedId === row.id" />
+              <Share2 v-else />
             </Button>
             <Button
               variant="ghost"

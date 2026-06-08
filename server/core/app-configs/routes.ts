@@ -43,6 +43,12 @@ export const appConfigRoutes = new Hono()
     if (!existing) throw HttpErr(404, "AppConfig not found");
     return c.json(await prisma.appConfig.delete({ where: { id } }));
   })
+  .post("/:id/rotate-api-token", mid.paramId, async (c) => {
+    const { id } = c.req.valid("param");
+    const existing = await prisma.appConfig.findUnique({ where: { id } });
+    if (!existing) throw HttpErr(404, "AppConfig not found");
+    return c.json(await prisma.appConfig.update({ where: { id }, data: { apiToken: crypto.randomUUID() } }));
+  })
   .get("/:id/sub", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
     const item = await prisma.appConfig.findUnique({ where: { id } });

@@ -99,6 +99,7 @@ model Ruleset {
 model AppConfig {
   id       String @id @default(uuid())
   name     String @unique
+  apiToken String @default(uuid(4))
   type     String @default("")
   template String @default("")
   /// ![any]
