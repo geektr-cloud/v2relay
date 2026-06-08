@@ -98,7 +98,7 @@ export class RulesetManager {
       contentType,
     };
 
-    await env.kv.put(kvKey(this.id), body, { metadata: status });
+    await env.kv.put(kvKey(this.id), body, { metadata: status, expirationTtl: 86400 });
 
     const response = new Response(body, {
       headers: {
@@ -126,7 +126,6 @@ export class RulesetManager {
     let url = this.url;
     if (env.GITHUB_PROXY && url.includes("github")) {
       url = `${env.GITHUB_PROXY}${url}`;
-      console.log(`Using GitHub proxy for ruleset ${this.id}: ${url}`);
     }
 
     const res = await fetch(url, { headers: { "user-agent": USER_AGENT } });
