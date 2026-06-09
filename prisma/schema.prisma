@@ -97,13 +97,16 @@ model Ruleset {
 }
 
 model AppConfig {
-  id       String @id @default(uuid())
-  name     String @unique
-  apiToken String @default(uuid(4))
-  type     String @default("")
-  template String @default("")
+  id           String @id @default(uuid())
+  name         String @unique
+  overrideName String @default("")
+  apiToken     String @default(uuid(4))
+  type         String @default("")
+  template     String @default("")
   /// ![any]
-  config   Json   @default("{}")
+  config       Json   @default("{}")
+  /// ![import("../../core/nodes/node-filter").Filter]
+  nodeFilter   Json   @default("{\"type\":\"none\"}")
 }
 
 model Route {

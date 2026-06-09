@@ -34,8 +34,10 @@ export const app = new Hono()
     if (!token) throw HttpErr(404, "not found");
     const item = await prisma.appConfig.findFirst({ where: { apiToken: token } });
     if (!item) throw HttpErr(404, "not found");
+    const filter = item.nodeFilter as import("@server/core/nodes/node-filter").Filter;
+    const displayName = item.overrideName || item.name;
     if (item.type === "clash") {
-      const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData);
+      const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData, filter, displayName);
       return adapter.send();
     }
     throw HttpErr(400, "type not supported");

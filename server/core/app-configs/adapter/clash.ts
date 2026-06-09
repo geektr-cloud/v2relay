@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { prisma } from "@server/db";
 import { RulesetManager } from "@server/core/rulesets/ruleset-manager";
-import { filterNodes } from "@server/core/nodes/node-filter";
+import { type Filter, filterNodes } from "@server/core/nodes/node-filter";
 import type { Node } from "@server/core/nodes/schema";
 import type { Route } from "@server/core/routes/schema";
 import type { AppConfigAdapter } from "./base";
@@ -14,12 +14,18 @@ export class ClashConfigAdapter implements AppConfigAdapter {
   constructor(
     private template: string,
     private config: ClashConfigData,
+    private nodeFilter: Filter = { type: "none" },
+    private displayName: string = "",
+    private updateIntervalHours: number = 24,
   ) {}
 
   async build(): Promise<Record<string, unknown>> {
     const base: Record<string, unknown> = this.template ? (YAML.parse(this.template) ?? {}) : {};
 
     let allNodes = await prisma.node.findMany();
+    if (this.nodeFilter && this.nodeFilter.type !== "none") {
+      allNodes = filterNodes(allNodes, this.nodeFilter);
+    }
     allNodes = allNodes.sort((a, b) => `${a.subscriptionId}-${a.name}`.localeCompare(`${b.subscriptionId}-${b.name}`));
 
     const proxies: unknown[] = [];
@@ -86,7 +92,7 @@ export class ClashConfigAdapter implements AppConfigAdapter {
           });
           members.push(autoName);
         }
-        members.push(...nodeNames);
+        for (const name of nodeNames) members.push(name);
         members.push("DIRECT", "REJECT");
 
         proxyGroups.push({ name: target, type: "select", proxies: members });
@@ -117,8 +123,15 @@ export class ClashConfigAdapter implements AppConfigAdapter {
   }
 
   async send(): Promise<Response> {
-    return new Response(await this.serialize(), {
-      headers: { "content-type": "text/yaml; charset=utf-8" },
-    });
+    const headers: Record<string, string> = {
+      "content-type": "text/yaml; charset=utf-8",
+      "profile-update-interval": String(this.updateIntervalHours),
+    };
+    if (this.displayName) {
+      // RFC 5987 encoded form so clients show non-ASCII names correctly.
+      const encoded = encodeURIComponent(this.displayName);
+      headers["content-disposition"] = `attachment; filename="${encoded}"; filename*=UTF-8''${encoded}`;
+    }
+    return new Response(await this.serialize(), { headers });
   }
 }

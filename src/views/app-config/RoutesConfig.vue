@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import RouteRefList from "@/views/route/RouteRefList.vue";
-import type { ClashConfigData } from "@server/core/app-configs/adapter/clash";
 
-const props = withDefaults(
-  defineProps<{ modelValue: ClashConfigData | undefined; editable?: boolean }>(),
-  { editable: true },
-);
-const emit = defineEmits<{ "update:modelValue": [value: ClashConfigData] }>();
+interface RoutesData {
+  routes: string[];
+}
+
+const props = withDefaults(defineProps<{ modelValue: RoutesData | undefined; editable?: boolean }>(), {
+  editable: true,
+});
+const emit = defineEmits<{ "update:modelValue": [value: RoutesData] }>();
 
 const routes = computed<string[]>({
   get: () => props.modelValue?.routes ?? [],

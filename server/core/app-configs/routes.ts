@@ -53,7 +53,11 @@ export const appConfigRoutes = new Hono()
     const { id } = c.req.valid("param");
     const item = await prisma.appConfig.findUnique({ where: { id } });
     if (!item) throw HttpErr(404, "AppConfig not found");
-    if (item.type !== "clash") throw HttpErr(400, "Only clash type supported");
-    const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData);
-    return adapter.send();
+    const filter = item.nodeFilter as import("@server/core/nodes/node-filter").Filter;
+    const displayName = item.overrideName || item.name;
+    if (item.type === "clash") {
+      const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData, filter, displayName);
+      return adapter.send();
+    }
+    throw HttpErr(400, "type not supported");
   });
