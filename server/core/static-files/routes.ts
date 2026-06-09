@@ -61,20 +61,35 @@ export const staticFileRoutes = new Hono()
     return new Response(response.body, { headers: response.headers });
   });
 
-export const publicStaticFileRoutes = new Hono()
-  .get("/:idOrName", mid.paramIdOrName, async (c) => {
-    const { idOrName } = c.req.valid("param");
-    const item = await prisma.staticFile.findUnique({ where: idOrNameWhere(idOrName) });
-    if (!item) throw HttpErr(404, "not found");
-    const handle = new StaticFileManager(item);
-    const { response } = await handle.get();
-    return new Response(response.body, { headers: response.headers });
-  })
-  .get("/:idOrName/sha256", mid.paramIdOrName, async (c) => {
-    const { idOrName } = c.req.valid("param");
-    const item = await prisma.staticFile.findUnique({ where: idOrNameWhere(idOrName) });
-    if (!item) throw HttpErr(404, "not found");
-    const handle = new StaticFileManager(item);
-    const { cacheStatus } = await handle.get();
+/**
+ * Public read endpoints mounted at `/files`. Names may contain slashes
+ * (e.g. `geosite/foo.srs`), so we use a wildcard route and parse the
+ * remaining path manually rather than relying on `:idOrName` which only
+ * matches a single segment.
+ *
+ * - `/files/<name>`         → cached file body
+ * - `/files/<name>/sha256`  → sha256 hex of cached body
+ */
+const PUBLIC_PREFIX = "/files/";
+
+export const publicStaticFileRoutes = new Hono().get("*", async (c) => {
+  if (!c.req.path.startsWith(PUBLIC_PREFIX)) throw HttpErr(404, "not found");
+  let rest = c.req.path.slice(PUBLIC_PREFIX.length);
+  rest = decodeURIComponent(rest);
+  let isSha256 = false;
+  if (rest.endsWith("/sha256")) {
+    rest = rest.slice(0, -"/sha256".length);
+    isSha256 = true;
+  }
+  if (!rest) throw HttpErr(404, "not found");
+
+  const item = await prisma.staticFile.findFirst({ where: idOrNameWhere(rest) });
+  if (!item) throw HttpErr(404, "not found");
+  const handle = new StaticFileManager(item);
+  const { response, cacheStatus } = await handle.get();
+
+  if (isSha256) {
     return new Response(cacheStatus.sha256, { headers: { "content-type": "text/plain; charset=utf-8" } });
-  });
+  }
+  return new Response(response.body, { headers: response.headers });
+});

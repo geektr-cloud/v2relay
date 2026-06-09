@@ -3,7 +3,17 @@ import { type Equals, assert } from "tsafe";
 import type { StaticFile } from "@server/generated/prisma/dto";
 
 const id = z.uuid();
-const name = z.string().trim().min(1).max(64);
+const name = z
+  .string()
+  .trim()
+  .min(1)
+  .max(256)
+  .refine((s) => !s.startsWith("/") && !s.endsWith("/") && !s.includes("//"), {
+    message: "name cannot start/end with '/' or contain consecutive '/'",
+  })
+  .refine((s) => !s.endsWith("/sha256"), {
+    message: "name cannot end with '/sha256'",
+  });
 const url = z.string().trim().url();
 const expire = z.number().int().min(60);
 
