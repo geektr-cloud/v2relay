@@ -106,7 +106,9 @@ model AppConfig {
   /// ![any]
   config       Json   @default("{}")
   /// ![import("../../core/nodes/node-filter").Filter]
-  nodeFilter   Json   @default("{\"type\":\"none\"}")
+  nodeFilter   Json    @default("{\"type\":\"none\"}")
+  // 生成订阅时是否保留 no-resolve；false/空 → 删除所有 no-resolve
+  keepNoResolve Boolean @default(false)
 }
 
 model Route {

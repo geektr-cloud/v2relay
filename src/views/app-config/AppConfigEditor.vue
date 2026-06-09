@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { CopyTag, JsonTextArea } from "@/components/DataView";
 import { useAppConfigStore } from "@/stores/app-configs";
 import { appConfig } from "@server/core/app-configs";
@@ -82,6 +83,13 @@ const useRoutesPicker = computed(() => form.type === "clash");
         <FieldDescription>非 none 时，生成订阅前会先用此筛选缩小节点池；各路由的 filter 在其结果上再次筛选。</FieldDescription>
         <NodeFilter v-model="form.nodeFilter" />
         <FieldError :errors="issues.errors('nodeFilter')" />
+      </Field>
+      <Field v-if="form.type === 'clash'" orientation="horizontal" class="border px-3 py-5">
+        <div class="flex flex-col gap-1">
+          <FieldLabel for="keepNoResolve">保留 no-resolve</FieldLabel>
+          <FieldDescription>关闭（默认）时，生成订阅会删除所有规则的 no-resolve。</FieldDescription>
+        </div>
+        <Switch id="keepNoResolve" v-model="form.keepNoResolve" />
       </Field>
       <Field>
         <FieldLabel>模板</FieldLabel>

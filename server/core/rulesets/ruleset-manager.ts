@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { HttpErr } from "@server/utils/http-errors";
-import { parseRule, RuleCollection, stringifyWithPolicy } from "@server/pkgs/rules";
+import { RuleCollection } from "@server/pkgs/rules";
 import type { ParsedRules } from "./schema";
 
 const USER_AGENT =
@@ -76,14 +76,18 @@ export class RulesetManager {
 
   /**
    * 拉取（受 maxAge 约束）→ 解析归类 → 把 `{classical,domain,ipcidr}` 副本写入 KV。
-   * 返回归类结果及两个缓存状态。
+   * 返回归类结果（含 {@link RuleCollection}）及两个缓存状态。
    */
-  async getParsed(
-    options: { maxAge?: number } = {},
-  ): Promise<{ parsed: ParsedRules; cacheStatus: RulesetCacheStatus; parsedStatus: ParsedCacheStatus }> {
+  async getParsed(options: { maxAge?: number } = {}): Promise<{
+    parsed: ParsedRules;
+    collection: RuleCollection;
+    cacheStatus: RulesetCacheStatus;
+    parsedStatus: ParsedCacheStatus;
+  }> {
     const { response, cacheStatus } = await this.get(options);
     const text = await response.text();
-    const parsed: ParsedRules = RuleCollection.fromRuleList(text).toGroups();
+    const collection = RuleCollection.fromRuleList(text);
+    const parsed = collection.toGroups();
 
     const parsedStatus: ParsedCacheStatus = {
       cachedAt: new Date().toISOString(),
@@ -94,12 +98,24 @@ export class RulesetManager {
       },
     };
 
-    await env.kv.put(parsedKey(this.id), JSON.stringify(parsed), {
+    await env.kv.put(parsedKey(this.id), collection.toJSON(), {
       metadata: parsedStatus,
       expirationTtl: 86400,
     });
 
-    return { parsed, cacheStatus, parsedStatus };
+    return { parsed, collection, cacheStatus, parsedStatus };
+  }
+
+  /**
+   * 读取已存的 parsed 副本（rule-providers 形态）。
+   * KV 命中则直接反序列化（不打上游）；未命中才即时计算并写回。
+   * 订阅生成走这条路——“取 parsed 的结果”，新鲜度由全局 pull 维护。
+   */
+  async getParsedCollection(): Promise<RuleCollection> {
+    const stored = await env.kv.get(parsedKey(this.id), "text");
+    if (stored) return RuleCollection.fromJson(stored);
+    const { collection } = await this.getParsed();
+    return collection;
   }
 
   private buildInline(): { response: Response; cacheStatus: RulesetCacheStatus } {
@@ -157,19 +173,6 @@ export class RulesetManager {
     });
     return { response, cacheStatus: status };
   }
-
-  async *genClashRulesWithPolicy(policy: string): AsyncGenerator<string> {
-    const { response } = await this.get();
-    const text = await response.text();
-    for (const raw of text.split("\n")) {
-      const l = raw.trim();
-      if (!l || l.startsWith("#")) continue;
-      const r = parseRule(l);
-      if (!r) continue;
-      yield stringifyWithPolicy(r, policy);
-    }
-  }
-
 
   private async fetchUpstream(): Promise<{ body: ArrayBuffer; contentType: string }> {
     let url = this.url;

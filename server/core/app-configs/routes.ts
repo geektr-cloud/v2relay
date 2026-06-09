@@ -56,7 +56,13 @@ export const appConfigRoutes = new Hono()
     const filter = item.nodeFilter as import("@server/core/nodes/node-filter").Filter;
     const displayName = item.overrideName || item.name;
     if (item.type === "clash") {
-      const adapter = new ClashConfigAdapter(item.template, item.config as ClashConfigData, filter, displayName);
+      const adapter = new ClashConfigAdapter(
+        item.template,
+        item.config as ClashConfigData,
+        filter,
+        displayName,
+        item.keepNoResolve,
+      );
       return adapter.send();
     }
     throw HttpErr(400, "type not supported");

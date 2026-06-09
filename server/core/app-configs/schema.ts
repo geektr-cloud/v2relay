@@ -13,8 +13,10 @@ export const appConfigTypes = typeEnum.options;
 const template = z.string();
 const config = z.any();
 const nodeFilter = filterSchema;
+// 生成订阅时是否保留 no-resolve；false/空 → 删除所有 no-resolve。
+const keepNoResolve = z.boolean();
 
-export const appConfig = z.object({ id, name, overrideName, apiToken, type, template, config, nodeFilter });
+export const appConfig = z.object({ id, name, overrideName, apiToken, type, template, config, nodeFilter, keepNoResolve });
 assert<Equals<z.infer<typeof appConfig>, AppConfig>>();
 export type { AppConfig };
 export const newItem = (): AppConfig => ({
@@ -26,6 +28,7 @@ export const newItem = (): AppConfig => ({
   template: "",
   config: {},
   nodeFilter: { type: "none" },
+  keepNoResolve: false,
 });
 
 export const create = {

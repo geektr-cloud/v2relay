@@ -1,7 +1,9 @@
 import YAML from "yaml";
 import { prisma } from "@server/db";
 import { RulesetManager } from "@server/core/rulesets/ruleset-manager";
+import { RuleCollection } from "@server/pkgs/rules";
 import { type Filter, filterNodes } from "@server/core/nodes/node-filter";
+import { RuleAggregator } from "./rule-aggregator";
 import type { Node } from "@server/core/nodes/schema";
 import type { Route } from "@server/core/routes/schema";
 import type { AppConfigAdapter } from "./base";
@@ -16,6 +18,7 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     private config: ClashConfigData,
     private nodeFilter: Filter = { type: "none" },
     private displayName: string = "",
+    private keepNoResolve: boolean = false,
     private updateIntervalHours: number = 24,
   ) {}
 
@@ -49,7 +52,10 @@ export class ClashConfigAdapter implements AppConfigAdapter {
     const rulesetById = new Map(rulesetRows.map((rs) => [rs.id, rs]));
 
     const proxyGroups: unknown[] = [];
-    const rules: string[] = [];
+
+    // 按 policy（目标）聚合 parsed 结果：同一目标的规则集 / 内联规则合并去重。
+    const baseProviders = (base["rule-providers"] as Record<string, unknown>) ?? {};
+    const aggregator = new RuleAggregator(Object.keys(baseProviders), !this.keepNoResolve);
 
     for (const id of this.config.routes) {
       const r = routeById.get(id);
@@ -98,24 +104,34 @@ export class ClashConfigAdapter implements AppConfigAdapter {
         proxyGroups.push({ name: target, type: "select", proxies: members });
       }
 
-      for (const rsId of r.rulesets) {
-        const rs = rulesetById.get(rsId);
-        if (!rs) continue;
-        const mgr = new RulesetManager(rs);
-        for await (const rule of mgr.genClashRulesWithPolicy(policy)) rules.push(rule);
-      }
+      // 取各规则集已存的 parsed 副本并聚合（不打上游；坏规则集跳过，不让整份订阅失败）。
+      const cols = await Promise.all(
+        r.rulesets.map(async (rsId) => {
+          const rs = rulesetById.get(rsId);
+          if (!rs) return null;
+          try {
+            return await new RulesetManager(rs).getParsedCollection();
+          } catch {
+            return null;
+          }
+        }),
+      );
+      for (const col of cols) if (col) aggregator.aggCollection(policy, col);
 
-      if (r.rules) {
-        const inline = new RulesetManager({ id: `inline-${r.id}`, url: "", rules: r.rules });
-        for await (const rule of inline.genClashRulesWithPolicy(policy)) rules.push(rule);
-      }
+      // 路由自身的内联规则同样并入该目标。
+      if (r.rules) aggregator.aggCollection(policy, RuleCollection.fromRuleList(r.rules));
     }
 
-    if (!rules.find((r) => r.startsWith("MATCH"))) {
+    const { rules, providers } = aggregator.finish();
+
+    if (!rules.some((r) => r.startsWith("MATCH"))) {
       rules.push("MATCH,DIRECT");
     }
 
-    return { ...base, proxies, "proxy-groups": proxyGroups, rules };
+    const out: Record<string, unknown> = { ...base, proxies, "proxy-groups": proxyGroups, rules };
+    const mergedProviders = { ...baseProviders, ...providers };
+    if (Object.keys(mergedProviders).length) out["rule-providers"] = mergedProviders;
+    return out;
   }
 
   async serialize(): Promise<string> {
