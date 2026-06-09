@@ -9,5 +9,6 @@ export { default as Route } from "./Route.vue";
 
 export { default as CopyBtn } from "./CopyBtn.vue";
 export { default as CopyTag } from "./CopyTag.vue";
+export { default as QrBtn } from "./QrBtn.vue";
 export { default as JsonTextArea } from "./JsonTextArea.vue";
 export { default as EntitySelect } from "./EntitySelect.vue";
