@@ -14,7 +14,7 @@ import {
   ComboboxList,
   ComboboxViewport,
 } from "@/components/ui/combobox";
-import { useTagStore } from "@/stores/tags";
+import { useAllTagsStore } from "@/stores/tags";
 import { useNodeStore } from "@/stores/nodes";
 import SubscriptionSelect from "@/views/subscription/SubscriptionSelect.vue";
 import type { nodeFilter } from "@server/core/nodes";
@@ -144,20 +144,15 @@ function setPrice(v: string) {
 }
 
 // ── tag / protocol options ────────────────────────────────────────────────────
-const tagStore = useTagStore();
-const [tags] = tagStore.useAll();
+const allTagsStore = useAllTagsStore();
+allTagsStore.ensure();
+const tagOptions = computed(() => allTagsStore.tags);
 
 const nodeStore = useNodeStore();
 const [nodes] = nodeStore.useAll();
 const protocols = computed(() => {
   const set = new Set<string>();
   for (const n of nodes.value) if (n.protocol) set.add(n.protocol);
-  return [...set].sort();
-});
-const tagOptions = computed(() => {
-  const set = new Set<string>();
-  for (const t of tags.value) if (t.name) set.add(t.name);
-  for (const n of nodes.value) for (const t of n.tags) if (t) set.add(t);
   return [...set].sort();
 });
 

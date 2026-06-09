@@ -8,6 +8,20 @@ import { tagMatcher } from "./tag-matcher";
 
 export const tagRoutes = new Hono()
   .get("/", async (c) => c.json(await prisma.tag.findMany({ orderBy: { name: "asc" } })))
+  .get("/all", async (c) => {
+    // Union of Tag.name + every distinct value in Node.tags (JSON string[] column).
+    const [tags, nodes] = await Promise.all([
+      prisma.tag.findMany({ select: { name: true } }),
+      prisma.node.findMany({ select: { tags: true } }),
+    ]);
+    const set = new Set<string>();
+    for (const t of tags) if (t.name) set.add(t.name);
+    for (const n of nodes) {
+      if (!Array.isArray(n.tags)) continue;
+      for (const t of n.tags as string[]) if (t) set.add(t);
+    }
+    return c.json([...set].sort());
+  })
   .get("/:id", mid.paramId, async (c) => {
     const { id } = c.req.valid("param");
     const tag = await prisma.tag.findUnique({ where: { id } });
