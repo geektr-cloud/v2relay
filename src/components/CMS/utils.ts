@@ -55,10 +55,10 @@ export const useFormModel = (Form: Component) => {
         h(
           VueFinalModal,
           {
-            class: "flex justify-center items-center",
-            contentClass: "flex flex-col max-w-5xl",
+            class: "flex overflow-y-auto py-[10vh]",
+            contentClass: "m-auto flex flex-col max-w-5xl px-4",
             focusTrap: false,
-            zIndexFn: ({ index }) => index + 1,
+            zIndexFn: ({ index }) => 1000 + index,
           },
           {
             default: () =>
