@@ -53,10 +53,37 @@ export const rulesetRoutes = new Hono()
   })
   .get("/:id/content", mid.paramId, zValidator("query", schema.content.query), async (c) => {
     const { id } = c.req.valid("param");
-    const { force_reload } = c.req.valid("query");
+    const { max_age } = c.req.valid("query");
     const item = await prisma.ruleset.findUnique({ where: { id } });
     if (!item) throw HttpErr(404, "Ruleset not found");
     const handle = new RulesetManager(item);
-    const { response } = await handle.get({ forceReload: force_reload });
+    const { response } = await handle.get({ maxAge: max_age });
     return new Response(response.body, { headers: response.headers });
+  })
+  .get("/:id/parsed", mid.paramId, zValidator("query", schema.parsed.query), async (c) => {
+    const { id } = c.req.valid("param");
+    const { max_age } = c.req.valid("query");
+    const item = await prisma.ruleset.findUnique({ where: { id } });
+    if (!item) throw HttpErr(404, "Ruleset not found");
+    const handle = new RulesetManager(item);
+    const { parsed } = await handle.getParsed({ maxAge: max_age });
+    return c.json(parsed);
+  })
+  // 全局拉取：解析归类全部规则集并写入 KV 副本。
+  // max_age 缺省 600s——十分钟内已更新过的规则集会被跳过，避免重复打上游。
+  .post("/parsed", zValidator("query", schema.parsed.query), async (c) => {
+    const { max_age } = c.req.valid("query");
+    const maxAge = max_age ?? 600;
+    const items = await prisma.ruleset.findMany();
+    const results = await Promise.all(
+      items.map(async (item) => {
+        try {
+          const { parsedStatus } = await new RulesetManager(item).getParsed({ maxAge });
+          return { id: item.id, name: item.name, ok: true as const, counts: parsedStatus.counts };
+        } catch (e) {
+          return { id: item.id, name: item.name, ok: false as const, error: e instanceof Error ? e.message : String(e) };
+        }
+      }),
+    );
+    return c.json({ total: results.length, ok: results.filter((r) => r.ok).length, results });
   });

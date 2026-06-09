@@ -40,8 +40,23 @@ export const upsert = {
   ),
 };
 
-const forceReload = z.stringbool().optional().default(false);
+// 容许的过期时间（秒）：缓存年龄小于该值则跳过上游重新拉取，直接复用缓存。
+//   undefined → 永远复用已有缓存（仅缓存缺失时才拉取，等价旧的 force_reload=false）
+//   0         → 永远重新拉取（等价旧的 force_reload=true）
+const maxAge = z.coerce.number().int().nonnegative().optional();
 
 export const content = {
-  query: z.object({ force_reload: forceReload }).optional().default({ force_reload: false }),
+  query: z.object({ max_age: maxAge }).optional().default({}),
 };
+
+export const parsed = {
+  query: z.object({ max_age: maxAge }).optional().default({}),
+};
+
+// 解析+归类后的副本：每条传统规则经 toRuleSetItem() 降级到三种 rule-providers 载荷之一。
+export const parsedRules = z.object({
+  classical: z.array(z.string()),
+  domain: z.array(z.string()),
+  ipcidr: z.array(z.string()),
+});
+export type ParsedRules = z.infer<typeof parsedRules>;

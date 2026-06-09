@@ -35,7 +35,9 @@ const formatSize = (bytes: number): string => {
 const forceReload = ref(false);
 
 const fetchContent = async () => {
-  const res = await fetch(`/api/rulesets/${encodeURIComponent(props.id)}/content?force_reload=${forceReload.value}`);
+  // 强制刷新用 max_age=0（永远重新拉取）；普通查看不带参数（复用缓存）。
+  const qs = forceReload.value ? "?max_age=0" : "";
+  const res = await fetch(`/api/rulesets/${encodeURIComponent(props.id)}/content${qs}`);
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
     try {

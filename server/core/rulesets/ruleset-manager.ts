@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { HttpErr } from "@server/utils/http-errors";
 import { parseRule, stringifyWithPolicy } from "@server/pkgs/rules";
+import type { ParsedRules } from "./schema";
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36";
@@ -12,7 +13,27 @@ export type RulesetCacheStatus = {
   contentType: string;
 };
 
+export type ParsedCacheStatus = {
+  cachedAt: string;
+  counts: { classical: number; domain: number; ipcidr: number };
+};
+
 const kvKey = (id: string): string => `ruleset:${id}`;
+const parsedKey = (id: string): string => `ruleset-parsed:${id}`;
+
+/** 逐行解析规则文本（template 形式），经 toRuleSetItem() 归类成三种 rule-providers 载荷。 */
+function classifyRules(text: string): ParsedRules {
+  const out: ParsedRules = { classical: [], domain: [], ipcidr: [] };
+  for (const raw of text.split("\n")) {
+    const l = raw.trim();
+    if (!l || l.startsWith("#")) continue;
+    const r = parseRule(l);
+    if (!r) continue;
+    const [type, payload] = r.toRuleSetItem();
+    out[type].push(payload);
+  }
+  return out;
+}
 
 type RulesetRef = { id: string; url: string; rules: string };
 
@@ -39,18 +60,60 @@ export class RulesetManager {
     return this.rules !== "";
   }
 
-  async get(options: { forceReload?: boolean } = {}): Promise<{ response: Response; cacheStatus: RulesetCacheStatus }> {
+  async get(options: { maxAge?: number } = {}): Promise<{ response: Response; cacheStatus: RulesetCacheStatus }> {
     if (this.inline) return this.buildInline();
 
-    if (!options.forceReload) {
-      const cached = await this.readCached();
-      if (cached) return cached;
-    }
+    const cached = await this.readCached();
+    if (cached && RulesetManager.isFresh(cached.cacheStatus.cachedAt, options.maxAge)) return cached;
 
-    if (!this.url) throw HttpErr(400, "Ruleset has neither url nor rules");
+    if (!this.url) {
+      if (cached) return cached; // 无法重新拉取时回退到（可能已过期的）缓存
+      throw HttpErr(400, "Ruleset has neither url nor rules");
+    }
 
     const upstream = await this.fetchUpstream();
     return this.write(upstream.body, upstream.contentType, this.url);
+  }
+
+  /**
+   * 缓存是否“足够新”以跳过上游重新拉取。
+   *   maxAge undefined → 永远复用缓存
+   *   maxAge <= 0      → 永不复用（强制刷新）
+   *   否则             → 缓存年龄 < maxAge 秒才复用
+   */
+  private static isFresh(cachedAt: string, maxAge?: number): boolean {
+    if (maxAge === undefined) return true;
+    if (maxAge <= 0) return false;
+    const ageSec = (Date.now() - new Date(cachedAt).getTime()) / 1000;
+    return ageSec < maxAge;
+  }
+
+  /**
+   * 拉取（受 maxAge 约束）→ 解析归类 → 把 `{classical,domain,ipcidr}` 副本写入 KV。
+   * 返回归类结果及两个缓存状态。
+   */
+  async getParsed(
+    options: { maxAge?: number } = {},
+  ): Promise<{ parsed: ParsedRules; cacheStatus: RulesetCacheStatus; parsedStatus: ParsedCacheStatus }> {
+    const { response, cacheStatus } = await this.get(options);
+    const text = await response.text();
+    const parsed = classifyRules(text);
+
+    const parsedStatus: ParsedCacheStatus = {
+      cachedAt: new Date().toISOString(),
+      counts: {
+        classical: parsed.classical.length,
+        domain: parsed.domain.length,
+        ipcidr: parsed.ipcidr.length,
+      },
+    };
+
+    await env.kv.put(parsedKey(this.id), JSON.stringify(parsed), {
+      metadata: parsedStatus,
+      expirationTtl: 86400,
+    });
+
+    return { parsed, cacheStatus, parsedStatus };
   }
 
   private buildInline(): { response: Response; cacheStatus: RulesetCacheStatus } {
