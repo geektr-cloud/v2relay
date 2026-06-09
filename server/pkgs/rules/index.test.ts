@@ -1,100 +1,98 @@
 import { describe, expect, it } from "vitest";
-import { Rule } from "./index";
+import { findRule, parseRule, stringifyWithPolicy } from "./index";
 
-describe("Rule.parse", () => {
-  it("parses basic domain rule", () => {
-    const r = Rule.parse("DOMAIN,ad.com,REJECT")!;
-    expect(r).toEqual(new Rule("DOMAIN", "ad.com", "REJECT", ""));
+describe("parseRule", () => {
+  it("parses a basic rule (no policy)", () => {
+    const r = parseRule("SRC-IP-CIDR,192.168.1.201/32")!;
+    expect(r.prefix).toBe("SRC-IP-CIDR");
+    expect(r.content).toBe("192.168.1.201/32");
+    expect(r.no_resolve).toBeUndefined();
+    expect(r.src).toBeUndefined();
   });
 
-  it("parses rule with additions", () => {
-    const r = Rule.parse("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve")!;
-    expect(r).toEqual(new Rule("IP-CIDR", "127.0.0.0/8", "DIRECT", "no-resolve"));
+  it("parses trailing no-resolve addition", () => {
+    const r = parseRule("IP-CIDR,127.0.0.0/8,no-resolve")!;
+    expect(r.content).toBe("127.0.0.0/8");
+    expect(r.no_resolve).toBe(true);
   });
 
-  it("parses MATCH (no argument)", () => {
-    const r = Rule.parse("MATCH,auto")!;
-    expect(r).toEqual(new Rule("MATCH", "", "auto", ""));
+  it("parses stacked additions (no-resolve + src)", () => {
+    const r = parseRule("IP-CIDR,127.0.0.0/8,no-resolve,src")!;
+    expect(r.content).toBe("127.0.0.0/8");
+    expect(r.no_resolve).toBe(true);
+    expect(r.src).toBe(true);
   });
 
-  it("handles logical rules", () => {
-    expect(Rule.parse("AND,((DOMAIN,baidu.com),(NETWORK,UDP)),DIRECT")).toEqual(
-      new Rule("AND", "((DOMAIN,baidu.com),(NETWORK,UDP))", "DIRECT", ""),
-    );
-    expect(Rule.parse("NOT,((DOMAIN,baidu.com)),PROXY")).toEqual(new Rule("NOT", "((DOMAIN,baidu.com))", "PROXY", ""));
-    expect(Rule.parse("SUB-RULE,(NETWORK,tcp),sub-rule")).toEqual(
-      new Rule("SUB-RULE", "(NETWORK,tcp)", "sub-rule", ""),
-    );
+  it("keeps backslashes in process paths", () => {
+    const r = parseRule("PROCESS-PATH,C:\\Program Files\\chrome.exe")!;
+    expect(r.content).toBe("C:\\Program Files\\chrome.exe");
   });
 
-  it("returns null for empty lines", () => {
-    expect(Rule.parse("")).toBeNull();
-    expect(Rule.parse("  ")).toBeNull();
+  it("returns null for empty / unknown / logical prefixes", () => {
+    expect(parseRule("")).toBeNull();
+    expect(parseRule("  ")).toBeNull();
+    expect(parseRule("MATCH,auto")).toBeNull();
+    expect(parseRule("RULE-SET,foo")).toBeNull();
+    expect(parseRule("AND,((DOMAIN,a.com)),DIRECT")).toBeNull();
+    expect(parseRule("BOGUS,x")).toBeNull();
   });
 
-  it("parses process path with backslashes", () => {
-    const r = Rule.parse("PROCESS-PATH,C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe,PROXY")!;
-    expect(r).toEqual(
-      new Rule("PROCESS-PATH", "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", "PROXY", ""),
-    );
-  });
-});
-
-describe("Rule.stringify", () => {
-  it("stringifies basic rule", () => {
-    expect(new Rule("DOMAIN", "ad.com", "REJECT", "").stringify()).toBe("DOMAIN,ad.com,REJECT");
-  });
-
-  it("stringifies rule with additions", () => {
-    expect(new Rule("IP-CIDR", "127.0.0.0/8", "DIRECT", "no-resolve").stringify()).toBe(
-      "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
-    );
-  });
-
-  it("stringifies MATCH", () => {
-    expect(new Rule("MATCH", "", "auto", "").stringify()).toBe("MATCH,auto");
-  });
-
-  it("roundtrips logical rules", () => {
-    const input = "AND,((DOMAIN,baidu.com),(NETWORK,UDP)),DIRECT";
-    expect(Rule.parse(input)!.stringify()).toBe(input);
+  it("does not let IP-CIDR steal IP-CIDR6", () => {
+    expect(parseRule("IP-CIDR6,2620:0:2d0:200::7/32")!.prefix).toBe("IP-CIDR6");
   });
 });
 
-describe("Rule.parseTemplate", () => {
-  it("parses basic template", () => {
-    expect(Rule.parseTemplate("DOMAIN,ad.com")).toEqual(new Rule("DOMAIN", "ad.com", "", ""));
+describe("Rule.toString", () => {
+  it("roundtrips template form", () => {
+    expect(parseRule("DOMAIN-SUFFIX,google.com")!.toString()).toBe("DOMAIN-SUFFIX,google.com");
+    expect(parseRule("IP-CIDR,127.0.0.0/8,no-resolve")!.toString()).toBe("IP-CIDR,127.0.0.0/8,no-resolve");
+  });
+});
+
+describe("stringifyWithPolicy", () => {
+  it("places policy before additions", () => {
+    const r = parseRule("IP-CIDR,127.0.0.0/8,no-resolve")!;
+    expect(stringifyWithPolicy(r, "DIRECT")).toBe("IP-CIDR,127.0.0.0/8,DIRECT,no-resolve");
   });
 
-  it("parses template with additions", () => {
-    expect(Rule.parseTemplate("IP-CIDR,127.0.0.0/8,no-resolve")).toEqual(
-      new Rule("IP-CIDR", "127.0.0.0/8", "", "no-resolve"),
-    );
+  it("handles plain rule", () => {
+    expect(stringifyWithPolicy(parseRule("DOMAIN,ad.com")!, "REJECT")).toBe("DOMAIN,ad.com,REJECT");
+  });
+});
+
+describe("toRuleSetItem", () => {
+  it("DOMAIN -> domain (exact)", () => {
+    expect(parseRule("DOMAIN,google.com")!.toRuleSetItem()).toEqual(["domain", "google.com"]);
   });
 
-  it("parses MATCH (no argument, no policy)", () => {
-    expect(Rule.parseTemplate("MATCH")).toEqual(new Rule("MATCH", "", "", ""));
+  it("DOMAIN-SUFFIX -> domain (+. prefix)", () => {
+    expect(parseRule("DOMAIN-SUFFIX,google.com")!.toRuleSetItem()).toEqual(["domain", "+.google.com"]);
   });
 
-  it("parses logical template", () => {
-    expect(Rule.parseTemplate("AND,((DOMAIN,baidu.com),(NETWORK,UDP))")).toEqual(
-      new Rule("AND", "((DOMAIN,baidu.com),(NETWORK,UDP))", "", ""),
-    );
+  it("IP-CIDR / IP-CIDR6 -> ipcidr (bare cidr)", () => {
+    expect(parseRule("IP-CIDR,127.0.0.0/8")!.toRuleSetItem()).toEqual(["ipcidr", "127.0.0.0/8"]);
+    expect(parseRule("IP-CIDR6,2620:0:2d0:200::7/32")!.toRuleSetItem()).toEqual([
+      "ipcidr",
+      "2620:0:2d0:200::7/32",
+    ]);
   });
 
-  it("parses IP-CIDR6 template", () => {
-    expect(Rule.parseTemplate("IP-CIDR6,2620:0:2d0:200::7/32")).toEqual(
-      new Rule("IP-CIDR6", "2620:0:2d0:200::7/32", "", ""),
-    );
+  it("SRC-IP-CIDR -> classical (full template line)", () => {
+    expect(parseRule("SRC-IP-CIDR,192.168.1.201/32")!.toRuleSetItem()).toEqual([
+      "classical",
+      "SRC-IP-CIDR,192.168.1.201/32",
+    ]);
   });
 
-  it("parses process path template", () => {
-    expect(Rule.parseTemplate("PROCESS-PATH,C:\\Program Files\\chrome.exe")).toEqual(
-      new Rule("PROCESS-PATH", "C:\\Program Files\\chrome.exe", "", ""),
-    );
+  it("DOMAIN-KEYWORD / GEOSITE fall back to classical", () => {
+    expect(parseRule("DOMAIN-KEYWORD,google")!.toRuleSetItem()).toEqual(["classical", "DOMAIN-KEYWORD,google"]);
+    expect(parseRule("GEOSITE,youtube")!.toRuleSetItem()).toEqual(["classical", "GEOSITE,youtube"]);
   });
+});
 
-  it("returns null for empty", () => {
-    expect(Rule.parseTemplate("")).toBeNull();
+describe("findRule", () => {
+  it("matches by exact prefix", () => {
+    expect(findRule("IP-CIDR")?.prefix).toBe("IP-CIDR");
+    expect(findRule("nope")).toBeNull();
   });
 });

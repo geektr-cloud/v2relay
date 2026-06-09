@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { HttpErr } from "@server/utils/http-errors";
-import { Rule } from "@server/pkgs/rules";
+import { parseRule, stringifyWithPolicy } from "@server/pkgs/rules";
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36";
@@ -115,10 +115,9 @@ export class RulesetManager {
     for (const raw of text.split("\n")) {
       const l = raw.trim();
       if (!l || l.startsWith("#")) continue;
-      const r = Rule.parseTemplate(l);
+      const r = parseRule(l);
       if (!r) continue;
-      r.policy = policy;
-      yield r.stringify();
+      yield stringifyWithPolicy(r, policy);
     }
   }
 
