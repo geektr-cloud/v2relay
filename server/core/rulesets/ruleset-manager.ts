@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { HttpErr } from "@server/utils/http-errors";
-import { parseRule, stringifyWithPolicy } from "@server/pkgs/rules";
+import { parseRule, RuleCollection, stringifyWithPolicy } from "@server/pkgs/rules";
 import type { ParsedRules } from "./schema";
 
 const USER_AGENT =
@@ -20,20 +20,6 @@ export type ParsedCacheStatus = {
 
 const kvKey = (id: string): string => `ruleset:${id}`;
 const parsedKey = (id: string): string => `ruleset-parsed:${id}`;
-
-/** 逐行解析规则文本（template 形式），经 toRuleSetItem() 归类成三种 rule-providers 载荷。 */
-function classifyRules(text: string): ParsedRules {
-  const out: ParsedRules = { classical: [], domain: [], ipcidr: [] };
-  for (const raw of text.split("\n")) {
-    const l = raw.trim();
-    if (!l || l.startsWith("#")) continue;
-    const r = parseRule(l);
-    if (!r) continue;
-    const [type, payload] = r.toRuleSetItem();
-    out[type].push(payload);
-  }
-  return out;
-}
 
 type RulesetRef = { id: string; url: string; rules: string };
 
@@ -97,7 +83,7 @@ export class RulesetManager {
   ): Promise<{ parsed: ParsedRules; cacheStatus: RulesetCacheStatus; parsedStatus: ParsedCacheStatus }> {
     const { response, cacheStatus } = await this.get(options);
     const text = await response.text();
-    const parsed = classifyRules(text);
+    const parsed: ParsedRules = RuleCollection.fromRuleList(text).toGroups();
 
     const parsedStatus: ParsedCacheStatus = {
       cachedAt: new Date().toISOString(),

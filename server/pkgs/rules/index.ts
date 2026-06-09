@@ -3,6 +3,8 @@ import type { Rule, RuleStatic } from "./types";
 
 export { defineRule } from "./base";
 export type { RuleOpts, RuleClass } from "./base";
+export { RuleCollection } from "./collection";
+export type { RuleSetGroups } from "./collection";
 export type { Rule, RuleStatic, RuleSetType } from "./types";
 
 /**
