@@ -1,4 +1,4 @@
-import { classical, defineRule, domainExact, domainSuffix, ipcidr } from "./base";
+import { defineRule, domainExact, domainSuffix, ipcidr } from "./base";
 import type { Rule, RuleStatic } from "./types";
 
 export { defineRule } from "./base";
@@ -60,14 +60,30 @@ export const Rules = [
 export const findRule = (prefix: string): RuleStatic | null => Rules.find((R) => R.prefix === prefix) ?? null;
 
 /**
+ * 终端规则 MATCH：无条件匹配，无参数。
+ *
+ * 不在 {@link Rules} 注册表里——它不是 rule-provider 载荷，{@link RuleCollection} 会跳过它。
+ * 但订阅生成（`genClashRulesWithPolicy`）需要保留它：`stringifyWithPolicy(MATCH, p)` → `MATCH,p`。
+ * `toRuleSetItem` 仅为满足接口，集合侧永不调用。
+ */
+export const MATCH: Rule = {
+  prefix: "MATCH",
+  content: "",
+  toString: () => "MATCH",
+  toRuleSetItem: () => ["classical", "MATCH"],
+};
+
+/**
  * 解析单行规则（template 形式，**不含 policy**）成规则实例；
  * 前缀未命中已知规则、空行、或仅含逗号无前缀时返回 null。
+ * `MATCH`（无论是否带尾随策略）映射到终端 {@link MATCH}。
  */
 export const parseRule = (line: string): Rule | null => {
   const trimmed = line.trim();
   if (!trimmed) return null;
   const i = trimmed.indexOf(",");
   const prefix = (i === -1 ? trimmed : trimmed.slice(0, i)).trim();
+  if (prefix === "MATCH") return MATCH;
   const R = findRule(prefix);
   return R ? R.fromString(trimmed) : null;
 };

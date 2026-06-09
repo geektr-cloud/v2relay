@@ -19,9 +19,10 @@ describe("RuleCollection.fromRuleList", () => {
   });
 
   it("skips empty lines, comments, and unparseable rules", () => {
-    const groups = RuleCollection.fromRuleList("\n# a comment\nMATCH,auto\nDOMAIN,ok.com\n  ").toGroups();
-    expect(groups.domain).toEqual(["ok.com"]);
-    expect(groups.classical).toEqual([]);
+    const c = RuleCollection.fromRuleList("\n# a comment\nMATCH,auto\nDOMAIN,ok.com\n  ");
+    expect(c.toGroups().domain).toEqual(["ok.com"]);
+    expect(c.toGroups().classical).toEqual([]); // MATCH is not a bucket payload
+    expect(c.hasMatch).toBe(true); // ...but its presence is remembered
   });
 
   it("dedupes by template string", () => {
@@ -37,7 +38,20 @@ describe("parseAddRule", () => {
     expect(c.parseAddRule("DOMAIN,a.com")).toBe(true);
     expect(c.parseAddRule("# comment")).toBe(false);
     expect(c.parseAddRule("")).toBe(false);
-    expect(c.parseAddRule("MATCH,auto")).toBe(false);
+  });
+
+  it("records MATCH without bucketing it", () => {
+    const c = new RuleCollection();
+    expect(c.parseAddRule("MATCH,auto")).toBe(true);
+    expect(c.hasMatch).toBe(true);
+    expect(c.toGroups()).toEqual({ classical: [], domain: [], ipcidr: [] });
+  });
+
+  it("merges hasMatch across collections", () => {
+    const a = RuleCollection.fromRuleList("DOMAIN,a.com");
+    expect(a.hasMatch).toBe(false);
+    a.addCollections(RuleCollection.fromRuleList("MATCH"));
+    expect(a.hasMatch).toBe(true);
   });
 });
 

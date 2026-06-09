@@ -31,7 +31,6 @@ describe("parseRule", () => {
   it("returns null for empty / unknown / logical prefixes", () => {
     expect(parseRule("")).toBeNull();
     expect(parseRule("  ")).toBeNull();
-    expect(parseRule("MATCH,auto")).toBeNull();
     expect(parseRule("RULE-SET,foo")).toBeNull();
     expect(parseRule("AND,((DOMAIN,a.com)),DIRECT")).toBeNull();
     expect(parseRule("BOGUS,x")).toBeNull();
@@ -39,6 +38,23 @@ describe("parseRule", () => {
 
   it("does not let IP-CIDR steal IP-CIDR6", () => {
     expect(parseRule("IP-CIDR6,2620:0:2d0:200::7/32")!.prefix).toBe("IP-CIDR6");
+  });
+});
+
+describe("MATCH", () => {
+  it("parses to the terminal MATCH rule (content-less)", () => {
+    const r = parseRule("MATCH")!;
+    expect(r.prefix).toBe("MATCH");
+    expect(r.content).toBe("");
+    expect(r.toString()).toBe("MATCH");
+  });
+
+  it("ignores any trailing token (templates carry no policy)", () => {
+    expect(parseRule("MATCH,auto")!.prefix).toBe("MATCH");
+  });
+
+  it("re-emits with policy via stringifyWithPolicy", () => {
+    expect(stringifyWithPolicy(parseRule("MATCH")!, "DIRECT")).toBe("MATCH,DIRECT");
   });
 });
 

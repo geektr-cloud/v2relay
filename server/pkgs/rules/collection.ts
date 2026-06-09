@@ -40,6 +40,14 @@ export class RuleCollection {
     ipcidr: new Set(),
   };
 
+  // 是否含终端 MATCH。MATCH 不是 provider 载荷（不入桶），但聚合时需据此 emit `MATCH,<policy>`。
+  private match = false;
+
+  /** 这批规则里是否出现过 MATCH（无条件匹配）。 */
+  get hasMatch(): boolean {
+    return this.match;
+  }
+
   /** 从 `{classical,domain,ipcidr}` JSON 字符串构造；非字符串载荷与解析失败被静默跳过。 */
   static fromJson(s: string): RuleCollection {
     const c = new RuleCollection();
@@ -66,7 +74,7 @@ export class RuleCollection {
     return c;
   }
 
-  /** 解析单行规则并加入；解析失败（空行、注释、未知前缀）返回 false。 */
+  /** 解析单行规则并加入；解析失败（空行、注释、未知前缀）返回 false，MATCH 记录后返回 true。 */
   parseAddRule(s: string): boolean {
     const line = s.trim();
     if (!line || line.startsWith("#")) return false;
@@ -76,15 +84,22 @@ export class RuleCollection {
     return true;
   }
 
-  /** 加入一条规则实例：归类成载荷存入对应 set（按载荷去重）。 */
+  /** 加入一条规则实例：归类成载荷存入对应 set（按载荷去重）。MATCH 只记标记，不入桶。 */
   addRule(rule: Rule): void {
+    if (rule.prefix === "MATCH") {
+      this.match = true;
+      return;
+    }
     const [type, payload] = rule.toRuleSetItem();
     this.buckets[type].add(payload);
   }
 
-  /** 合并其它若干 {@link RuleCollection}（按载荷去重）。 */
+  /** 合并其它若干 {@link RuleCollection}（按载荷去重；MATCH 标记取并集）。 */
   addCollections(...collections: RuleCollection[]): void {
-    for (const c of collections) for (const type of TYPES) for (const p of c.buckets[type]) this.buckets[type].add(p);
+    for (const c of collections) {
+      if (c.match) this.match = true;
+      for (const type of TYPES) for (const p of c.buckets[type]) this.buckets[type].add(p);
+    }
   }
 
   /** 归类成 `{classical,domain,ipcidr}` 载荷分组。 */
