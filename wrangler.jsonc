@@ -20,7 +20,7 @@
 	"observability": {
 		"enabled": true
 	},
-	"upload_source_maps": true,
+	"upload_source_maps": false,
 	"compatibility_flags": [
 		"nodejs_compat"
 	],

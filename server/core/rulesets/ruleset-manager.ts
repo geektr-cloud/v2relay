@@ -122,6 +122,7 @@ export class RulesetManager {
     }
   }
 
+
   private async fetchUpstream(): Promise<{ body: ArrayBuffer; contentType: string }> {
     let url = this.url;
     if (env.GITHUB_PROXY && url.includes("github")) {
