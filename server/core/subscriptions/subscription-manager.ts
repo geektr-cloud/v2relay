@@ -64,6 +64,12 @@ export class SubscriptionManager {
       if (cached) return cached;
     }
 
+    if (this.urls.length === 0) {
+      // 无 url：禁用同步。已有缓存可由 forceReload=false 命中（上方已处理），
+      // 否则只能等手动 PUT /content。
+      throw HttpErr(400, "Subscription has no urls; sync disabled");
+    }
+
     const upstream = await this.fetchFirstWorking();
     if (!upstream) throw HttpErr(500, "All subscription URLs failed or returned unrecognized content");
 

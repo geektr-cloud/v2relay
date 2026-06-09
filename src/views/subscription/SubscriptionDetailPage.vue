@@ -84,7 +84,7 @@ const providerName = computed(
         </CardContent>
       </Card>
 
-      <SubscriptionContentViewer :id="item.id" />
+      <SubscriptionContentViewer :id="item.id" :has-urls="item.urls.length > 0" />
     </template>
   </DetailPage>
 </template>

@@ -11,7 +11,7 @@ import { sniffContentType } from "@server/utils/sniff-content-type";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const props = defineProps<{ id: string }>();
+const props = withDefaults(defineProps<{ id: string; hasUrls?: boolean }>(), { hasUrls: true });
 const showContent = ref(false);
 
 // ── cache status ──────────────────────────────────────────────────────────────
@@ -192,7 +192,13 @@ const doDownload = async () => {
           </Button>
           <VSeparator class="h-5" />
         </template>
-        <Button variant="secondary" size="icon" :disabled="status.loading" title="强制刷新" @click="doForceReload">
+        <Button
+          variant="secondary"
+          size="icon"
+          :disabled="status.loading || !hasUrls"
+          :title="hasUrls ? '强制刷新' : '订阅无 URL，同步已关闭'"
+          @click="doForceReload"
+        >
           <RefreshCw :class="status.loading ? 'animate-spin' : ''" />
         </Button>
         <Button
